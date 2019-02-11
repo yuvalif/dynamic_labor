@@ -4,14 +4,18 @@ function objective_function = estimation_f(param, f_type, display, global_param,
 %   Author: Osnat Lifshitz
 %   Date: 12-March-2014
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+global HSD; global HSG; global SC; global CG; global PC ;global H_HSD; global H_HSG; global H_SC; global H_CG; global H_PC ;
 
 % define values
 H = 0;
 W = 1;
-beta = 0.983;       % discount rate
-
-global normal_arr = [-1.2817,  -0.524,  0.000,  0.524, 1.2817];
-global bp_vector = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1 ];
+beta = 0.983;       % discount rate\
+K_IDX = 5;
+KIDS_IDX = 4;
+NORMAL_IDX = 5; 
+BINARY_IDX = 2;
+global normal_arr; normal_arr = [-1.2817,  -0.524,  0.000,  0.524, 1.2817];
+global bp_vector; bp_vector = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1 ];
 
 % standart normal distribution array : 5%, 15%, 25%, 35%, 45%, 55%, 65%, 75%, 85%, 95%
 %normal_arr = [-1.645, -1.036, -0.674, -0.385, -0.126, 0.126, 0.385, 0.674, 1.036, 1.645];
@@ -19,31 +23,32 @@ global bp_vector = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1 ];
 %                  SMALL SCALE                 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % set small scale to 1 for running in small scale
-small_scale = 0;
+global K0;global K5;global K10;global K20;global HE0;global HE5;global HE10;global HE20
+small_scale = 1;
 if (small_scale == 1)
-    K0 = 0;
-    K5 = 0;
-    K10 = 0;
-    K20 = 0;
-    HE0 = 0;
-    HE5 = 0;
-    HE10 = 0;
-    HE20 = 0;
-    TERMINAL = 25;
-    H_EXP20 = 0;
-    EMAX21 = TERMINAL - 18 + 1 + 1;
+     K0= 0;
+     K5 = 5;
+     K10 = 10;
+     K20 = 20;
+     HE0 = 0;
+     HE5 = 5;
+     HE10 = 10;
+     HE20 = 20;
+     TERMINAL = 25;
+     H_EXP20 = 20;
+     EMAX21 = TERMINAL - 18 + 1 + 1;
 else
-    K0 = 0;
-    K5 = 5;
-    K10 = 10;
-    K20 = 20;
-    HE0 = 0;
-    HE5 = 5;
-    HE10 = 10;
-    HE20 = 20;
-    TERMINAL = 45;
-    H_EXP20 = 20;
-    EMAX21 = H_EXP20 + 1;
+     K0 = 0;
+     K5 = 5;
+     K10 = 10;
+     K20 = 20;
+     HE0 = 0;
+     HE5 = 5;
+     HE10 = 10;
+     HE20 = 20;
+     TERMINAL = 45;
+      H_EXP20 = 20;
+      EMAX21 = H_EXP20 + 1;
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %           COUNTER FACTUALS + STATIC          %
@@ -67,115 +72,116 @@ DUMP_EMAX = 0;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 x_idx = get_global_param_idx(f_type);
 global_param(x_idx) = param;
-global sigma = zeros(5,5);
+global sigma;
+sigma = zeros(5,5);
 % Utility parameters WIFE:  
-global alpha1_w = global_param(1);        % utility from leisure 
-global alpha2_w = global_param(2);        % utility from young children
-global alpha3_w = global_param(3);        % utility from children when married
+ global alpha1_w;alpha1_w = global_param(1);        % utility from leisure 
+ global alpha2_w;alpha2_w = global_param(2);        % utility from young children
+ global alpha3_w;alpha3_w = global_param(3);        % utility from children when married
 % Utility parameters HUSBAND: 
-global alpha1_h = global_param(4);        % utility from leisure 
-global alpha2_h = global_param(5);        % utility from young children
-global alpha3_h = global_param(6);        % utility from children when married - unidentified since no children when unmarried???
-global alpha    = global_param(7);         % CRRA income parameter
+ global alpha1_h;alpha1_h = global_param(4);        % utility from leisure 
+ global alpha2_h;alpha2_h = global_param(5);        % utility from young children
+ global alpha3_h;alpha3_h = global_param(6);        % utility from children when married - unidentified since no children when unmarried???
+ global alpha;alpha    = global_param(7);         % CRRA income parameter
 % Wage parameters wife
-global beta1_w  = global_param(8);     %experience 
-global beta2_w  = global_param(9);     %exp^2  
+ global beta1_w;beta1_w  = global_param(8);     %experience 
+ global beta2_w;beta2_w  = global_param(9);     %exp^2  
 %beta30_w = global_param();     %HSD - schooling    
-global beta31_w = global_param(10);    %HSG - schooling    
-global beta32_w = global_param(11);    %SC -  schooling    
-global beta33_w = global_param(12);    %CG -  schooling    
-global beta34_w = global_param(13);    %PC -  schooling
+ global beta31_w;beta31_w = global_param(10);    %HSG - schooling    
+ global beta32_w;beta32_w = global_param(11);    %SC -  schooling    
+ global beta33_w;beta33_w = global_param(12);    %CG -  schooling    
+ global beta34_w;beta34_w = global_param(13);    %PC -  schooling
 % Wage parameters husband
-global beta1_h  = global_param(14);    %experience 
-global beta2_h  = global_param(15);    %exp^2  
-global beta30_h = global_param(16);    %HSD - schooling    
-global beta31_h = global_param(17);    %HSG- schooling 
-global beta32_h = global_param(18);    %SC -  schooling    
-global beta33_h = global_param(19);    %CG -  schooling    
-global beta34_h = global_param(20);    %PC -  schooling    
+ global beta1_h;beta1_h  = global_param(14);    %experience 
+ global beta2_h;beta2_h  = global_param(15);    %exp^2  
+ global beta30_h;beta30_h = global_param(16);    %HSD - schooling    
+ global beta31_h;beta31_h = global_param(17);    %HSG- schooling 
+ global beta32_h;beta32_h = global_param(18);    %SC -  schooling    
+ global beta33_h;beta33_h = global_param(19);    %CG -  schooling    
+ global beta34_h;beta34_h = global_param(20);    %PC -  schooling    
 % Job offer parameters  wife 
-global row_w    = global_param(21);      % constant 
-global row0_w   = global_param(22);      % work in previous period
-global row11_w  = global_param(23);      % HSG -schooling
-global row12_w  = global_param(24);      % SC - schooling
-global row13_w  = global_param(25);      % CG - schooling
-global row14_w  = global_param(26);      % PC - schooling
-global row2_w   = global_param(27);      % work experience
+global  row_w;row_w    = global_param(21);      % constant 
+ global row0_w;row0_w   = global_param(22);      % work in previous period
+ global row11_w;row11_w  = global_param(23);      % HSG -schooling
+ global row12_w;row12_w  = global_param(24);      % SC - schooling
+ global row13_w;row13_w  = global_param(25);      % CG - schooling
+ global row14_w;row14_w  = global_param(26);      % PC - schooling
+ global row2_w;row2_w   = global_param(27);      % work experience
 % Job offer parameters  husband 
-global row_h    = global_param(28);      % constant 
-global row0_h   = global_param(29);      % work in previous period
-global row11_h  = global_param(30);      % HSG -schooling
-global row12_h  = global_param(31);      % SC - schooling
-global row13_h  = global_param(32);      % CG - schooling
-global row14_h  = global_param(33);      % PC - schooling
-global row2_h   = global_param(34);      % work experience
+global  row_h;row_h    = global_param(28);      % constant 
+ global row0_h;row0_h   = global_param(29);      % work in previous period
+ global row11_h;row11_h  = global_param(30);      % HSG -schooling
+ global row12_h;row12_h  = global_param(31);      % SC - schooling
+ global row13_h;row13_h  = global_param(32);      % CG - schooling
+ global row14_h;row14_h  = global_param(33);      % PC - schooling
+ global row2_h;row2_h   = global_param(34);      % work experience
 %home production technology - parameters    
-global hp1 = global_param(35);         % # of young children influence on work at home hours
-global hp2 = global_param(36);         % # of old children influence on work at home hours
-global hp3 = global_param(37);         % husband leisure 
-global hp4 = global_param(38);         % wife leisure
-global hp5 = global_param(39);         % # of young children influence on consumption  
-global hp6 = global_param(40);         % # of old children influence on consumption
-global hp7 = global_param(41);         % sigma CRRA parameter
+ global hp1;hp1 = global_param(35);         % # of young children influence on work at home hours
+ global hp2;hp2 = global_param(36);         % # of old children influence on work at home hours
+ global hp3;hp3= global_param(37);         % husband leisure 
+ global hp4;hp4 = global_param(38);         % wife leisure
+ global hp5;hp5 = global_param(39);         % # of young children influence on consumption  
+ global hp6;hp6 = global_param(40);         % # of old children influence on consumption
+ global hp7;hp7 = global_param(41);         % sigma CRRA parameter
 %probability of another child parameters    
-global c1 = global_param(42);           % previous work state - wife
-global c2 = global_param(43);          %age wife - HSG
-global c3 = global_param(44);          %age square wife - HSG
-global c4 = global_param(45);          %age wife - SC
-global c5 = global_param(46);          %age square wife - SC
-global c6 = global_param(47);          %age wife - CG
-global c7 = global_param(48);          %age square wife - CG
-global c8 = global_param(49);          %age wife - PC
-global c9 = global_param(50);          %age square wife - PC
-global c10 = global_param(51);         %number of children at household    
-global c11 = global_param(52);         % schooling - husband
-global c12 = global_param(53);         % married - M
+ global c1;c1 = global_param(42);           % previous work state - wife
+ global c2;c2 = global_param(43);          %age wife - HSG
+ global c3;c3 = global_param(44);          %age square wife - HSG
+ global c4;c4 = global_param(45);          %age wife - SC
+ global c5;c5= global_param(46);          %age square wife - SC
+ global c6;c6 = global_param(47);          %age wife - CG
+ global c7;c7 = global_param(48);          %age square wife - CG
+ global c8;c8 = global_param(49);          %age wife - PC
+ global c9;c9 = global_param(50);          %age square wife - PC
+ global c10;c10 = global_param(51);         %number of children at household    
+ global c11;c11 = global_param(52);         % schooling - husband
+ global c12;c12 = global_param(53);         % married - M
 % terminal value Parameters
 %t0 = global_param();           % schooling wife - HSD
-global t1_w = global_param(54);        % schooling wife - HSG
-global t2_w = global_param(55);        % schooling wife - SC
-global t3_w = global_param(56);        % schooling wife - CG
-global t4_w = global_param(57);        % schooling wife - PC
-global t5_w = global_param(58);        % exp wife
-global t6_w = global_param(59);        % schooling husband if married - HSD
-global t7_w = global_param(60);        % schooling husband if married - HSG
-global t8_w = global_param(61);        % schooling husband if married - SC
-global t9_w = global_param(62);        % schooling husband if married - CG
-global t10_w = global_param(63);       % schooling husband if married - PC
-global t11_w = global_param(64);       % exp husband if married 
-global t12_w = global_param(65);       % martial status
-global t13_w = global_param(66);       % number of children
-global t14_w = global_param(67);       % match quality if married
-global t15_w = global_param(68);       % number of children if married
-global t16_w = global_param(69);       % previous work state - wife
-global t17_w = global_param(70);       % previous work state - husband if married
+ global t1_w;t1_w = global_param(54);        % schooling wife - HSG
+ global t2_w;t2_w = global_param(55);        % schooling wife - SC
+ global t3_w;t3_w = global_param(56);        % schooling wife - CG
+ global t4_w;t4_w = global_param(57);        % schooling wife - PC
+ global t5_w;t5_w = global_param(58);        % exp wife
+ global t6_w;t6_w = global_param(59);        % schooling husband if married - HSD
+ global t7_w;t7_w = global_param(60);        % schooling husband if married - HSG
+ global t8_w;t8_w = global_param(61);        % schooling husband if married - SC
+ global t9_w;t9_w = global_param(62);        % schooling husband if married - CG
+ global t10_w;t10_w = global_param(63);       % schooling husband if married - PC
+ global t11_w;t11_w = global_param(64);       % exp husband if married 
+ global t12_w;t12_w = global_param(65);       % martial status
+ global t13_w;t13_w = global_param(66);       % number of children
+ global t14_w;t14_w = global_param(67);       % match quality if married
+ global t15_w;t15_w = global_param(68);       % number of children if married
+ global t16_w;t16_w = global_param(69);       % previous work state - wife
+ global t17_w;t17_w = global_param(70);       % previous work state - husband if married
 % terminal value Parameters
 %t0 = global_param();           % schooling wife if married - HSD
-global t1_h = global_param(71);        % schooling wife if married- HSG
-global t2_h = global_param(72);        % schooling wife if married- SC
-global t3_h = global_param(73);        % schooling wife if married- CG
-global t4_h = global_param(74);        % schooling wife if married- PC
-global t5_h = global_param(75);        % exp wife if married
-global t6_h = global_param(76);        % schooling husband - HSD
-global t7_h = global_param(77);        % schooling husband - HSG
-global t8_h = global_param(78);        % schooling husband - SC
-global t9_h = global_param(79);        % schooling husband - CG
-global t10_h = global_param(80);       % schooling husband - PC
-global t11_h = global_param(81);       % exp husband  
-global t12_h = global_param(82);       % martial status if married
-global t13_h = global_param(83);       % number of children if married
-global t14_h = global_param(84);       % match quality if married
-global t15_h = global_param(85);        % number of children if married - NO NEED
-global t16_h = global_param(86);       % previous work state - wife if married
-global t17_h = global_param(87);       % previous work state - husband 
+ global t1_h;t1_h = global_param(71);        % schooling wife if married- HSG
+ global t2_h;t2_h = global_param(72);        % schooling wife if married- SC
+ global t3_h;t3_h = global_param(73);        % schooling wife if married- CG
+ global t4_h;t4_h = global_param(74);        % schooling wife if married- PC
+ global t5_h;t5_h = global_param(75);        % exp wife if married
+ global t6_h;t6_h = global_param(76);        % schooling husband - HSD
+ global t7_h;t7_h = global_param(77);        % schooling husband - HSG
+ global t8_h;t8_h = global_param(78);        % schooling husband - SC
+ global t9_h;t9_h = global_param(79);        % schooling husband - CG
+ global t10_h;t10_h = global_param(80);       % schooling husband - PC
+ global t11_h;t11_h = global_param(81);       % exp husband  
+ global t12_h;t12_h = global_param(82);       % martial status if married
+ global t13_h;t13_h = global_param(83);       % number of children if married
+ global t14_h;t14_h = global_param(84);       % match quality if married
+ global t15_h;t15_h = global_param(85);        % number of children if married - NO NEED
+ global t16_h;t16_h = global_param(86);       % previous work state - wife if married
+ global t17_h;t17_h = global_param(87);       % previous work state - husband 
 % match quality parameters
-global P_HUSBAND =        (exp(global_param(88)))/(1+exp(global_param(88)));   % PROBABILITY OF MEETING A POTENTIAL HUSBAND
-global MATCH_Q_DECREASE = (exp(global_param(89)))/(1+exp(global_param(89)));   % probability of match quality decrease
-global MATCH_Q_INCREASE = (exp(global_param(90)))/(1+exp(global_param(90)));   % probability of match quality increase
-global EDUC_MATCH_2 = global_param(91);  %education match parameter
-global EDUC_MATCH_3 = global_param(92);  %education match parameter
-global EDUC_MATCH_4 = global_param(93);  %education match parameter
-global EDUC_MATCH_5 = global_param(94);  %education match parameter
+global  P_HUSBAND;P_HUSBAND =        (exp(global_param(88)))/(1+exp(global_param(88)));   % PROBABILITY OF MEETING A POTENTIAL HUSBAND
+ global MATCH_Q_DECREASE;MATCH_Q_DECREASE = (exp(global_param(89)))/(1+exp(global_param(89)));   % probability of match quality decrease
+ global MATCH_Q_INCREASE;MATCH_Q_INCREASE = (exp(global_param(90)))/(1+exp(global_param(90)));   % probability of match quality increase
+ global EDUC_MATCH_2;EDUC_MATCH_2 = global_param(91);  %education match parameter
+ global EDUC_MATCH_3;EDUC_MATCH_3 = global_param(92);  %education match parameter
+ global EDUC_MATCH_4;EDUC_MATCH_4 = global_param(93);  %education match parameter
+ global EDUC_MATCH_5;EDUC_MATCH_5 = global_param(94);  %education match parameter
 % random shocks variance-covariance matrix
 sigma(1,1) = exp(global_param(95));             %wage error variance husband;
 sigma(2,2) = exp(global_param(96));             %wage error variance wife;
@@ -186,7 +192,8 @@ sigma(5,5) = exp(global_param(99));             % variance match quality
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                INITIALIZATION           %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-emp =                   zeros(DRAW_F,T_MAX, SCHOOL_GROUPS);         % employment total
+emp_choice_w =          zeros(DRAW_F,T_MAX, SCHOOL_GROUPS);         % employment total
+emp_choice_h =          zeros(DRAW_F,T_MAX, SCHOOL_GROUPS);         % employment total
 emp_m =                 zeros(DRAW_F,T_MAX, SCHOOL_GROUPS);         % employment married
 emp_um =                zeros(DRAW_F,T_MAX, SCHOOL_GROUPS);          % employment unmarried
 emp_m_up =              zeros(DRAW_F,T_MAX, SCHOOL_GROUPS);         % employment married up
@@ -283,9 +290,12 @@ count_just_married 			= zeros(T_MAX, SCHOOL_GROUPS);
 count_just_divorced 		= zeros(T_MAX, SCHOOL_GROUPS);
 count_newborn_um 			= zeros(T_MAX, SCHOOL_GROUPS);
 count_newborn_m 			= zeros(T_MAX, SCHOOL_GROUPS);
+% EMAX(t,WE,N_Y,N_O,prev_state_W,ability_w_index,M,HE,HS,Q_INDEX, prev_state_h,ability_h_index,bp_dummy )-  168,000,000 EACH EMAX
+EMAX_W = zeros(TERMINAL-17,K_IDX,KIDS_IDX,KIDS_IDX,BINARY_IDX,NORMAL_IDX,BINARY_IDX,K_IDX,5,NORMAL_IDX,BINARY_IDX,NORMAL_IDX,3); 
+EMAX_H = zeros(TERMINAL-17,K_IDX,KIDS_IDX,KIDS_IDX,BINARY_IDX,NORMAL_IDX,BINARY_IDX,K_IDX,5,NORMAL_IDX,BINARY_IDX,NORMAL_IDX,3); 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-global T = TERMINAL;
+ T = TERMINAL;
 for school_group=1 : 5       % school_group 1 is only for calculating the emax if single men, other than that, there is a "if school_group>1"
     if (school_group == 1)
         HSG = 0;  SC = 0;  CG = 0; PC = 0;
@@ -336,7 +346,7 @@ for school_group=1 : 5       % school_group 1 is only for calculating the emax i
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%                                     SOLVING BACKWARD                             %%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-	if (STATIC == 0 && COUNTER != 1) % 
+	if (STATIC == 0 && COUNTER ~= 1) % 
 	end   % if STATIC == 0
 
     if (DUMP_EMAX == 1)
@@ -373,9 +383,9 @@ for school_group=1 : 5       % school_group 1 is only for calculating the emax i
             else
                 prev_state_w = 1;
             end 
-            prev_state_T_minus_1_w = 0;
+            prev_state_w_T_minus_1 = 0;
             prev_state_h = 0;
-            prev_state_T_minus_1_h = 0;
+            prev_state_h_T_minus_1 = 0;
 
             count_age1 = 0; %the age of the oldest child under6
             count_age2 = 0; %the age of the 2nd oldest child under6
@@ -404,13 +414,15 @@ for school_group=1 : 5       % school_group 1 is only for calculating the emax i
 			similar_educ = 0;
             ability_w = normal_arr(w_ability_draw(draw_f, school_group))*sigma(3,3);
             ability_w_index = w_ability_draw(draw_f,school_group);
+            ability_h = 0;
+            ability_h_index = 0;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             % Make choices for all periods
             for t = 1 : T
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%            
                 CHOOSE_HUSBAND = 0;
-                prev_state_T_minus_1_w = prev_state_w;
-                prev_state_T_minus_1_h = prev_state_h;
+                prev_state_w_T_minus_1 = prev_state_w;
+                prev_state_h_T_minus_1 = prev_state_h;
                 D_T_minus_1 = D;
                 NEW_BORN = 0;
  %%%%%%%%%%%%%%%%%%%%%     DRAW HUSBAND    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -420,6 +432,7 @@ for school_group=1 : 5       % school_group 1 is only for calculating the emax i
                     Q = 0;
 					similar_educ = 0;
                     % DRAW A POTENTIAL HUSBAND: EXP, SCHOOLING, MATCH QUALITY, ABILITY
+                    
                     if h_draws(draw_f,t,school_group,1)<P_HUSBAND
                         CHOOSE_HUSBAND = 1;
                         [ability_h, ability_h_index, Q, Q_INDEX,HS,H_HSD, H_HSG, H_SC, H_CG, H_PC,HE, similar_educ]=draw_husband(husbands, t, age_index, draw_f, h_draws,school_group );
@@ -437,72 +450,25 @@ for school_group=1 : 5       % school_group 1 is only for calculating the emax i
 				end	
 %%%%%%%%%%%%%%%%%%%%%%%%   POTENTIAL OR CURRENT HUSBAND WAGE:    %%%%%%%%%%%%%%%%
                 if (M == 1 ||  CHOOSE_HUSBAND == 1)
-                    [wage_h, JOB_OFFER_H]=calculate_wage(H, H_HSD, H_HSG,H_SC, H_CG, H_PC, HE, HSD, HSG, SC, CG, PC, WE , h_draws, w_draws, draw_f,t, school_group, prev_state_w, prev_state_h);
+                    [wage_h, JOB_OFFER_H]=calculate_wage(H, H_HSD, H_HSG,H_SC, H_CG, H_PC, HE, HSD, HSG, SC, CG, PC, WE , h_draws, w_draws, epsilon_f, draw_f,t, school_group, prev_state_w, prev_state_h,ability_w, ability_h);
                 else
                     JOB_OFFER_H = 0;
                     wage_h = 0;
                 end 
 %%%%%%%%%%%%%%%%%%%%%%%%   JOB OFFER PROBABILITY + WAGE WIFE     %%%%%%%%%%%%%%%%
-                [wage_w, JOB_OFFER_W]=calculate_wage(W, H_HSD, H_HSG,H_SC, H_CG, H_PC, HE, HSD, HSG, SC, CG, PC, WE , h_draws, w_draws, draw_f, t, school_group, prev_state_w, prev_state_h);
+                [wage_w, JOB_OFFER_W]=calculate_wage(W, H_HSD, H_HSG,H_SC, H_CG, H_PC, HE, HSD, HSG, SC, CG, PC, WE , h_draws, w_draws,epsilon_f, draw_f, t, school_group, prev_state_w, prev_state_h,ability_w, ability_h);
 %%%%%%%%%%%%%%%%%%%%%%%% calculate husbands and wives utility     %%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%% from each option + -999 for unavailable  %%%%%%%%%%%%%%%
-                [U_W,U_H]=calculate_utility(N_Y, N_O,N_Y_H,N_O_H, wage_h, wage_w, CHOOSE_HUSBAND, JOB_OFFER_H, JOB_OFFER_W, M, STATIC, COUNTER, similar_educ, Q, t); 
+                [U_W,U_H]=calculate_utility(N_Y, N_O,N_Y_H,N_O_H, wage_h, wage_w, CHOOSE_HUSBAND, JOB_OFFER_H, JOB_OFFER_W, M, STATIC, COUNTER, similar_educ, Q, t, ability_h, ability_h_index,ability_w, ability_w_index, HE,WE);  
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%   MAXIMIZATION - MARRIAGE + WORK DESICION  %%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 if (M == 0 &&  CHOOSE_HUSBAND == 1)
-%%%%%%%%%%%%%%  Nash bargaining at first period of marriage  %%%%%%%%%%%%%%%%%%%%
-                    M_T_minus_1 = M;
-                    % marriage decision - outside option value wife
-                    if U_W(1)>U_W(2)
-                        outside_option_w_v = U_W(1);
-                        outside_option_w = 1; %"unemployed"
-                    else        
-                        outside_option_w_v = U_W(2);
-                        outside_option_w = 2; %employed
-                    end
-                    if U_H(1)>U_H(2)
-                        outside_option_h_v = U_H(1);
-                        outside_option_h = 1; %"unemployed"
-                    else        
-                        outside_option_h_v = U_H(2);
-                        outside_option_h = 2; %employed
-                    end
-                    weighted_utility=U_H(3:6).*BP+U_W(3:6).*(1-BP);  %weighted utility
-                    max_weighted_utility=max(weighted_utility);      % max of weighted utility
-                    max_weighted_utility_index=find(weighted_utility==max(weighted_utility(:)));  % the index:1-4 of max of weighted utility
-                    % leave only positive surplus for both
-                    for tmp=1:4
-                        if ((U_W(1+2)-outside_option_w_v)>0 && (U_H(1+2)-outside_option_h_v)>0)
-                            nash_value(tmp) =((U_W(tmp+2)-outside_option_w_v).^0.5)*((U_H(tmp+2)-outside_option_h_v).^0.5) ;  %3-married+wife unemployed+ husband employed
-                        else
-                            nash_value(tmp)=-9999
-                        end
-                    end
-                    max_nash_value = max(nash_value)
-                    max_nash_value_index=find(nash_value==max(nash_value(:)));  % the index:1-4 of max of weighted utility
-                    %%%%%   find the value of the bargaining power %%%%%%
-                    for tmp=1:4
-                        if(max_nash_value_index==tmp && max_nash_value> -999)  %3-married+wife unemployed+ husband employed
-                            if ( max_weighted_utility_index== 2+tmp )
-                                BP = 0.5;
-                            else %need to change the value of alpha - the bargaining power so 3-married+unemployed will be better than 4-married+employed
-                                weighted_utility_option(:,1)=U_H(3).*bp_vector+U_W(3).*(1-bp_vector);  %weighted utility
-                                weighted_utility_option(:,2)=U_H(4).*bp_vector+U_W(4).*(1-bp_vector);  %weighted utility
-                                weighted_utility_option(:,3)=U_H(5).*bp_vector+U_W(5).*(1-bp_vector);  %weighted utility
-                                weighted_utility_option(:,4)=U_H(6).*bp_vector+U_W(6).*(1-bp_vector);  %weighted utility
-                                posibilities=weighted_utility_option(:,tmp)==max(weighted_utility_option(:,:))  ;     %a 11 elements vector, with 1 for all the alpha-bp where 3 is bigger than 4, all possible alphas
-                                ind1 = find(posibilities(1:11), 1, 'first');
-                                ind2 = find(posibilities(1:11), 1, 'last');
-                                if abs(6-ind1)>abs(6-ind2)
-                                    BP=(ind2-1)*0.1;
-                                else
-                                    BP=(ind1-1)*0.1;    
-                                end
-                            end 
-                        end
-                    end      
-                end    % END OF MARRIAGE OFFER - CALCULATE INITIAL BP
+                    [BP]=nash(M,U_W,U_H,BP)  ;% Nash bargaining at first period of marriage  
+                    if (BP == -1)   % there is no BP that can give both positive surplus
+                        CHOOSE_HUSBAND = 0;
+                    end 
+                end    %  CALCULATE INITIAL BP
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%   at this point the BP IS .5 IF NO MARRIAGE AND NO OFFER, is calculated by nash if offer  and is from previous period if already married                
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -528,8 +494,7 @@ for school_group=1 : 5       % school_group 1 is only for calculating the emax i
                     looking_for_solution = 1;
                     while (looking_for_solution == 1)
                         weighted_utility=U_H(3:6).*BP+U_W(3:6).*(1-BP);  %weighted utility
-                        max_weighted_utility=max(weighted_utility);      % max of weighted utility
-                        max_weighted_utility_index=find(weighted_utility==max(weighted_utility(:)));  % the index:1-4 of max of weighted utility
+                        [max_weighted_utility,max_weighted_utility_index]=max(weighted_utility);      % max of weighted utility
                         if (U_H(max_weighted_utility_index+2)> outside_option_h_v && U_W(max_weighted_utility_index+2)> outside_option_w_v) %the max in married for both is better than outside
                             looking_for_solution = 0;
                             M = 1 ;
@@ -640,7 +605,7 @@ for school_group=1 : 5       % school_group 1 is only for calculating the emax i
                                 end  
                             end    
                         end
-                    end%while
+                    end%while - loop over BP, increase/decrease BP 
                 elseif ( M==0 && CHOOSE_HUSBAND == 0)
                     M = 0 ;
                     marriage_choice(draw_f,t,school_group) = 0;
@@ -664,7 +629,7 @@ for school_group=1 : 5       % school_group 1 is only for calculating the emax i
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%      
 %probability of another child parameters:%c1 previous work state - wife   %c2 age wife - HSG   %c3 age square  wife - HSG  %c4 age wife - SC   %c5 age square  wife - SC   %c6 age wife - CG
           %c7 age square  wife - CG   %c8 age wife - PC   %c9 age square  wife - PC   %c10 number of children at household    %c11 schooling - husband  %c12 unmarried
-                c_lamda=c1*prev_state_w+c2*HSG*(AGE+t)+c3*HSG*(AGE+t)^2+c4*SC*(AGE+t)+c5*SC*(AGE+t)^2+c6*CG*(AGE+t)+c7*CG*(AGE+t)^2+c8*PC*(AGE+t)+c9*PC*(AGE+t)^2+c10*(N_Y+N_O)+c11*HS*M+c12*M;
+                c_lamda=c1*prev_state_w+c2*HSG*(AGE+t)+c3*HSG*(AGE+t).^2+c4*SC*(AGE+t)+c5*SC*(AGE+t).^2+c6*CG*(AGE+t)+c7*CG*(AGE+t)^2+c8*PC*(AGE+t)+c9*PC*(AGE+t)^2+c10*(N_Y+N_O)+c11*HS*M+c12*M;
                 child_prob = normcdf(c_lamda);
                 if (w_draws(draw_f,t,school_group,2) < child_prob) && ((AGE+t) < 40)  %w_draws = rand(DRAW_F,T,3); 1-job offer, 2-new child, 3 - match quality change- new child was born
                     NEW_BORN = 1;
@@ -741,7 +706,7 @@ for school_group=1 : 5       % school_group 1 is only for calculating the emax i
                 end
 				if BP>0.5
 					bp_dummy = 3;
-				elseif BP < 0.5
+				elseif (BP < 0.5 && BP >-1)
 					bp_dummy = 1;
 				else
 					bp_dummy = 2;
@@ -749,44 +714,42 @@ for school_group=1 : 5       % school_group 1 is only for calculating the emax i
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 %   CREATE AND SAVE MOMENTS
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-                %individual moments:
-                emp(draw_f, t+age_index, school_group)= prev_state;         % employment total - prev_state is actually current state at this point
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 %                   MARRIED WOMEN EMPLOYMENT BY KIDS INDIVIDUAL MOMENTS
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 if N_TOTAL == 0 && M ==1 
-                    emp_m_no_kids(draw_f, t+age_index , school_group) = prev_state;         % employment married no kids
+                    emp_m_no_kids(draw_f, t+age_index , school_group) = prev_state_w;         % employment married no kids
                     count_emp_m_no_kids(t+age_index,school_group)=count_emp_m_no_kids(t+age_index,school_group)+1;
                 elseif N_TOTAL == 1 && M ==1
-                    emp_m_one_kid(draw_f, t+age_index, school_group) = prev_state;          % employment married 1 kid
+                    emp_m_one_kid(draw_f, t+age_index, school_group) = prev_state_w;          % employment married 1 kid
                     count_emp_m_one_kid(t+age_index,school_group) = count_emp_m_one_kid(t+age_index,school_group)+1;
                 elseif N_TOTAL == 2 && M ==1
-                    emp_m_2_kids(draw_f, t+age_index, school_group) = prev_state;          % employment married 2 kid
+                    emp_m_2_kids(draw_f, t+age_index, school_group) = prev_state_w;          % employment married 2 kid
                     count_emp_m_2_kids(t+age_index,school_group) = count_emp_m_2_kids(t+age_index,school_group)+1;
 				elseif N_TOTAL == 3 && M ==1
-                    emp_m_3_kids(draw_f, t+age_index, school_group) = prev_state;          % employment married 3 kid
+                    emp_m_3_kids(draw_f, t+age_index, school_group) = prev_state_w;          % employment married 3 kid
                     count_emp_m_3_kids(t+age_index,school_group) = count_emp_m_3_kids(t+age_index,school_group)+1;
 				elseif N_TOTAL > 3  && M ==1
-                    emp_m_4plus_kids(draw_f, t+age_index, school_group) = prev_state;           % employment married 4  kids
+                    emp_m_4plus_kids(draw_f, t+age_index, school_group) = prev_state_w;           % employment married 4  kids
                     count_emp_m_4plus_kids(t+age_index,school_group) = count_emp_m_4plus_kids(t+age_index,school_group)+1;
                 end
 				%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 %                   UNMARRIED WOMEN EMPLOYMENT BY KIDS INDIVIDUAL MOMENTS                       %
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 if M == 0;
-                    emp_um(draw_f, t+age_index, school_group) = prev_state;         % employment unmarried
+                    emp_um(draw_f, t+age_index, school_group) = prev_state_w;         % employment unmarried
                     if (N_Y+N_O)==0
-                        emp_um_no_kids(draw_f, t+age_index, school_group) = prev_state;     % employment unmarried and no children
+                        emp_um_no_kids(draw_f, t+age_index, school_group) = prev_state_w;     % employment unmarried and no children
                         count_emp_um_no_kids(t+age_index, school_group) = count_emp_um_no_kids(t+age_index, school_group) + 1;
                     else
-                        emp_um_kids(draw_f, t+age_index, school_group) = prev_state;            % employment unmarried and children
+                        emp_um_kids(draw_f, t+age_index, school_group) = prev_state_w;            % employment unmarried and children
                         count_emp_um_kids(t+age_index, school_group) = count_emp_um_kids(t+age_index, school_group) + 1;
                     end 
                 end
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 %                 EMPLOYMENT TRANSITION MATRIX                                                 %
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-                if prev_state == 1 && prev_state_T_minus_1 == 0
+                if prev_state_w == 1 && prev_state_w_T_minus_1 == 0
 					if M ==1
 						just_found_job_m(draw_f, t+age_index, school_group) = 1;              % for transition matrix - unemployment to employment 
 						count_just_found_job_m(t+age_index, school_group) = count_just_found_job_m(t+age_index, school_group)+1;
@@ -798,7 +761,7 @@ for school_group=1 : 5       % school_group 1 is only for calculating the emax i
 						just_found_job_um(draw_f, t+age_index, school_group) = 1;              % for transition matrix - unemployment to employment 
 						count_just_found_job_um(t+age_index, school_group) = count_just_found_job_um(t+age_index, school_group)+1;
 					end	
-                elseif prev_state == 0 && prev_state_T_minus_1 == 1
+                elseif prev_state_w == 0 && prev_state_w_T_minus_1 == 1
 					if M ==1
 						just_got_fired_m(draw_f, t+age_index, school_group) = 1;              % for transition matrix - unemployment to employment 
 						count_just_got_fired_m(t+age_index, school_group) = count_just_got_fired_m(t+age_index, school_group)+1;
@@ -812,7 +775,7 @@ for school_group=1 : 5       % school_group 1 is only for calculating the emax i
 						count_just_got_fired_um(t+age_index, school_group) = count_just_got_fired_um(t+age_index, school_group)+1;
 						
 					end	
-                elseif prev_state == 0 && prev_state_T_minus_1 == 0
+                elseif prev_state_w == 0 && prev_state_w_T_minus_1 == 0
 					if M ==1
 						count_just_found_job_m(t+age_index, school_group) = count_just_found_job_m(t+age_index, school_group)+1;
 						if N_TOTAL >0
@@ -821,7 +784,7 @@ for school_group=1 : 5       % school_group 1 is only for calculating the emax i
 					else
 						count_just_found_job_um(t+age_index, school_group) = count_just_found_job_um(t+age_index, school_group)+1;
 					end	
-				elseif prev_state == 1 && prev_state_T_minus_1 == 1
+				elseif prev_state_w == 1 && prev_state_w_T_minus_1 == 1
 					if M ==1
 						count_just_got_fired_m(t+age_index, school_group) = count_just_got_fired_m(t+age_index, school_group)+1;
 						if N_TOTAL > 0
@@ -834,7 +797,7 @@ for school_group=1 : 5       % school_group 1 is only for calculating the emax i
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 %                   MARRIED WOMEN EMPLOYMENT + WAGES MOMENTS
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-				if prev_state == 1
+				if prev_state_w == 1
 					if wage_w > 0
 							
 						wages_w(K, school_group)=wages_w(K, school_group) +wage_w;        % women wages if employed by experience
@@ -846,15 +809,15 @@ for school_group=1 : 5       % school_group 1 is only for calculating the emax i
 						wages_m_h(HE+D, HS)=wages_m_h(HE+D, HS) + wage_h;         % married men wages
 						count_wages_m_h(HE+D, HS) = count_wages_m_h(HE+D, HS)+1;
 					end	
-                    emp_m(draw_f, t+age_index, school_group) = prev_state;      % employment married women  
+                    emp_m(draw_f, t+age_index, school_group) = prev_state_w;      % employment married women  
                     if school_group > HS                %women married down, men married up - HS is 1 to 5 while school_group 1 to 4 so to copare: -1
-                        emp_m_down(draw_f, t+age_index, school_group) = prev_state;         % employment married down
+                        emp_m_down(draw_f, t+age_index, school_group) = prev_state_w;         % employment married down
                         count_emp_m_down(t+age_index, school_group) = count_emp_m_down(t+age_index, school_group)+1;
 						if (HE+D <37 )  && wage_h > wage_moments(HE+D,5+HS)     %wage_moments(1:36,6:10)
-							emp_m_down_above(draw_f, t+age_index, school_group) = prev_state;         % employment married down
+							emp_m_down_above(draw_f, t+age_index, school_group) = prev_state_w;         % employment married down
 							count_emp_m_down_above(t+age_index, school_group) = count_emp_m_down_above(t+age_index, school_group)+1;
 						else	
-							emp_m_down_below(draw_f, t+age_index, school_group) = prev_state;         % employment married down
+							emp_m_down_below(draw_f, t+age_index, school_group) = prev_state_w;         % employment married down
 							count_emp_m_down_below(t+age_index, school_group) = count_emp_m_down_below(t+age_index, school_group)+1;
 						end
                         wages_m_h_up(draw_f, HE+D, HS)=wage_h;   % married up men wages 
@@ -868,13 +831,13 @@ for school_group=1 : 5       % school_group 1 is only for calculating the emax i
 							count_match_w_down(t+age_index, school_group)=count_match_w_down(t+age_index, school_group)+1;
 						end
                     elseif school_group < HS            %women married up, men married down
-                        emp_m_up(draw_f, t+age_index, school_group) = prev_state;   % employment married up women
+                        emp_m_up(draw_f, t+age_index, school_group) = prev_state_w;   % employment married up women
 						count_emp_m_up(t+age_index, school_group) = count_emp_m_up(t+age_index, school_group)+1;
                         if (HE+D <37 ) && wage_h > wage_moments(HE+D,5+HS)     %wage_moments(1:36,6:10)
-							emp_m_up_above(draw_f, t+age_index, school_group) = prev_state;         % employment married down
+							emp_m_up_above(draw_f, t+age_index, school_group) = prev_state_w;         % employment married down
 							count_emp_m_up_above(t+age_index, school_group) = count_emp_m_up_above(t+age_index, school_group)+1;
 						else	
-							emp_m_up_below(draw_f, t+age_index, school_group) = prev_state;         % employment married down
+							emp_m_up_below(draw_f, t+age_index, school_group) = prev_state_w;         % employment married down
 							count_emp_m_up_below(t+age_index, school_group) = count_emp_m_up_below(t+age_index, school_group)+1;
 						end
                         wages_m_h_down(draw_f, HE+D, HS)=wage_h; % married down men wages
@@ -890,14 +853,14 @@ for school_group=1 : 5       % school_group 1 is only for calculating the emax i
                     elseif  school_group == HS         %married equal
                         wages_m_h_eq(draw_f, HE+D, HS)=wage_h;   % married equal men wages 
                         count_wages_m_h_eq(HE+D, HS)=count_wages_m_h_eq(HE+D, HS)+1;
-                        emp_m_eq(draw_f, t+age_index, school_group) = prev_state;   % employment married equal women
+                        emp_m_eq(draw_f, t+age_index, school_group) = prev_state_w;   % employment married equal women
 						count_emp_m_eq(t+age_index, school_group) = count_emp_m_eq(t+age_index, school_group)+1;
 						
 						if (HE+D <37 )  && wage_h > wage_moments(HE+D,5+HS)      %wage_moments(1:36,6:10)
-							emp_m_eq_above(draw_f, t+age_index, school_group) = prev_state;         % employment married down
+							emp_m_eq_above(draw_f, t+age_index, school_group) = prev_state_w;         % employment married down
 							count_emp_m_eq_above(t+age_index, school_group) = count_emp_m_eq_above(t+age_index, school_group)+1;
 						else	
-							emp_m_eq_below(draw_f, t+age_index, school_group) = prev_state;         % employment married down
+							emp_m_eq_below(draw_f, t+age_index, school_group) = prev_state_w;         % employment married down
 							count_emp_m_eq_below(t+age_index, school_group) = count_emp_m_eq_below(t+age_index, school_group)+1;
 						end
 						if M==1 && M_T_minus_1==0
@@ -910,7 +873,7 @@ for school_group=1 : 5       % school_group 1 is only for calculating the emax i
 						end
                     end
                 end
-                if M==1 && prev_state == 1                              %prev_state is actually current state at this point
+                if M==1 && prev_state_w == 1                              %prev_state_w is actually current state at this point
                     wages_m_w(draw_f, K, school_group)=wage_w;          % married women wages if employed
                     if school_group < HS
                         wages_m_w_up(draw_f, K, school_group)=wage_w;   % married up women wages if employed
@@ -922,14 +885,14 @@ for school_group=1 : 5       % school_group 1 is only for calculating the emax i
                         wages_m_w_eq(draw_f, K, school_group)=wage_w; % married equal women wages if employed
                         count_wages_m_w_eq(K, school_group)=count_wages_m_w_eq(K, school_group)+1;
                     end
-                elseif M==0 && prev_state == 1
+                elseif M==0 && prev_state_w == 1
                     wages_um_w(draw_f, K, school_group)=wage_w;         % unmarried women wages if employed
                 end
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 %           FERTILITY AND MARRIED RATE MOMENTS
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 married(draw_f, t+age_index, school_group) = M  ;                   % married yes/no
-                newborn(draw_f, t+age_index, school_group)=NEW_BORN;                % new born in period t - for probability and distribution
+%                newborn(draw_f, t+age_index, school_group)=NEW_BORN;                % new born in period t - for probability and distribution
 				if M ==1
 	                newborn_m(draw_f, t+age_index, school_group)=NEW_BORN;                % new born in period t - for probability and distribution
 					count_newborn_m(t+age_index, school_group) = count_newborn_m(t+age_index, school_group)+1;
@@ -994,30 +957,34 @@ average_match_w_down = nansum(match_w_down./count_match_w_down)
 %column 2-5 - employment rate by education group. start at t+age index
 %column 6-9 - married women employment rate by education group. start at t+age index
 %column 10-13- unmarried women employment rate by education group. start at t+age index
-f_emp = [mean(emp(:,:,2)); mean(emp(:,:,3)); mean(emp(:,:,4)); mean(emp(:,:,5))]' ;                                 % employment total by education
+f_emp_w = [mean(emp_choice_w(:,:,2)); mean(emp_choice_w(:,:,3)); mean(emp_choice_w(:,:,4)); mean(emp_choice_w(:,:,5))]'                                  % employment total by education
 tmp_married = [sum(married(:,:,2)); sum(married(:,:,3)); sum(married(:,:,4)); sum(married(:,:,5))]';                % married yes/no
 f_emp_m = [sum(emp_m(:,:,2)); sum(emp_m(:,:,3)); sum(emp_m(:,:,4)); sum(emp_m(:,:,5))]';                            % employment married by education
 f_emp_m  = f_emp_m ./tmp_married;
 f_emp_um = [sum(emp_um(:,:,2)); sum(emp_um(:,:,3)); sum(emp_um(:,:,4)); sum(emp_um(:,:,5))]';                       % employment unmarried by education
 f_emp_um  = f_emp_um ./[DRAW_F - tmp_married];
-emp_moments_fitted_matrix = [f_emp  f_emp_m  f_emp_um];
+f_emp_h = [mean(emp_choice_h(:,:,1));mean(emp_choice_h(:,:,2)); mean(emp_choice_h(:,:,3)); mean(emp_choice_h(:,:,4)); mean(emp_choice_h(:,:,5))]' ;       % employment total by education
+tmp_married = [sum(married(:,:,1));sum(married(:,:,2)); sum(married(:,:,3)); sum(married(:,:,4)); sum(married(:,:,5))]';                % married yes/no
+f_emp_h=f_emp_h./tmp_married;
+emp_moments_fitted_matrix = [f_emp_w  f_emp_m  f_emp_um];
 emp_sd = nansum((emp_moments(1:28,2:13) - emp_moments_fitted_matrix).^2);
 format short g;
 disp('	WOMEN EMPLOYMENT ACTUAL 		   	     WOMEN EMPLOYMENT FITTED  ');
 temp = [emp_moments(1:28,2:5)  emp_moments_fitted_matrix(:,1:4)]
 disp('	MARRIED WOMEN EMPLOYMENT ACTUAL  	 	 MARRIED WOMEN EMPLOYMENT FITTED  ');
 temp = [emp_moments(1:28,6:9)  emp_moments_fitted_matrix(:,5:8)]
-disp('	UNMARRIED WOMEN EMPLOYMENT ACTUAL  	     UNMARRIED WOMEN EMPLOYMENT FITTED  ');
-temp = [emp_moments(1:28,10:13)  emp_moments_fitted_matrix(:,9:12)]
+disp('	MEN EMPLOYMENT FITTED by EDUCATION - NOT A MOMENT! ALL 4 HIGH GROUPS ARE THE SAME (95%). ONLY HSD LOWER (90%)   ');
+temp = [f_emp_h]
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %marr_fer_moments - 9 by 28 matrix
 %first column - age
 %column 2-5 - marriage rate by education group. start at t+age index
 %column 6-9 - frtility rate by education group - start at t+age index end at 42
 f_married = [mean(married(:,:,2)); mean(married(:,:,3)); mean(married(:,:,4)); mean(married(:,:,5))]'  ; 
-f_fertility = [mean(newborn(:,:,2)); mean(newborn(:,:,3)); mean(newborn(:,:,4)); mean(newborn(:,:,5))]';    
+f_fertility_m = [mean(newborn_m(:,:,2)); mean(newborn_m(:,:,3)); mean(newborn_m(:,:,4)); mean(newborn_m(:,:,5))]';    
 f_divorce = [mean(divorce(:,:,2)); mean(divorce(:,:,3)); mean(divorce(:,:,4)); mean(divorce(:,:,5))]' ;     
-marr_fer_moments_fitted_matrix = [ f_married  f_fertility  f_divorce];
+marr_fer_moments_fitted_matrix = [ f_married  f_fertility_m  f_divorce];
 marr_fer_sd = nansum((marr_fer_moments(1:28,2:13) - marr_fer_moments_fitted_matrix).^2);
 disp('	MARRIAGE RATE ACTUAL  		   	   MARRIAGE RATE FITTED  ');
 temp = [marr_fer_moments(1:28,2:5)  marr_fer_moments_fitted_matrix(:,1:4)]

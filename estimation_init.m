@@ -10,7 +10,7 @@ function [husbands_2,husbands_3, husbands_4, husbands_5 , wives, wage_moments, m
 %	Author: Osnat Lifshitz								    %
 %	Date: 05-sept-12										%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-disp(strcat(strftime('%X',localtime(time)), ': loading files...'));
+%disp(strcat(strftime('%X',localtime(time)), ': loading files...'));
 
 disp('loading file: husbands_2.out');
 husbands_2 = load('husbands_2.out');
@@ -29,10 +29,10 @@ marr_fer_moments = load('marr_fer_moments.txt'); %
 emp_moments = load('emp_moments.txt'); %
 general_moments = load('general_moments.txt'); %
 
-disp(strcat(strftime('%X',localtime(time)), ': initializing random shocks...'));
+%disp(strcat(strftime('%X',localtime(time)), ': initializing random shocks...'));
 
 % start with the same random shoks
-rand("state", 1234); 
+%rand("state", 1234); 
 
 % random shocks' mean and variance
 myu = [0];

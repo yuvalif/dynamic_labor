@@ -1,5 +1,6 @@
 function [ability_h, ability_h_index, Q, Q_INDEX,HS,H_HSD, H_HSG, H_SC, H_CG, H_PC,HE, similar_educ]=draw_husband(husbands, t, age_index, draw_f, h_draws,school_group )
-global normal_arr; global sigma; global EDUC_MATCH_2; global EDUC_MATCH_3; global EDUC_MATCH_4; global EDUC_MATCH_5
+global normal_arr; global sigma; global EDUC_MATCH_2; global EDUC_MATCH_3; global EDUC_MATCH_4; global EDUC_MATCH_5;
+global K0 ; global K5 ; global K10 ; global K20 ;global HE0 ; global HE5; global HE10 ;    global HE20 ;    global TERMINAL ;    global H_EXP20 ;    global EMAX21 ;
 %h_draws = rand(DRAW_F,T,5); %1- HUSBAND; 2-HUSBAND EXP+SCHOOLING; 3-HUSBAND ABILITY; 4 - INITIAL MATCH QUALITY; 5 - MATCH UALITY CHANGE PROBABILITY
 
 P_HSD_0=husbands(t+age_index,2);
