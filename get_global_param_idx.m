@@ -9,7 +9,7 @@ elseif (strcmp(f_type,'wage'))
 elseif (strcmp(f_type,'child'))
         x_idx = [33:43];		   % probability for another child parameter
 elseif (strcmp(f_type,'all'))
-        x_idx = [1:99];
+        x_idx = [1:103];
 else
         error(sprintf('unsupported type %s', f_type));
 end

@@ -61,17 +61,21 @@ for i=1:DRAW_F
 	end
 end
 % random draw from uniform distribution, for backward solution
+%       BACKWARD DRAWS                                        
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 h_draws_b = rand(DRAW_B, T_MAX, SCHOOL_GROUPS, 4); %1- HUSBAND; 2-HUSBAND EXP+SCHOOLING; 3-HUSBAND ABILITY; 4 - INITIAL MATCH QUALITY; 
-h_draws_b(:,:,:,3)= randi(5, DRAW_B, T_MAX, SCHOOL_GROUPS);
-h_draws_b(:,:,:,4)= randi(5, DRAW_B, T_MAX, SCHOOL_GROUPS);
+h_draws_b(:,:,:,3)= randi(3, DRAW_B, T_MAX, SCHOOL_GROUPS);%husband ability: high, medium, low
+h_draws_b(:,:,:,4)= randi(3, DRAW_B, T_MAX, SCHOOL_GROUPS);%match quality:high, medium, low
 w_draws_b = rand(DRAW_B, T_MAX, SCHOOL_GROUPS, 6);%1- wife; 2-wife EXP+SCHOOLING+PREV_STATE; 3-wife ABILITY; 4 - INITIAL MATCH QUALITY; 5 - JOB OFFER FOR MARRIED MEN AND WOMEN EMAX; 6-JOB OFFER FOR SINGLE MEN EMAX
-w_draws_b(:,:,:,3)= randi(5, DRAW_B, T_MAX, SCHOOL_GROUPS);
-w_draws_b(:,:,:,4)= randi(5, DRAW_B, T_MAX, SCHOOL_GROUPS);
+w_draws_b(:,:,:,3)= randi(3, DRAW_B, T_MAX, SCHOOL_GROUPS);%wife ability: high, medium, low
+w_draws_b(:,:,:,4)= randi(3, DRAW_B, T_MAX, SCHOOL_GROUPS);%match quality:high, medium, low
 % random draw from uniform distribution, for forward solution
-w_ability_draw = randi(5, DRAW_F,SCHOOL_GROUPS, 1);   %wife ability draw, constant by period
+%      FORWARD DRAWS
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+w_ability_draw = randi(3, DRAW_F,SCHOOL_GROUPS, 1);   %wife ability draw, constant by period
 h_draws = rand(DRAW_F, T_MAX, SCHOOL_GROUPS, 6);			 %1- HUSBAND; 2-HUSBAND EXP+SCHOOLING; 3-HUSBAND ABILITY; 4 - INITIAL MATCH QUALITY; 5 - MATCH UALITY CHANGE PROBABILITY; 6 - job offer
-h_draws(:,:,:,3)= randi(5, DRAW_F, T_MAX, SCHOOL_GROUPS);
-h_draws(:,:,:,4)= randi(5, DRAW_F, T_MAX, SCHOOL_GROUPS);
+h_draws(:,:,:,3)= randi(3, DRAW_F, T_MAX, SCHOOL_GROUPS);%husband ability: high, medium, low
+h_draws(:,:,:,4)= randi(3, DRAW_F, T_MAX, SCHOOL_GROUPS);%match quality:high, medium, low
 w_draws = rand(DRAW_F, T_MAX, SCHOOL_GROUPS, 2);			%1 - JOB OFFER, 2 - NEW BORN
 
 %%%%%%%

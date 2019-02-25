@@ -69,5 +69,5 @@ format short G
 %		squeeze(actual_moments_out(:,:,i))'
 %	end%for i
 %else
-	save char_matrix.mat char_matrix
+	%save char_matrix.mat char_matrix
 %end
