@@ -409,20 +409,16 @@ for school_group=1 : 5       % school_group 1 is only for calculating the emax i
             M_T_minus_1=0;
             DIVORCE = 0;
             NEW_BORN = 0;
-            N_Y = 0;
-            N_O = 0;
-            N_Y_H = 0;
-            N_O_H = 0;
-            N_TOTAL = 0;
-            N_TOTAL_M = 0;
-            N_TOTAL_UM = 0;
-            D = 0 ;
-            D_T_minus_1 = 0;
+            N_KIDS = 0;
+            N_KIDS_H = 0;
+            N_KIDS = 0;
+            N_KIDS_M = 0;
+            N_KIDS_UM = 0;
+            duration = 0 ;
             Q = 0;
             HS = 1;
             HE = 0;
             BP = 0.5;
-            bp_dummy = 2;
             similar_educ = 0;
             ability_w = normal_arr(w_ability_draw(draw_f, school_group))*sigma(3,3);
             ability_wi = w_ability_draw(draw_f,school_group);
@@ -435,14 +431,14 @@ for school_group=1 : 5       % school_group 1 is only for calculating the emax i
                 CHOOSE_HUSBAND = 0;
                 prev_state_w_T_minus_1 = prev_state_w;
                 prev_state_h_T_minus_1 = prev_state_h;
-                D_T_minus_1 = D;
+                duration_minus_1 = duration;
                 NEW_BORN = 0;
                 %%%%%%%%%%%%%%%%%%%%%     DRAW HUSBAND    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 if M == 0
                     BP = 0.5;
                     BP_FLAG_PLUS = 0;
                     BP_FLAG_MINUS = 0;
-                    D = 0;
+                    duration = 0;
                     Q = 0;
                     Q_INDEX = 1; %index must be 1 if no husband
                     similar_educ = 0;
@@ -479,7 +475,7 @@ for school_group=1 : 5       % school_group 1 is only for calculating the emax i
                     h_draws, w_draws,epsilon_f, draw_f, t, school_group, prev_state_w, prev_state_h,ability_w, ability_h);
                 %%%%%%%%%%%%%%%%%%%%%%%% calculate husbands and wives utility     %%%%%%%%%%%%%%%
                 %%%%%%%%%%%%%%%%%%%%%%%% from each option + -999 for unavailable  %%%%%%%%%%%%%%%
-                [U_W,U_H,U_W_S,U_H_S]=calculate_utility(N_Y, N_O,N_Y_H,N_O_H, wage_h, wage_w, CHOOSE_HUSBAND, JOB_OFFER_H, JOB_OFFER_W, ...
+                [U_W,U_H,U_W_S,U_H_S]=calculate_utility(N_KIDS, N_KIDS_H, wage_h, wage_w, CHOOSE_HUSBAND, JOB_OFFER_H, JOB_OFFER_W, ...
                     M, STATIC, COUNTER, similar_educ, Q,Q_INDEX,HS, t, ability_h, ability_hi,ability_w, ability_wi, HE,WE, BP);  
                 if (CHOOSE_HUSBAND == 1)% write 1 for testing
                     %U_W
@@ -491,7 +487,7 @@ for school_group=1 : 5       % school_group 1 is only for calculating the emax i
                 %%%%%%%%%%%%%%%%%%%%%%%%   MAXIMIZATION - MARRIAGE + WORK DESICION  %%%%%%%%%%%%%
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 if (M == 0 &&  CHOOSE_HUSBAND == 1)
-                    [BP]=nash(U_W,U_H,U_W_S,U_H_S,BP)  % Nash bargaining at first period of marriage  
+                    [BP]=nash(U_W,U_H,U_W_S,U_H_S,BP);  % Nash bargaining at first period of marriage  
                     if (BP == -1)   % there is no BP that can give both positive surplus
                         CHOOSE_HUSBAND = 0;
                     end 
@@ -615,42 +611,38 @@ for school_group=1 : 5       % school_group 1 is only for calculating the emax i
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%      
                 %probability of another child parameters:%c1 previous work state - wife   %c2 age wife - HSG   %c3 age square  wife - HSG  %c4 age wife - SC   %c5 age square  wife - SC   %c6 age wife - CG
                 %c7 age square  wife - CG   %c8 age wife - PC   %c9 age square  wife - PC   %c10 number of children at household    %c11 schooling - husband  %c12 unmarried
-                c_lamda=c1*prev_state_w+c2*HSG*(AGE+t)+c3*HSG*(AGE+t).^2+c4*SC*(AGE+t)+c5*SC*(AGE+t).^2+c6*CG*(AGE+t)+c7*CG*(AGE+t)^2+c8*PC*(AGE+t)+c9*PC*(AGE+t)^2+c10*(N_Y+N_O)+c11*HS*M+c12*M;
+                c_lamda=c1*prev_state_w+c2*HSG*(AGE+t)+c3*HSG*(AGE+t).^2+c4*SC*(AGE+t)+c5*SC*(AGE+t).^2+c6*CG*(AGE+t)+c7*CG*(AGE+t)^2+c8*PC*(AGE+t)+c9*PC*(AGE+t)^2+c10*(N_KIDS)+c11*HS*M+c12*M;
                 child_prob = normcdf(c_lamda);
                 if (w_draws(draw_f,t,school_group,2) < child_prob) && ((AGE+t) < 40)  %w_draws = rand(DRAW_F,T,3); 1-job offer, 2-new child, 3 - match quality change- new child was born
                     NEW_BORN = 1;
-                    if N_Y < 3
-                        N_Y = N_Y + 1;
+                    if N_KIDS < 3
+                        N_KIDS = N_KIDS + 1;
                     end
-
-                    N_TOTAL = N_TOTAL + 1;
                     if M == 1
-                        N_TOTAL_M = N_TOTAL_M +1;
+                        N_KIDS_M = N_KIDS_M +1;
                     else
-                        N_TOTAL_UM = N_TOTAL_UM +1;
+                        N_KIDS_UM = N_KIDS_UM +1;
                     end 
-                    if N_Y==1
+                    if N_KIDS==1
                         count_age1=1;
-                    elseif N_Y==2   
+                    elseif N_KIDS==2   
                         count_age2=1;
-                    elseif N_Y==3
+                    elseif N_KIDS==3
                         count_age3=1;
-                    elseif N_Y==4
+                    elseif N_KIDS==4
                         count_age4=1;
-                    elseif N_Y==5
+                    elseif N_KIDS==5
                         count_age5=1;   
                     end 
-                elseif N_Y > 0
-                    if  count_age1==5 %no new born, just update ages - 5 years old chid
+                elseif N_KIDS > 0   % no new born, but kids at house so update ages
+                    if  count_age1==18 %no new born, just update ages - kids above 18 leaves the household
                         count_age1=count_age2;
                         count_age2=count_age3;
                         count_age3=count_age4;
                         count_age4=count_age5;
                         count_age5=0;
-                        N_Y=N_Y-1;
-                        if N_O<4
-                            N_O=N_O+1;
-                        end
+                        N_KIDS=N_KIDS-1;
+                        
                     end         
                     count_age1=count_age1+1;
                     if count_age2>0
@@ -667,64 +659,49 @@ for school_group=1 : 5       % school_group 1 is only for calculating the emax i
                     end 
                 end 
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-                %  UPDARE T+1 STATE SPACE
+                %  UPDARE T+1 STATE SPACE - match quality 
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%                
-                % EMAX(t,K,N_Y,N_O,prev_state,ability_w_index,M,HE+D,HS,Q_INDEX, ability_h_index)
-                % t - by loop
-                % K - updated in  MAXIMIZATION - MARRIAGE + WORK DESICION
-                % N_Y, N_O, count_age1-4 - updated in   FERTILITY EXOGENOUS PROCESS
-                % prev_state -  updated in  MAXIMIZATION - MARRIAGE + WORK DESICION
-                % abiity_w, ability_h_index, HE, HS - constants
-                % M - updated in  MAXIMIZATION - MARRIAGE + WORK DESICION
-                % DURATION + MATCH QUALITY
-                if M == 1
+               if M == 1    %update the match quality
                     DIVORCE = 0;
-                    D = D + 1;
+                    duration = duration + 1;
                     Q_minus_1 = Q;
                     MATCH_QUALITY_CHANGE_PROBABIITY = h_draws(draw_f,t,school_group,5);
                     if (MATCH_QUALITY_CHANGE_PROBABIITY < MATCH_Q_DECREASE && Q_INDEX > 1)
                         Q_INDEX = Q_INDEX - 1;
                         Q = normal_arr(Q_INDEX)*sigma(5,5);
-                    elseif (MATCH_QUALITY_CHANGE_PROBABIITY > MATCH_Q_DECREASE) && (MATCH_QUALITY_CHANGE_PROBABIITY < MATCH_Q_DECREASE + MATCH_Q_INCREASE) && (Q_INDEX < 5)
+                    elseif (MATCH_QUALITY_CHANGE_PROBABIITY > MATCH_Q_DECREASE) && (MATCH_QUALITY_CHANGE_PROBABIITY < MATCH_Q_DECREASE + MATCH_Q_INCREASE) && (Q_INDEX < 3)
                         Q_INDEX = Q_INDEX + 1;
                         Q = normal_arr(Q_INDEX)*sigma(5,5);
                     end
                 end
-                if BP>0.5
-                    bp_dummy = 3;
-                elseif (BP < 0.5 && BP >-1)
-                    bp_dummy = 1;
-                else
-                    bp_dummy = 2;
-                end	       
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 %   CREATE AND SAVE MOMENTS
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 %                   MARRIED WOMEN EMPLOYMENT BY KIDS INDIVIDUAL MOMENTS
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-                if N_TOTAL == 0 && M ==1 
+                if N_KIDS == 0 && M ==1 
                     emp_m_no_kids(draw_f, t+age_index , school_group) = prev_state_w;         % employment married no kids
                     count_emp_m_no_kids(t+age_index,school_group)=count_emp_m_no_kids(t+age_index,school_group)+1;
-                elseif N_TOTAL == 1 && M ==1
+                elseif N_KIDS == 1 && M ==1
                     emp_m_one_kid(draw_f, t+age_index, school_group) = prev_state_w;          % employment married 1 kid
                     count_emp_m_one_kid(t+age_index,school_group) = count_emp_m_one_kid(t+age_index,school_group)+1;
-                elseif N_TOTAL == 2 && M ==1
+                elseif N_KIDS == 2 && M ==1
                     emp_m_2_kids(draw_f, t+age_index, school_group) = prev_state_w;          % employment married 2 kid
                     count_emp_m_2_kids(t+age_index,school_group) = count_emp_m_2_kids(t+age_index,school_group)+1;
-                elseif N_TOTAL == 3 && M ==1
+                elseif N_KIDS == 3 && M ==1
                     emp_m_3_kids(draw_f, t+age_index, school_group) = prev_state_w;          % employment married 3 kid
                     count_emp_m_3_kids(t+age_index,school_group) = count_emp_m_3_kids(t+age_index,school_group)+1;
-                elseif N_TOTAL > 3  && M ==1
+                elseif N_KIDS > 3  && M ==1
                     emp_m_4plus_kids(draw_f, t+age_index, school_group) = prev_state_w;           % employment married 4  kids
                     count_emp_m_4plus_kids(t+age_index,school_group) = count_emp_m_4plus_kids(t+age_index,school_group)+1;
                 end
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 %                   UNMARRIED WOMEN EMPLOYMENT BY KIDS INDIVIDUAL MOMENTS                       %
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-                if M == 0;
+                if M == 0
                     emp_um(draw_f, t+age_index, school_group) = prev_state_w;         % employment unmarried
-                    if (N_Y+N_O)==0
+                    if (N_KIDS)==0
                         emp_um_no_kids(draw_f, t+age_index, school_group) = prev_state_w;     % employment unmarried and no children
                         count_emp_um_no_kids(t+age_index, school_group) = count_emp_um_no_kids(t+age_index, school_group) + 1;
                     else
@@ -739,7 +716,7 @@ for school_group=1 : 5       % school_group 1 is only for calculating the emax i
                     if M ==1
                         just_found_job_m(draw_f, t+age_index, school_group) = 1;              % for transition matrix - unemployment to employment 
                         count_just_found_job_m(t+age_index, school_group) = count_just_found_job_m(t+age_index, school_group)+1;
-                        if N_TOTAL >0
+                        if N_KIDS >0
                             just_found_job_mc(draw_f, t+age_index, school_group) = 1;              % for transition matrix - unemployment to employment
                             count_just_found_job_mc(t+age_index, school_group) = count_just_found_job_mc(t+age_index, school_group)+1;							
                         end	
@@ -751,7 +728,7 @@ for school_group=1 : 5       % school_group 1 is only for calculating the emax i
                     if M ==1
                         just_got_fired_m(draw_f, t+age_index, school_group) = 1;              % for transition matrix - unemployment to employment 
                         count_just_got_fired_m(t+age_index, school_group) = count_just_got_fired_m(t+age_index, school_group)+1;
-                        if N_TOTAL > 0
+                        if N_KIDS > 0
                             just_got_fired_mc(draw_f, t+age_index, school_group) = 1;              % for transition matrix - unemployment to employment 
                             count_just_got_fired_mc(t+age_index, school_group) = count_just_got_fired_mc(t+age_index, school_group)+1;
 
@@ -764,7 +741,7 @@ for school_group=1 : 5       % school_group 1 is only for calculating the emax i
                 elseif prev_state_w == 0 && prev_state_w_T_minus_1 == 0
                     if M ==1
                         count_just_found_job_m(t+age_index, school_group) = count_just_found_job_m(t+age_index, school_group)+1;
-                        if N_TOTAL >0
+                        if N_KIDS >0
                             count_just_found_job_mc(t+age_index, school_group) = count_just_found_job_mc(t+age_index, school_group)+1;							
                         end	
                     else
@@ -773,7 +750,7 @@ for school_group=1 : 5       % school_group 1 is only for calculating the emax i
                 elseif prev_state_w == 1 && prev_state_w_T_minus_1 == 1
                     if M ==1
                         count_just_got_fired_m(t+age_index, school_group) = count_just_got_fired_m(t+age_index, school_group)+1;
-                        if N_TOTAL > 0
+                        if N_KIDS > 0
                             count_just_got_fired_mc(t+age_index, school_group) = count_just_got_fired_mc(t+age_index, school_group)+1;
                         end
                     else
@@ -792,22 +769,23 @@ for school_group=1 : 5       % school_group 1 is only for calculating the emax i
                 end 
                 if M == 1 
                     if wage_h > 0
-                        wages_m_h(HE+D, HS)=wages_m_h(HE+D, HS) + wage_h;         % married men wages
-                        count_wages_m_h(HE+D, HS) = count_wages_m_h(HE+D, HS)+1;
+                     
+                        wages_m_h(HE, HS)=wages_m_h(HE, HS) + wage_h;         % husband always works
+                        count_wages_m_h(HE, HS) = count_wages_m_h(HE, HS)+1;
                     end	
                     emp_m(draw_f, t+age_index, school_group) = prev_state_w;      % employment married women  
                     if school_group > HS                %women married down, men married up - HS is 1 to 5 while school_group 1 to 4 so to copare: -1
                         emp_m_down(draw_f, t+age_index, school_group) = prev_state_w;         % employment married down
                         count_emp_m_down(t+age_index, school_group) = count_emp_m_down(t+age_index, school_group)+1;
-                        if (HE+D <37 )  && wage_h > wage_moments(HE+D,5+HS)     %wage_moments(1:36,6:10)
+                        if (HE <37 )  && wage_h > wage_moments(HE,5+HS)     %wage_moments(1:36,6:10)
                             emp_m_down_above(draw_f, t+age_index, school_group) = prev_state_w;         % employment married down
                             count_emp_m_down_above(t+age_index, school_group) = count_emp_m_down_above(t+age_index, school_group)+1;
                         else	
                             emp_m_down_below(draw_f, t+age_index, school_group) = prev_state_w;         % employment married down
                             count_emp_m_down_below(t+age_index, school_group) = count_emp_m_down_below(t+age_index, school_group)+1;
                         end
-                        wages_m_h_up(draw_f, HE+D, HS)=wage_h;   % married up men wages 
-                        count_wages_m_h_up(HE+D, HS)=count_wages_m_h_up(HE+D, HS)+1;
+                        wages_m_h_up(draw_f, HE, HS)=wage_h;   % married up men wages 
+                        count_wages_m_h_up(HE, HS)=count_wages_m_h_up(HE, HS)+1;
                         if M==1 && M_T_minus_1==0
                             ability_h_up(t+age_index, HS) = ability_h_up(t+age_index, HS) + ability_h;
                             count_ability_h_up(t+age_index, HS) = count_ability_h_up(t+age_index, HS) +1;
@@ -819,15 +797,15 @@ for school_group=1 : 5       % school_group 1 is only for calculating the emax i
                     elseif school_group < HS            %women married up, men married down
                         emp_m_up(draw_f, t+age_index, school_group) = prev_state_w;   % employment married up women
                         count_emp_m_up(t+age_index, school_group) = count_emp_m_up(t+age_index, school_group)+1;
-                        if (HE+D <37 ) && wage_h > wage_moments(HE+D,5+HS)     %wage_moments(1:36,6:10)
+                        if (HE <37 ) && wage_h > wage_moments(HE,5+HS)     %wage_moments(1:36,6:10)
                             emp_m_up_above(draw_f, t+age_index, school_group) = prev_state_w;         % employment married down
                             count_emp_m_up_above(t+age_index, school_group) = count_emp_m_up_above(t+age_index, school_group)+1;
                         else	
                             emp_m_up_below(draw_f, t+age_index, school_group) = prev_state_w;         % employment married down
                             count_emp_m_up_below(t+age_index, school_group) = count_emp_m_up_below(t+age_index, school_group)+1;
                         end
-                        wages_m_h_down(draw_f, HE+D, HS)=wage_h; % married down men wages
-                        count_wages_m_h_down(HE+D, HS)=count_wages_m_h_down(HE+D, HS)+1;
+                        wages_m_h_down(draw_f, HE, HS)=wage_h; % married down men wages
+                        count_wages_m_h_down(HE, HS)=count_wages_m_h_down(HE, HS)+1;
                         if M==1 && M_T_minus_1==0
                             ability_h_down(t+age_index, HS) = ability_h_down(t+age_index, HS) + ability_h;
                             count_ability_h_down(t+age_index, HS) = count_ability_h_down(t+age_index, HS) +1;
@@ -837,12 +815,12 @@ for school_group=1 : 5       % school_group 1 is only for calculating the emax i
                             count_match_w_up(t+age_index, school_group)=count_match_w_up(t+age_index, school_group)+1;
                         end
                     elseif  school_group == HS         %married equal
-                        wages_m_h_eq(draw_f, HE+D, HS)=wage_h;   % married equal men wages 
-                        count_wages_m_h_eq(HE+D, HS)=count_wages_m_h_eq(HE+D, HS)+1;
+                        wages_m_h_eq(draw_f, HE, HS)=wage_h;   % married equal men wages 
+                        count_wages_m_h_eq(HE, HS)=count_wages_m_h_eq(HE, HS)+1;
                         emp_m_eq(draw_f, t+age_index, school_group) = prev_state_w;   % employment married equal women
                         count_emp_m_eq(t+age_index, school_group) = count_emp_m_eq(t+age_index, school_group)+1;
 
-                        if (HE+D <37 )  && wage_h > wage_moments(HE+D,5+HS)      %wage_moments(1:36,6:10)
+                        if (HE <37 )  && wage_h > wage_moments(HE,5+HS)      %wage_moments(1:36,6:10)
                             emp_m_eq_above(draw_f, t+age_index, school_group) = prev_state_w;         % employment married down
                             count_emp_m_eq_above(t+age_index, school_group) = count_emp_m_eq_above(t+age_index, school_group)+1;
                         else	
@@ -888,9 +866,9 @@ for school_group=1 : 5       % school_group 1 is only for calculating the emax i
                 end
                 %duration_of_first_marriage(draw_f, school_group) = D_T_minus_1 ;
                 if t == T 
-                    kids(draw_f, school_group) = N_TOTAL ;          % # of children by school group
-                    kids_m(draw_f, school_group) = N_TOTAL_M;
-                    kids_um(draw_f, school_group) = N_TOTAL_UM;
+                    kids(draw_f, school_group) = N_KIDS ;          % # of children by school group
+                    kids_m(draw_f, school_group) = N_KIDS_M;
+                    kids_um(draw_f, school_group) = N_KIDS_UM;
                 end
                 if M==1 && M_T_minus_1==0
                     just_married(draw_f, t+age_index, school_group)=1;          % for transition matrix from single to married
@@ -906,7 +884,7 @@ for school_group=1 : 5       % school_group 1 is only for calculating the emax i
                     count_just_divorced(t+age_index, school_group) = count_just_divorced(t+age_index, school_group)+1;
 
                     if duration_of_first_marriage(draw_f, school_group)==0
-                        duration_of_first_marriage(draw_f, school_group) = D_T_minus_1 ;                % duration of marriage if divorce 
+                        duration_of_first_marriage(draw_f, school_group) = duration-1 ;                % duration of marriage if divorce 
                         count_dur_of_first_marriage(school_group) = count_dur_of_first_marriage(school_group)+1;
                     end
                 elseif (M==0 && M_T_minus_1==0)

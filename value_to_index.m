@@ -1,14 +1,14 @@
-function [exp_wi   ,exp_hi, kidsi  ,   BPi   , CSi  ]  = value_to_index(WE, HE, N_Y, N_O, BP, CS);
+function [exp_wi   ,exp_hi, kidsi  ,   BPi   , CSi  ]  = value_to_index(WE, HE, N_KIDS, BP, CS);
 
 exp_wi = group_exp(WE);
 exp_hi = group_exp(HE);
-if (N_Y+N_O) == 0
+if (N_KIDS) == 0
     kidsi = 1;
-elseif (N_Y+N_O) == 1
+elseif (N_KIDS) == 1
     kidsi = 2;
-elseif (N_Y+N_O) == 2
+elseif (N_KIDS) == 2
     kidsi = 3;
-elseif (N_Y+N_O) > 2
+elseif (N_KIDS) > 2
     kidsi = 4;
 end
 if (BP <0.2)
