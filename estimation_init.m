@@ -14,8 +14,8 @@ function [husbands_2,husbands_3, husbands_4, husbands_5 , wives, wage_moments, m
 
 disp('loading file: husbands_2.out');
 husbands_2 = load('husbands_2.out');
-disp('loading file: husbands.out');
-husbands_3 = load('husbands.out');  %can marry all
+disp('loading file: husbands_3.out');
+husbands_3 = load('husbands_3.out');  %can marry all
 disp('loading file: husbands_4.out');
 husbands_4 = load('husbands_4.out');
 disp('loading file: husbands_5.out');
@@ -48,7 +48,7 @@ for i=1:DRAW_B
 		end
 	end
 end
-	
+
 % random draw from normal distribution, for shocks realizations in forward solution
 %epsilon_f = mvnrnd(myu, sig, [DRAW_F, T_MAX, SCHOOL_GROUPS+1,2]);
 for i=1:DRAW_F

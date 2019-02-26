@@ -1,4 +1,4 @@
-function [exp_wi   ,exp_hi, kidsi  ,   BPi   , CSi  ]  = value_to_index(WE, HE, N_KIDS, BP, CS);
+function [exp_wi, exp_hi, kidsi, BPi, CSi]  = value_to_index(WE, HE, N_KIDS, BP, CS)
 
 exp_wi = group_exp(WE);
 exp_hi = group_exp(HE);
