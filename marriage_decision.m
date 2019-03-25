@@ -2,7 +2,7 @@ function [M,prev_state_w,WE,HE,max_weighted_utility_index]=marriage_decision(U_H
     BP_FLAG_PLUS = 0;
     BP_FLAG_MINUS = 0;
     if (BP<0)
-        error()
+        error("BP must be positive value")
     end
        looking_for_solution = 1;
        max_iterations = 10;
@@ -10,9 +10,8 @@ function [M,prev_state_w,WE,HE,max_weighted_utility_index]=marriage_decision(U_H
        prev_state_w = 0;
         while (looking_for_solution == 1)
             if (max_iterations == 0)
-                BP
-                BP_FLAG_PLUS
-                BP_FLAG_MINUS
+                warning("max iteration reached: BP=%f BP_FLAG_PLUS=%d BP_FLAG_MINUS=%d", ...
+                    BP, BP_FLAG_PLUS, BP_FLAG_MINUS)
             end
             max_iterations = max_iterations - 1;
             weighted_utility=U_H(1:22).*BP+U_W(1:22).*(1-BP);  %weighted utility
@@ -31,7 +30,7 @@ function [M,prev_state_w,WE,HE,max_weighted_utility_index]=marriage_decision(U_H
                     WE = WE+1;
                     HE = HE+1;
                 else
-                    error()
+                    error("invalid max_weighted_utility_index")
                 end            
             elseif (U_H(max_weighted_utility_index)< outside_option_h_v && U_W(max_weighted_utility_index)<outside_option_w_v) 
                 %the outside option is better for both - no marriage
@@ -77,6 +76,6 @@ function [M,prev_state_w,WE,HE,max_weighted_utility_index]=marriage_decision(U_H
                     end    
                 end    
             else
-                error(0)
+                error("invalid marriage decision")
             end
         end%while - loop over BP, increase/decrease BP 

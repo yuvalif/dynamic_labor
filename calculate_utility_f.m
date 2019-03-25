@@ -1,4 +1,4 @@
-function [U_W, U_H, U_W_S, U_H_S] = calculate_utility(EMAX_W_T, EMAX_H_T, N_KIDS, N_KIDS_H,...
+function [U_W, U_H, U_W_S, U_H_S] = calculate_utility_f(N_KIDS, N_KIDS_H,...
                                                       wage_h, wage_w, CHOOSE_PARTNER, CHOOSE_WORK_H, CHOOSE_WORK_W,...
                                                       M, similar_educ, Q, Q_INDEX, HS, WS, t, ability_hi, ability_wi, HE, WE, BP, T_END, single_men)  
 % Utility parameters WIFE:  
@@ -8,6 +8,7 @@ global t1_w; global t2_w; global t3_w; global t4_w; global t5_w; global t6_w; gl
 global t11_w; global t12_w; global t13_w; global t14_w; global t15_w; global t16_w; global t17_w;
 global t1_h; global t2_h; global t3_h;global t4_h; global t5_h; global t6_h; global t7_h; global t8_h; global t9_h; global t10_h;
 global t11_h; global t12_h; global t13_h; global t14_h; global t15_h; global t16_h ;global t17_h;
+global G_EMAX_W; global G_EMAX_H;
 
 women_cons_s1 = 0;  % women private consumption when single and unemployed
 women_cons_s2 = wage_w*(1+(N_KIDS)*0.4);% women private consumption when single and employed
@@ -17,7 +18,6 @@ UNEMP = 1;
 EMP = 2;
 MARRIED = 1;
 UNMARRIED = 2;
-NEXT_T = 2;
 U_W = zeros(1,22);
 U_H = zeros(1,22);
 U_W_S = zeros(1,2);
@@ -103,11 +103,11 @@ else
                 t12_h+t13_h*(N_KIDS)+t14_h*(Q+similar_educ)+t16_h+t17_h;  
         elseif (t < T_END)   % the loop goes from 28 to 1, but for SC, CG and PC the loop is shorter
             [exp_wi, exp_hi, kidsi, BPi, ~] = value_to_index(WE, HE+1, N_KIDS, BP, CS);%calculate EMAX indexes when women unemployed
-            U_W(1,1+i) =UC_W1 +beta0*EMAX_W_T(NEXT_T, exp_wi, exp_hi, kidsi, UNEMP, ability_wi, ability_hi, MARRIED, HS_IDX, WS_IDX, Q_INDEX, BPi);
-            U_H(1,1+i) =UC_H1 +beta0*EMAX_H_T(NEXT_T, exp_wi, exp_hi, kidsi, UNEMP, ability_wi, ability_hi, MARRIED, HS_IDX, WS_IDX, Q_INDEX, BPi);
+            U_W(1,1+i) =UC_W1 +beta0*G_EMAX_W(t, exp_wi, exp_hi, kidsi, UNEMP, ability_wi, ability_hi, MARRIED, HS_IDX, WS_IDX, Q_INDEX, BPi);
+            U_H(1,1+i) =UC_H1 +beta0*G_EMAX_H(t, exp_wi, exp_hi, kidsi, UNEMP, ability_wi, ability_hi, MARRIED, HS_IDX, WS_IDX, Q_INDEX, BPi);
             [exp_wi, exp_hi, kidsi, BPi, ~] = value_to_index(WE+1, HE+1, N_KIDS, BP, CS);%calculate EMAX indexes when women employed            
-            U_W(1,12+i)=UC_W2 +beta0*EMAX_W_T(NEXT_T, exp_wi, exp_hi, kidsi,   EMP, ability_wi, ability_hi, MARRIED, HS_IDX, WS_IDX, Q_INDEX, BPi);
-            U_H(1,12+i)=UC_H2 +beta0*EMAX_H_T(NEXT_T, exp_wi, exp_hi, kidsi,   EMP, ability_wi, ability_hi, MARRIED, HS_IDX, WS_IDX, Q_INDEX, BPi);
+            U_W(1,12+i)=UC_W2 +beta0*G_EMAX_W(t, exp_wi, exp_hi, kidsi,   EMP, ability_wi, ability_hi, MARRIED, HS_IDX, WS_IDX, Q_INDEX, BPi);
+            U_H(1,12+i)=UC_H2 +beta0*G_EMAX_H(t, exp_wi, exp_hi, kidsi,   EMP, ability_wi, ability_hi, MARRIED, HS_IDX, WS_IDX, Q_INDEX, BPi);
         end
     end
 end
@@ -120,11 +120,11 @@ if (t == T_END)
     U_H_S      = UC_H_S+t6_h*H_HSD+t7_h*H_HSG+t8_h*H_SC+t9_h*H_CG+t10_h*H_PC+t11_h*(HE+1)+t13_h*(N_KIDS_H); 
 elseif ( t < T_END)
     [exp_wi, ~, kidsi, ~, ~] = value_to_index(WE, 0, N_KIDS, 0, 0);
-    U_W_S(1,1) = UC_W_S(1,1)+beta0*EMAX_W_T(NEXT_T, exp_wi, 1, kidsi, UNEMP, ability_wi, 1, UNMARRIED, 1, WS_IDX, 1, 1);
+    U_W_S(1,1) = UC_W_S(1,1)+beta0*G_EMAX_W(t, exp_wi, 1, kidsi, UNEMP, ability_wi, 1, UNMARRIED, 1, WS_IDX, 1, 1);
     [exp_wi, ~, kidsi, ~, ~] = value_to_index(WE+1, 0, N_KIDS, 0, 0);
-    U_W_S(1,2) = UC_W_S(1,2)+beta0*EMAX_W_T(NEXT_T, exp_wi, 1, kidsi, EMP, ability_wi, 1, UNMARRIED, 1, WS_IDX, 1, 1);
+    U_W_S(1,2) = UC_W_S(1,2)+beta0*G_EMAX_W(t, exp_wi, 1, kidsi, EMP, ability_wi, 1, UNMARRIED, 1, WS_IDX, 1, 1);
     [~, exp_hi, kidsi, ~, ~] = value_to_index(0, HE+1, N_KIDS_H, 0, 0);
-    U_H_S      = UC_H_S     +beta0*EMAX_H_T(NEXT_T, 1, exp_hi, kidsi, UNEMP, 1, ability_hi, UNMARRIED, HS_IDX, WS_IDX, 1, 1);
+    U_H_S      = UC_H_S     +beta0*G_EMAX_H(t, 1, exp_hi, kidsi, UNEMP, 1, ability_hi, UNMARRIED, HS_IDX, WS_IDX, 1, 1);
 else
     error("invalid value of t: " + string(t))
 end

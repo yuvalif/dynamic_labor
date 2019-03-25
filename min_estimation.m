@@ -5,7 +5,7 @@ close all;
 format long;
 % general parameters
 T_MAX = 28;	% periods
-DRAW_B = 1;% 100;	% draws for monte carlo integration in backward solutionq
+DRAW_B = 100;% 100;	% draws for monte carlo integration in backward solutionq
 DRAW_F = 1000;	% number of observation
 SCHOOL_GROUPS = 5;
 
