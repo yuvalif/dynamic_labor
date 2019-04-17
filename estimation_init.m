@@ -1,4 +1,6 @@
-function [husbands_2,husbands_3, husbands_4, husbands_5 , wives, wage_moments, marr_fer_moments, emp_moments, general_moments, epsilon_b, epsilon_f, h_draws_b, w_draws_b, w_ability_draw, h_draws, w_draws] = estimation_init(T_MAX, DRAW_B, DRAW_F, SCHOOL_GROUPS)
+function [husbands_2,husbands_3, husbands_4, husbands_5 , wives, wage_moments, marr_fer_moments, ...
+    emp_moments, general_moments, epsilon_b, epsilon_f, h_draws_b, w_draws_b, w_ability_draw, h_draws,...
+    w_draws,tax_brackets,deductions_exemption] = estimation_init(T_MAX, DRAW_B, DRAW_F, SCHOOL_GROUPS)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %														    %
 %   estimation_init.m
@@ -28,6 +30,9 @@ wage_moments = load('wage_moments.txt'); %
 marr_fer_moments = load('marr_fer_moments.txt'); %
 emp_moments = load('emp_moments.txt'); %
 general_moments = load('general_moments.txt'); %
+
+tax_brackets = load('tax_brackets.out');  % matrix with tax brackets 1962-2012
+deductions_exemption = load('deductions_exemptions.out'); % matrix with deductions, exemptions and EICT
 
 %disp(strcat(strftime('%X',localtime(time)), ': initializing random shocks...'));
 

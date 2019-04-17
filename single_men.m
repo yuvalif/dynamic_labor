@@ -1,4 +1,4 @@
-function EMAX_H_T = single_men(HS, t, EMAX_W_T, EMAX_H_T, DRAW_B, TERMINAL, wives)
+function EMAX_H_T_OUT = single_men(HS, t, EMAX_W_T, EMAX_H_T, DRAW_B, TERMINAL, wives)
 global normal_arr;
 global sigma;
 global exp_vector;
@@ -7,6 +7,7 @@ global G_epsilon_b;
 global G_h_draws_b;
 global G_w_draws;
 global G_exp_h;
+
 THIS_T = 1;
 NEXT_T = 2;
 NO_HS = 1;
@@ -15,6 +16,8 @@ H_HSD = 0; H_HSG = 0; H_SC = 0; H_CG = 0; H_PC = 0;
 W = 1;
 H = 0;
 UNMARRIED = 2;
+
+EMAX_H_T_OUT(THIS_T, :, :, :, :, :, :, :, NO_HS, :, :, :) = EMAX_H_T(THIS_T, :, :, :, :, :, :, :, NO_HS, :, :, :);
 
         if (HS == 1)
             H_HSD = 1;AGE = 18;
@@ -46,6 +49,7 @@ UNMARRIED = 2;
                 return
             end
         end
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         for H_EXP_INDEX = 1 : G_exp_h %HUSBAND EXPERENCE - 5 GRID LEVEL
            for ability_hi = 1:3   %husband ability - high, medium, low
@@ -78,17 +82,17 @@ UNMARRIED = 2;
                     end 
                     %%%%%%%%%%%%%%%%%%%%%%%%    HUSBAND WAGE:    %%%%%%%%%%%%%%%%
                     [wage_h, JOB_OFFER_H] = calculate_wage(H, H_HSD, H_HSG, H_SC, H_CG, H_PC, HE, HSD, HSG, SC, CG, PC, WE,...
-                        0, G_epsilon_b(draw_b, t, HS, 1), prev_state_w, ability_w, ability_h);
+                        0, G_epsilon_b(draw_b, t, HS, 1), prev_state_w, ability_w, ability_h,t);
                     %%%%%%%%%%%%%%%%%%%%%%%%   JOB OFFER PROBABILITY + WAGE WIFE     %%%%%%%%%%%%%%%%
                     if  (CHOOSE_WIFE == 1)
                         [wage_w, JOB_OFFER_W] = calculate_wage(W, H_HSD, H_HSG, H_SC, H_CG, H_PC, HE, HSD, HSG, SC, CG, PC, WE,...
-                            G_w_draws(draw_b, t, HS, 1), G_epsilon_b(draw_b, t, WS, 2), prev_state_w, ability_w, ability_h);
+                            G_w_draws(draw_b, t, HS, 1), G_epsilon_b(draw_b, t, WS, 2), prev_state_w, ability_w, ability_h,t);
                     end
                     %%%%%%%%%%%%%%%%%%%%%%%% calculate husbands and wives utility     %%%%%%%%%%%%%%%
                     %%%%%%%%%%%%%%%%%%%%%%%% from each option + -999 for unavailable  %%%%%%%%%%%%%%%
                     [U_W,U_H,U_W_S,U_H_S]=calculate_utility(EMAX_W_T, EMAX_H_T, N_KIDS, N_KIDS_H,...
                         wage_h, wage_w, CHOOSE_WIFE, JOB_OFFER_H, JOB_OFFER_W, ...
-                        M, similar_educ, Q, Q_INDEX, HS, WS, t, ability_hi, ability_wi, HE, WE, BP, T_END, 1);  
+                        M, similar_educ, Q, Q_INDEX, HS, WS, t, ability_hi, ability_wi, HE, WE, BP, T_END, 1, age_index);  
                     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                     %%%%%%%%%%%%%%%%%%%%%%%%   MAXIMIZATION - MARRIAGE + WORK DESICION  %%%%%%%%%%%%%
                     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -121,6 +125,6 @@ UNMARRIED = 2;
                         ADD_EMAX = ADD_EMAX + U_H_S;
                     end
                 end   % end draw backward loop
-                EMAX_H_T(THIS_T, 1, H_EXP_INDEX, 1, 1, 1, ability_hi, UNMARRIED, NO_HS, 1, 1, 1) = ADD_EMAX/DRAW_B;
+                EMAX_H_T_OUT(THIS_T, 1, H_EXP_INDEX, 1, 1, 1, ability_hi, UNMARRIED, NO_HS, 1, 1, 1) = ADD_EMAX/DRAW_B;
             end % end single men ability loop
         end % end single men experience loop

@@ -1,5 +1,5 @@
 
-function objective_function = estimation_f(param, f_type, display, global_param, T_MAX, DRAW_B, DRAW_F, SCHOOL_GROUPS, husbands_2,husbands_3,husbands_4,husbands_5, wives, wage_moments, marr_fer_moments, emp_moments, general_moments, epsilon_b, epsilon_f, h_draws_b, w_draws_b, w_ability_draw, h_draws, w_draws) 
+function objective_function = estimation_f(param, f_type, display, global_param, T_MAX, DRAW_B, DRAW_F, SCHOOL_GROUPS, husbands_2,husbands_3,husbands_4,husbands_5, wives, wage_moments, marr_fer_moments, emp_moments, general_moments, epsilon_b, epsilon_f, h_draws_b, w_draws_b, w_ability_draw, h_draws, w_draws, tax_brackets,deductions_exemption) 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %   estimation_f
 %   Author: Osnat Lifshitz
@@ -33,7 +33,8 @@ global G_epsilon_b; G_epsilon_b = epsilon_b;
 global G_w_draws; G_w_draws = w_draws;
 global G_h_draws_b; G_h_draws_b = h_draws_b;
 global G_w_draws_b; G_w_draws_b = w_draws_b;
-
+global G_tax; G_tax = tax_brackets;
+global G_ded; G_ded = deductions_exemption;
 % standart normal distribution array : 5%, 15%, 25%, 35%, 45%, 55%, 65%, 75%, 85%, 95%
 %normal_arr = [-1.645, -1.036, -0.674, -0.385, -0.126, 0.126, 0.385, 0.674,1.036, 1.645];% 10 points
 %normal_arr = [-1.2817,  -0.524,  0.000,  0.524, 1.2817];  % 5 POINTS
@@ -219,35 +220,65 @@ sigma(3,3) = exp(global_param(101));             % variance wife ability
 sigma(4,4) = exp(global_param(102));             % variance husband ability
 sigma(5,5) = exp(global_param(103));             % variance match quality
 
+p = gcp();
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%                                    SOLVING BACKWARD                             %%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 tic();
 % when t = T_MAX
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%   EMAX FOR SINGLE MEN     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 for HS = 1 : 5  %HUSBAND SCHOOLING
-    EMAX_H(T_MAX, :, :, :, :, :, :, :, HS, :, :, :) = single_men(HS, T_MAX,...
+    F(HS) = parfeval(p, @single_men, 1, HS, T_MAX,...
         EMAX_W(T_MAX, :, :, :, :, :, :, :, HS, :, :, :),...
         EMAX_H(T_MAX, :, :, :, :, :, :, :, HS, :, :, :),...
         DRAW_B, TERMINAL, wives);
 end % end husband schooling loop
 
+% collect results
+for HS = 1 : 5  %HUSBAND SCHOOLING
+    [idx, EMAX_H_T] = fetchNext(F);
+    EMAX_H(T_MAX, :, :, :, :, :, :, :, idx, :, :, :) = EMAX_H_T(1, :, :, :, :, :, :, :, 1, :, :, :);
+end % end husband schooling loop
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%     emax for single women     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 for WS = 2 : 5 % no need to calclate emax of HSD single women - HSG to PC
-    EMAX_W(T_MAX, :, :, :, :, :, :, :, :, WS-1, :, :) = single_women(WS, T_MAX,...
-            EMAX_W(T_MAX, :, :, :, :, :, :, :, :, WS-1, :, :),...
-            EMAX_H(T_MAX, :, :, :, :, :, :, :, :, WS-1, :, :),...
-            DRAW_B, TERMINAL, husbands_2, husbands_3, husbands_4, husbands_5);
-end %close wife's schooling loop
-    
-for WS = 2 : 5 % no need to calclate emax of HSD single women
-    [EMAX_W(T_MAX, :, :, :, :, :, :, :, :, WS-1, :, :),...
-     EMAX_H(T_MAX, :, :, :, :, :, :, :, :, WS-1, :, :)] = married_couple(WS, T_MAX, ...
+    F(WS-1) = parfeval(p, @single_women, 1, WS, T_MAX,...
         EMAX_W(T_MAX, :, :, :, :, :, :, :, :, WS-1, :, :),...
         EMAX_H(T_MAX, :, :, :, :, :, :, :, :, WS-1, :, :),...
-        DRAW_B, TERMINAL); 
+        DRAW_B, TERMINAL, husbands_2, husbands_3, husbands_4, husbands_5);
+end %close wife's schooling loop
+
+% collect results
+for WS = 2 : 5
+    [idx, EMAX_W_T] = fetchNext(F);
+    EMAX_W(T_MAX, :, :, :, :, :, :, :, :, idx, :, :) = EMAX_W_T(1, :, :, :, :, :, :, :, :, 1, :, :);
+end %close wife's schooling loop
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%   Emax for Married Couple     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+for WS = 2 : 5 % no need to calclate emax of HSD single women
+    F(WS-1) = parfeval(p, @married_couple, 2, WS, T_MAX, ...
+        EMAX_W(T_MAX, :, :, :, :, :, :, :, :, WS-1, :, :),...
+        EMAX_H(T_MAX, :, :, :, :, :, :, :, :, WS-1, :, :),...
+        DRAW_B, TERMINAL);
 end %close wife schooling loop
 
-p = gcp(); % Get the current parallel pool
+% collect results
+for WS = 2 : 5
+    [idx, EMAX_W_T, EMAX_H_T] = fetchNext(F);
+    EMAX_W(T_MAX, :, :, :, :, :, :, :, :, idx, :, :) = EMAX_W_T(1, :, :, :, :, :, :, :, :, 1, :, :);
+    EMAX_H(T_MAX, :, :, :, :, :, :, :, :, idx, :, :) = EMAX_H_T(1, :, :, :, :, :, :, :, :, 1, :, :);
+end
 
+toc()
+
+tic();
 for t = T_MAX-1 : -1 :  1 %TIME
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%   EMAX FOR SINGLE MEN     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -262,7 +293,7 @@ for t = T_MAX-1 : -1 :  1 %TIME
     % collect results
     for HS = 1 : 5  %HUSBAND SCHOOLING
         [idx, EMAX_H_T] = fetchNext(F);
-        EMAX_H(t, :, :, :, :, :, :, :, idx, :, :, :) = EMAX_H_T(1, :, :, :, :, :, :, :, :, :, :, :);
+        EMAX_H(t, :, :, :, :, :, :, :, idx, :, :, :) = EMAX_H_T(1, :, :, :, :, :, :, :, 1, :, :, :);
     end % end husband schooling loop
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -278,7 +309,7 @@ for t = T_MAX-1 : -1 :  1 %TIME
     % collect results
     for WS = 2 : 5
         [idx, EMAX_W_T] = fetchNext(F);
-        EMAX_W(t, :, :, :, :, :, :, :, :, idx, :, :) = EMAX_W_T(1, :, :, :, :, :, :, :, :, :, :, :);
+        EMAX_W(t, :, :, :, :, :, :, :, :, idx, :, :) = EMAX_W_T(1, :, :, :, :, :, :, :, :, 1, :, :);
     end %close wife's schooling loop
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -294,12 +325,13 @@ for t = T_MAX-1 : -1 :  1 %TIME
     % collect results
     for WS = 2 : 5
         [idx, EMAX_W_T, EMAX_H_T] = fetchNext(F);
-        EMAX_W(t, :, :, :, :, :, :, :, :, idx, :, :) = EMAX_W_T(1, :, :, :, :, :, :, :, :, :, :, :);
-        EMAX_H(t, :, :, :, :, :, :, :, :, idx, :, :) = EMAX_H_T(1, :, :, :, :, :, :, :, :, :, :, :);
+        EMAX_W(t, :, :, :, :, :, :, :, :, idx, :, :) = EMAX_W_T(1, :, :, :, :, :, :, :, :, 1, :, :);
+        EMAX_H(t, :, :, :, :, :, :, :, :, idx, :, :) = EMAX_H_T(1, :, :, :, :, :, :, :, :, 1, :, :);
     end
     
 end % T backward loop
 toc()
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%               SOLVING FORWARD                  %%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -409,12 +441,13 @@ count_newborn_m 		= zeros(T_MAX, SCHOOL_GROUPS);
 kids = zeros(DRAW_F,SCHOOL_GROUPS);          % # of children by school group
 kids_m = zeros(DRAW_F,SCHOOL_GROUPS); % married women # of children by school group
 kids_um = zeros(DRAW_F,SCHOOL_GROUPS); % married women # of children by school group
+marriage_choice = zeros(DRAW_F,T_MAX,SCHOOL_GROUPS);
 
 BP_INITIAL_DISTRIBUTION = zeros(1,11);
 BP_DISTRIBUTION = zeros(1,11);
 CS_DISTRIBUTION = zeros(1,22);
 
-for school_group=1 : 5       % school_group 1 is only for calculating the emax if single men, other than that, there is a "if school_group>1"
+for school_group=2 : 5       % school_group 1 is only for calculating the emax if single men, other than that, there is a "if school_group>1"
     if (school_group == 1)
         HSG = 0;  SC = 0;  CG = 0; PC = 0;
         H_HSG = 0; H_SC = 0; H_CG = 0; H_PC = 0;
@@ -498,7 +531,6 @@ for school_group=1 : 5       % school_group 1 is only for calculating the emax i
             M_T_minus_1=0;
             DIVORCE = 0;
             NEW_BORN = 0;
-            N_KIDS = 0;
             N_KIDS_H = 0;
             N_KIDS = 0;
             N_KIDS_M = 0;
@@ -551,21 +583,21 @@ for school_group=1 : 5       % school_group 1 is only for calculating the emax i
                 %%%%%%%%%%%%%%%%%%%%%%%%   POTENTIAL OR CURRENT HUSBAND WAGE:    %%%%%%%%%%%%%%%%
                 if (M == 1 ||  CHOOSE_HUSBAND == 1)
                     [wage_h, JOB_OFFER_H] = calculate_wage(H, H_HSD, H_HSG, H_SC, H_CG, H_PC, HE, HSD, HSG, SC, CG, PC, WE,...
-                        0, epsilon_f(draw_f, t, school_group, 1), prev_state_w, ability_w, ability_h);
+                        0, epsilon_f(draw_f, t, school_group, 1), prev_state_w, ability_w, ability_h,t);
                 else
                     JOB_OFFER_H = 0;
                     wage_h = 0;
                 end 
                 %%%%%%%%%%%%%%%%%%%%%%%%   JOB OFFER PROBABILITY + WAGE WIFE     %%%%%%%%%%%%%%%%
                 [wage_w, JOB_OFFER_W] = calculate_wage(W, H_HSD, H_HSG, H_SC, H_CG, H_PC, HE, HSD, HSG, SC, CG, PC, WE,...
-                    w_draws(draw_f, t, school_group, 1), epsilon_f(draw_f, t, WS, 2), prev_state_w, ability_w, ability_h);
+                    w_draws(draw_f, t, school_group, 1), epsilon_f(draw_f, t, WS, 2), prev_state_w, ability_w, ability_h,t);
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 %%%%%%%%%%%%%%%%%%%%%%%%   MAXIMIZATION - MARRIAGE + WORK DESICION  %%%%%%%%%%%%%
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 if (M == 0 &&  CHOOSE_HUSBAND == 1)
                     BP = 0.5;
                     [U_W, U_H, U_W_S, U_H_S] = calculate_utility_f(N_KIDS, N_KIDS_H, wage_h, wage_w, CHOOSE_HUSBAND, JOB_OFFER_H, JOB_OFFER_W, ...
-                            M,  similar_educ, Q, Q_INDEX, HS, WS, t, ability_hi, ability_wi, HE, WE, BP, T_END, 0);
+                            M,  similar_educ, Q, Q_INDEX, HS, WS, t, ability_hi, ability_wi, HE, WE, BP, T_END, 0, age_index);
                     BP = nash(U_W,U_H,U_W_S,U_H_S,BP); % Nash bargaining at first period of marriage  
                     BP_INDEX = round(BP*10)+1;
                     if (BP ~= -1)
@@ -581,7 +613,7 @@ for school_group=1 : 5       % school_group 1 is only for calculating the emax i
                 %%%%%%%%%%%%%%%%%%%%%%%% calculate husbands and wives utility     %%%%%%%%%%%%%%%
                 %%%%%%%%%%%%%%%%%%%%%%%% from each option + -999 for unavailable  %%%%%%%%%%%%%%%
                 [U_W, U_H, U_W_S, U_H_S] = calculate_utility_f(N_KIDS, N_KIDS_H, wage_h, wage_w, CHOOSE_HUSBAND, JOB_OFFER_H, JOB_OFFER_W, ...
-                    M,  similar_educ, Q, Q_INDEX, HS, WS, t, ability_hi, ability_wi, HE, WE, BP, T_END, 0);
+                    M,  similar_educ, Q, Q_INDEX, HS, WS, t, ability_hi, ability_wi, HE, WE, BP, T_END, 0, age_index);
 
                 if (CHOOSE_HUSBAND == 1)% write 1 for testing
                     %U_W
@@ -803,7 +835,7 @@ for school_group=1 : 5       % school_group 1 is only for calculating the emax i
                     if wage_h > 0
                        wages_m_h(HE, HS)=wages_m_h(HE, HS) + wage_h;         % husband always works
                         count_wages_m_h(HE, HS) = count_wages_m_h(HE, HS)+1;
-                    end	
+                    end
                     emp_m(draw_f, t+age_index, school_group) = prev_state_w;      % employment married women  
                     if school_group > HS                %women married down, men married up - HS is 1 to 5 while school_group 1 to 4 so to copare: -1
                         emp_m_down(draw_f, t+age_index, school_group) = prev_state_w;         % employment married down
@@ -935,9 +967,10 @@ toc()
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%            CLOSE SOLVING FORWARD      %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%BP_DISTRIBUTION
-%BP_INITIAL_DISTRIBUTION
-CS_DISTRIBUTION
+BP_DISTRIBUTION(1,1:11)
+BP_INITIAL_DISTRIBUTION(1,1:11)
+CS_DISTRIBUTION(1,1:11)
+CS_DISTRIBUTION(1,12:22)
 average_ability_h_up = nansum(ability_h_up./count_ability_h_up)
 average_ability_h_eq = nansum(ability_h_eq./count_ability_h_eq)
 average_ability_h_down = nansum(ability_h_down./count_ability_h_down)

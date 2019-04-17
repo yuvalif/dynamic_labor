@@ -1,4 +1,4 @@
-function [wage, JOB_OFFER] = calculate_wage(sex, H_HSD, H_HSG, H_SC, H_CG, H_PC, HE, HSD, HSG, SC, CG, PC, WE, w_draw, epsilon, prev_state_w, ability_w, ability_h)
+function [wage, JOB_OFFER] = calculate_wage(sex, H_HSD, H_HSG, H_SC, H_CG, H_PC, HE, HSD, HSG, SC, CG, PC, WE, w_draw, epsilon, prev_state_w, ability_w, ability_h,t)
 
 global beta11_w; global beta12_w; global beta13_w; global beta14_w;
 global beta21_w; global beta22_w; global beta23_w; global beta24_w;

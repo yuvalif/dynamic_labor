@@ -1,6 +1,6 @@
 % script for finding the minimum of "estimation_xxx" functions
 
-clear all;
+clear;
 close all;
 format long;
 % general parameters
@@ -34,11 +34,12 @@ char_vec = load('init_parameters.txt');
  
 global_params = char_vec;
 %override_global_params
-[husbands_2 husbands_3 husbands_4 husbands_5  wives wage_moments marr_fer_moments emp_moments general_moments epsilon_b epsilon_f h_draws_b w_draws_b w_ability_draw h_draws w_draws ] = estimation_init(T_MAX, DRAW_B, DRAW_F, SCHOOL_GROUPS);
+[husbands_2, husbands_3, husbands_4, husbands_5,  wives, wage_moments, marr_fer_moments, emp_moments, general_moments,...
+    epsilon_b, epsilon_f, h_draws_b, w_draws_b, w_ability_draw, h_draws, w_draws, tax_brackets,deductions_exemption ] = estimation_init(T_MAX, DRAW_B, DRAW_F, SCHOOL_GROUPS);
 if strcmp(run_mode,'test')
-   	min_x = minestimation_test(@estimation_f, global_params, T_MAX, DRAW_B, DRAW_F, SCHOOL_GROUPS, husbands_2, husbands_3,husbands_4,husbands_5, wives, wage_moments, marr_fer_moments, emp_moments, general_moments, epsilon_b, epsilon_f, h_draws_b, w_draws_b, w_ability_draw, h_draws, w_draws)
+   	min_x = minestimation_test(@estimation_f, global_params, T_MAX, DRAW_B, DRAW_F, SCHOOL_GROUPS, husbands_2, husbands_3,husbands_4,husbands_5, wives, wage_moments, marr_fer_moments, emp_moments, general_moments, epsilon_b, epsilon_f, h_draws_b, w_draws_b, w_ability_draw, h_draws, w_draws, tax_brackets, deductions_exemption)
 elseif strcmp(run_mode,'std')
-   	minestimation_std(@estimation_f, global_params, T_MAX, DRAW_B, DRAW_F, SCHOOL_GROUPS, husbands_2 ,husbands_3,husbands_4,husbands_5, wives, wage_moments, marr_fer_moments, emp_moments, general_moments, epsilon_b, epsilon_f, h_draws_b, w_draws_b, w_ability_draw, h_draws, w_draws);
+   	minestimation_std(@estimation_f, global_params, T_MAX, DRAW_B, DRAW_F, SCHOOL_GROUPS, husbands_2 ,husbands_3,husbands_4,husbands_5, wives, wage_moments, marr_fer_moments, emp_moments, general_moments, epsilon_b, epsilon_f, h_draws_b, w_draws_b, w_ability_draw, h_draws, w_draws, tax_brackets, deductions_exemption);
 else
 	for run_idx = 1:run_list_len
 		run_param = strtrim(run_list(run_idx,:));
@@ -47,7 +48,7 @@ else
 		elseif strcmp(run_mode,'ga')	
 %			[min_x global_param] = minestimation_ga(@estimation_f, run_param, global_params, T_MAX, DRAW_B, DRAW_F, SCHOOL_GROUPS, husbands_HSG, husbands_SC, husbands_CG, husbands_PC, wage_moments, marr_fer_moments, emp_moments, general_moments, epsilon_b, epsilon_f, w_ability_draw, h_draws, w_draws);
 		else
-			error(sprintf('unsupported mode %s', mode));
+			error('unsupported mode %s', mode);
 		end
 	end%for run_idx
 end%if

@@ -1,6 +1,6 @@
 function [U_W, U_H, U_W_S, U_H_S] = calculate_utility(EMAX_W_T, EMAX_H_T, N_KIDS, N_KIDS_H,...
                                                       wage_h, wage_w, CHOOSE_PARTNER, CHOOSE_WORK_H, CHOOSE_WORK_W,...
-                                                      M, similar_educ, Q, Q_INDEX, HS, WS, t, ability_hi, ability_wi, HE, WE, BP, T_END, single_men)  
+                                                      M, similar_educ, Q, Q_INDEX, HS, WS, t, ability_hi, ability_wi, HE, WE, BP, T_END, single_men, age_index)  
 % Utility parameters WIFE:  
 global alpha; global alpha1_w_m; global alpha1_w_s; global alpha1_h_m; global alpha2_w; global alpha3_w;
 global hp; global beta0;
@@ -8,10 +8,8 @@ global t1_w; global t2_w; global t3_w; global t4_w; global t5_w; global t6_w; gl
 global t11_w; global t12_w; global t13_w; global t14_w; global t15_w; global t16_w; global t17_w;
 global t1_h; global t2_h; global t3_h;global t4_h; global t5_h; global t6_h; global t7_h; global t8_h; global t9_h; global t10_h;
 global t11_h; global t12_h; global t13_h; global t14_h; global t15_h; global t16_h ;global t17_h;
-
-women_cons_s1 = 0;  % women private consumption when single and unemployed
-women_cons_s2 = wage_w*(1+(N_KIDS)*0.4);% women private consumption when single and employed
-men_cons_s = wage_h; % men private consumption when single and employed
+global G_tax; 
+global G_ded;
 HSG = 0; SC = 0; CG = 0; PC = 0; H_HSD = 0; H_HSG = 0; H_SC = 0; H_CG = 0; H_PC = 0;
 UNEMP = 1;
 EMP = 2;
@@ -30,6 +28,7 @@ else
     WS_IDX = 1;
     HS_IDX = HS;
 end
+[net_income_s_h, net_income_s_w, net_income_m, net_income_m_unemp ]= gross_to_net(N_KIDS,  wage_w, wage_h,t, age_index);
 
 if (M == 0  &&  CHOOSE_PARTNER == 0)
     U_W(1, 1:22) = -99999;
@@ -62,8 +61,7 @@ else
     % home production technology - parameters    
     % global hp sigma CRRA parameter
     % eqvivalent scale = 1 + M*0.7 + (N_KIDS)*0.4;
-    total_earning1= wage_h;   % only men employed
-    total_earning2 = wage_h+wage_w; % both employed
+
     total_cons1 = 0;
     total_cons2 = 0;
     women_cons_m1 = 0;
@@ -78,8 +76,8 @@ else
     UC_H_S = 0; 
     for i = 0:10  % consumption share grid
         CS = i*0.1;
-        total_cons1   = ((total_earning1*(1.7+(N_KIDS)*0.4)).^hp / (CS.^hp+(1-CS).^hp)  ).^(1/hp); % only men employed
-        total_cons2   = ((total_earning2*(1.7+(N_KIDS)*0.4)).^hp / (CS.^hp+(1-CS).^hp)  ).^(1/hp); % both employed
+        total_cons1   = ((net_income_m_unemp*(1.7+(N_KIDS)*0.4)).^hp / (CS.^hp+(1-CS).^hp)  ).^(1/hp); % only men employed
+        total_cons2   = ((net_income_m*(1.7+(N_KIDS)*0.4)).^hp / (CS.^hp+(1-CS).^hp)  ).^(1/hp); % both employed
         women_cons_m1 = CS*total_cons1;      % women private consumption when married and unemployed
         women_cons_m2 = CS*total_cons2;      % women private consumption when married and employed
         men_cons_m1   = (1-CS)*total_cons1;   % men private consumption when married and women unemployed
@@ -112,8 +110,9 @@ else
     end
 end
 UC_W_S(1,1) = alpha1_w_s*(N_KIDS)+ alpha2_w*log(1+N_KIDS) + alpha3_w;
+women_cons_s2 = net_income_s_w*(1+(N_KIDS)*0.4);% women private consumption when single and employed
 UC_W_S(1,2) = (women_cons_s2.^alpha)/alpha + alpha1_w_s*(N_KIDS);
-UC_H_S = ((men_cons_s).^alpha)/alpha;
+UC_H_S = ((net_income_s_h).^alpha)/alpha;
 if (t == T_END)
     U_W_S(1,1) = UC_W_S(1,1)+t1_w*HSG+t2_w*SC+t3_w*CG+t4_w*PC+t5_w*WE    +t13_w*(N_KIDS);     
     U_W_S(1,2) = UC_W_S(1,2)+t1_w*HSG+t2_w*SC+t3_w*CG+t4_w*PC+t5_w*(WE+1)+t13_w*(N_KIDS)+t16_w;       

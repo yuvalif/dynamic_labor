@@ -1,4 +1,4 @@
-function [EMAX_W_T, EMAX_H_T] = married_couple(WS, t, EMAX_W_T, EMAX_H_T, DRAW_B, TERMINAL)
+function [EMAX_W_T_OUT, EMAX_H_T_OUT] = married_couple(WS, t, EMAX_W_T, EMAX_H_T, DRAW_B, TERMINAL)
 global exp_vector;
 global normal_arr;
 global sigma;
@@ -14,30 +14,37 @@ global beta30_h; global beta31_h; global beta32_h; global beta33_h; global beta3
 global row0_w;   global row11_w;  global row12_w;  global row13_w;  global row14_w; global row2_w;
 global EDUC_MATCH_2; global EDUC_MATCH_3; global EDUC_MATCH_4; global EDUC_MATCH_5; 
 
-    THIS_T = 1;
-    NEXT_T = 2;
-    NO_WS = 1;
+THIS_T = 1;
+NEXT_T = 2;
+NO_WS = 1;
+
+EMAX_H_T_OUT = EMAX_H_T(THIS_T, :, :, :, :, :, :, :, :, NO_WS, :, :);
+EMAX_W_T_OUT = EMAX_W_T(THIS_T, :, :, :, :, :, :, :, :, NO_WS, :, :);
 
     MARRIED = 1;
     HSG = 0; SC = 0; CG = 0; PC = 0;
     if (WS == 2)
         HSG = 1;AGE = 18;
         T_END = TERMINAL - AGE+1; % TERMINAL = 45, T=28
+        age_index = 0;
     elseif (WS == 3)  
         SC = 1; AGE = 20;
         T_END = TERMINAL - AGE+1; % TERMINAL = 45, T=26
+        age_index = 2;
         if (t > T_END)
             return
         end
      elseif (WS == 4)
         CG = 1;AGE = 22;
         T_END = TERMINAL - AGE+1;% TERMINAL = 45, T=24
+        age_index = 4;
         if (t > T_END)
             return
         end
      else
         PC = 1; AGE = 25;
         T_END = TERMINAL - AGE+1;   % TERMINAL = 45, T=21
+        age_index = 7;
         if (t > T_END)
             return
         end
@@ -46,7 +53,8 @@ global EDUC_MATCH_2; global EDUC_MATCH_3; global EDUC_MATCH_4; global EDUC_MATCH
         WE = exp_vector(1, W_EXP_INDEX);
         for H_EXP_INDEX = 1 : G_exp_h %HUSBAND EXPERENCE - 5 GRID LEVEL
             HE = exp_vector(1, H_EXP_INDEX);
-            for N_KIDS = 1 : G_kids
+            for N_KIDS_IND = 1 : G_kids
+                N_KIDS = N_KIDS_IND-1;                
                 for ability_wi = 1:3   %husband ability - high, medium, low
                     ability_w = normal_arr(ability_wi)*sigma(4,4);
                     for ability_hi = 1:3   %husband ability - high, medium, low
@@ -114,7 +122,8 @@ global EDUC_MATCH_2; global EDUC_MATCH_3; global EDUC_MATCH_4; global EDUC_MATCH
                                             CHOOSE_WIFE = 1; M = 1;
                                             [U_W, U_H, U_W_S, U_H_S] = calculate_utility(EMAX_W_T, EMAX_H_T,...
                                                 N_KIDS, N_KIDS, wage_h, wage_w, CHOOSE_WIFE, JOB_OFFER_H, JOB_OFFER_W, ...
-                                                M, similar_educ, Q, Q_INDEX, HS, WS, t, ability_hi, ability_wi, HE, WE, BP, T_END, 0);
+                                                M, similar_educ, Q, Q_INDEX, HS, WS, t, ability_hi, ability_wi, HE, WE, BP, T_END, 0,age_index);
+
                                             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                                             %%%%%%%%%%%%%%%%%%%%%%%%   MAXIMIZATION - MARRIAGE + WORK DESICION  %%%%%%%%%%%%%
                                             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -139,10 +148,9 @@ global EDUC_MATCH_2; global EDUC_MATCH_3; global EDUC_MATCH_4; global EDUC_MATCH
                                                 ADD_EMAX_W = ADD_EMAX_W + outside_option_w_v;
                                             end   
                                             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-                                        end   % end draw backward loop
-                                        EMAX_W_T(THIS_T, W_EXP_INDEX, H_EXP_INDEX, N_KIDS, prev, ability_wi, ability_hi, MARRIED, HS, NO_WS, Q_INDEX, BPi) = ADD_EMAX_W/DRAW_B;
-                                        EMAX_H_T(THIS_T, W_EXP_INDEX, H_EXP_INDEX, N_KIDS, prev, ability_wi, ability_hi, MARRIED, HS, NO_WS, Q_INDEX, BPi) = ADD_EMAX_H/DRAW_B;
-                                        return
+                                        end   % end draw backward loop                                        
+                                        EMAX_W_T_OUT(THIS_T, W_EXP_INDEX, H_EXP_INDEX, N_KIDS_IND, prev, ability_wi, ability_hi, MARRIED, HS, NO_WS, Q_INDEX, BPi) = ADD_EMAX_W/DRAW_B;
+                                        EMAX_H_T_OUT(THIS_T, W_EXP_INDEX, H_EXP_INDEX, N_KIDS_IND, prev, ability_wi, ability_hi, MARRIED, HS, NO_WS, Q_INDEX, BPi) = ADD_EMAX_H/DRAW_B;
                                     end   % end BP  loop
                                 end   % end match quality loop
                             end   % end husband schooling loop
