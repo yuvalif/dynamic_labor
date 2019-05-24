@@ -1,6 +1,11 @@
-function [ability_w, ability_wi, Q, Q_INDEX,WS,HSD, HSG, SC, CG, PC,WE, similar_educ, prev_state_w]=draw_wife(wives, t, age_index, draw, h_draws_b,school_group )
-global normal_arr; global sigma; global EDUC_MATCH_2; global EDUC_MATCH_3; global EDUC_MATCH_4; global EDUC_MATCH_5;
-global WE1;global WE2;global WE3;global WE4;global WE5;  
+function [ability_w, ability_wi, Q, Q_INDEX,WS,HSD, HSG, SC, CG, PC,WE, similar_educ, prev_state_w] = draw_wife(const_values, wives, t, age_index, draw, h_draws_b, school_group)
+
+WE1 = const_values.WE1;
+WE2 = const_values.WE2;
+WE3 = const_values.WE3;
+WE4 = const_values.WE4;
+WE5 = const_values.WE5;  
+
 %h_draws_b = rand(DRAW_F,T,5); %1- HUSBAND; 2-HUSBAND EXP+SCHOOLING; 3-HUSBAND ABILITY; 4 - INITIAL MATCH QUALITY; 5 - MATCH UALITY CHANGE PROBABILITY
 			P_HSG_1_UN=wives(t+age_index,2);
 			P_HSG_2_UN=wives(t+age_index,3);
@@ -44,9 +49,9 @@ global WE1;global WE2;global WE3;global WE4;global WE5;
 			P_PC_4_EMP=wives(t+age_index,40);	
 			P_PC_5_EMP=wives(t+age_index,41);	
               
-ability_w = normal_arr(h_draws_b(draw,t,school_group,3))*sigma(4,4);
+ability_w = const_values.normal_arr(h_draws_b(draw,t,school_group,3))*const_values.sigma(4,4);
 ability_wi = h_draws_b(draw,t,school_group,3);
-Q = normal_arr(h_draws_b(draw,t,school_group,4))*sigma(5,5);
+Q = const_values.normal_arr(h_draws_b(draw,t,school_group,4))*const_values.sigma(5,5);
 Q_INDEX = h_draws_b(draw,t,school_group,4);
 HSD = 0; HSG = 1; SC = 0; CG = 0; PC = 0;  WS = 2;WE = WE1;prev_state_w = 0;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -144,12 +149,12 @@ elseif h_draws_b(draw,t,school_group,2)>P_SC_2_EMP && h_draws_b(draw,t,school_gr
     WE = WE3;   
     prev_state_w = 1;
 elseif h_draws_b(draw,t,school_group,2)>P_SC_3_EMP && h_draws_b(draw,t,school_group,2)<P_SC_4_EMP
-   WS = 3;
+    WS = 3;
     SC=1;
     WE = WE4;  
     prev_state_w = 1;
 elseif h_draws_b(draw,t,school_group,2)>P_SC_4_EMP && h_draws_b(draw,t,school_group,2)<P_SC_5_EMP
-   WS = 3;
+    WS = 3;
     SC=1;
     WE = WE5;      
     prev_state_w = 1;
@@ -271,13 +276,13 @@ elseif WS == 5
     PC = 1;HSD = 0; HSG = 0; SC = 0; CG = 0; 
 end         
 if WS==2 && school_group==2
-    similar_educ = EDUC_MATCH_2;
+    similar_educ = const_values.EDUC_MATCH_2;
 elseif WS==3 && school_group==3	
-    similar_educ = EDUC_MATCH_3;
+    similar_educ = const_values.EDUC_MATCH_3;
 elseif WS==4 && school_group==4	
-    similar_educ = EDUC_MATCH_4;
+    similar_educ = const_values.EDUC_MATCH_4;
 elseif WS==5 && school_group==5	
-    similar_educ = EDUC_MATCH_5;
+    similar_educ = const_values.EDUC_MATCH_5;
 else
     similar_educ = 0;
 end	

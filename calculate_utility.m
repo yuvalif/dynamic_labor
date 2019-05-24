@@ -1,15 +1,49 @@
-function [U_W, U_H, U_W_S, U_H_S] = calculate_utility(EMAX_W_T, EMAX_H_T, N_KIDS, N_KIDS_H,...
+function [U_W, U_H, U_W_S, U_H_S] = calculate_utility(const_values, EMAX_W_T, EMAX_H_T, N_KIDS, N_KIDS_H,...
                                                       wage_h, wage_w, CHOOSE_PARTNER, CHOOSE_WORK_H, CHOOSE_WORK_W,...
                                                       M, similar_educ, Q, Q_INDEX, HS, WS, t, ability_hi, ability_wi, HE, WE, BP, T_END, single_men, age_index)  
-% Utility parameters WIFE:  
-global alpha; global alpha1_w_m; global alpha1_w_s; global alpha1_h_m; global alpha2_w; global alpha3_w;
-global hp; global beta0;
-global t1_w; global t2_w; global t3_w; global t4_w; global t5_w; global t6_w; global t7_w; global t8_w; global t9_w; global t10_w; 
-global t11_w; global t12_w; global t13_w; global t14_w; global t15_w; global t16_w; global t17_w;
-global t1_h; global t2_h; global t3_h;global t4_h; global t5_h; global t6_h; global t7_h; global t8_h; global t9_h; global t10_h;
-global t11_h; global t12_h; global t13_h; global t14_h; global t15_h; global t16_h ;global t17_h;
-global G_tax; 
-global G_ded;
+
+alpha = const_values.alpha; 
+alpha1_w_m = const_values.alpha1_w_m; 
+alpha1_w_s = const_values.alpha1_w_s; 
+alpha1_h_m = const_values.alpha1_h_m; 
+alpha2_w = const_values.alpha2_w; 
+alpha3_w = const_values.alpha3_w;
+hp = const_values.hp;
+beta0 = const_values.beta0;
+t1_w = const_values.t1_w;
+t2_w = const_values.t2_w; 
+t3_w = const_values.t3_w;
+t4_w = const_values.t4_w;
+t5_w = const_values.t5_w;
+t6_w = const_values.t6_w;
+t7_w = const_values.t7_w;
+t8_w = const_values.t8_w;
+t9_w = const_values.t9_w;
+t10_w = const_values.t10_w;
+t11_w = const_values.t11_w;
+t12_w = const_values.t12_w;
+t13_w = const_values.t13_w;
+t14_w = const_values.t14_w;
+t15_w = const_values.t15_w;
+t16_w = const_values.t16_w;
+t17_w = const_values.t17_w;
+t1_h = const_values.t1_h;
+t2_h = const_values.t2_h;
+t3_h = const_values.t3_h;
+t4_h = const_values.t4_h;
+t5_h = const_values.t5_h;
+t6_h = const_values.t6_h;
+t7_h = const_values.t7_h;
+t8_h = const_values.t8_h;
+t9_h = const_values.t9_h;
+t10_h = const_values.t10_h;
+t11_h = const_values.t11_h;
+t12_h = const_values.t12_h;
+t13_h = const_values.t13_h;
+t14_h = const_values.t14_h;
+t16_h = const_values.t16_h;
+t17_h = const_values.t17_h;
+
 HSG = 0; SC = 0; CG = 0; PC = 0; H_HSD = 0; H_HSG = 0; H_SC = 0; H_CG = 0; H_PC = 0;
 UNEMP = 1;
 EMP = 2;
@@ -20,7 +54,7 @@ U_W = zeros(1,22);
 U_H = zeros(1,22);
 U_W_S = zeros(1,2);
 U_H_S = 0;
-    
+
 if (single_men == 1)
     WS_IDX = WS-1;
     HS_IDX = 1;
@@ -28,7 +62,7 @@ else
     WS_IDX = 1;
     HS_IDX = HS;
 end
-[net_income_s_h, net_income_s_w, net_income_m, net_income_m_unemp ]= gross_to_net(N_KIDS,  wage_w, wage_h,t, age_index);
+[net_income_s_h, net_income_s_w, net_income_m, net_income_m_unemp] = gross_to_net(const_values, N_KIDS, wage_w, wage_h, t, age_index);
 
 if (M == 0  &&  CHOOSE_PARTNER == 0)
     U_W(1, 1:22) = -99999;

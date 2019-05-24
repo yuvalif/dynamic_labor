@@ -1,7 +1,9 @@
-function [ability_h, ability_hi, Q, Q_INDEX,HS,H_HSD, H_HSG, H_SC, H_CG, H_PC,HE, similar_educ]=draw_husband(husbands, t, age_index, draw_f, h_draws,school_group )
-global normal_arr; global sigma; global EDUC_MATCH_2; global EDUC_MATCH_3; global EDUC_MATCH_4; global EDUC_MATCH_5;
-global HE1;global HE2;global HE3;global HE4;global HE5
-global TERMINAL ;   
+function [ability_h, ability_hi, Q, Q_INDEX,HS,H_HSD, H_HSG, H_SC, H_CG, H_PC, HE, similar_educ] = draw_husband(const_values, husbands, t, age_index, draw_f, h_draws, school_group)
+HE1 = const_values.HE1;
+HE2 = const_values.HE2;
+HE3 = const_values.HE3;
+HE4 = const_values.HE4;
+HE5 = const_values.HE5;
 %h_draws = rand(DRAW_F,T,5); %1- HUSBAND; 2-HUSBAND EXP+SCHOOLING; 3-HUSBAND ABILITY; 4 - INITIAL MATCH QUALITY; 5 - MATCH UALITY CHANGE PROBABILITY
 
 P_HSD_1=husbands(t+age_index,2);
@@ -29,9 +31,9 @@ P_PC_2=husbands(t+age_index,22);
 P_PC_3=husbands(t+age_index,23);
 P_PC_4=husbands(t+age_index,24);               
 P_PC_5=husbands(t+age_index,25);               
-ability_h = normal_arr(h_draws(draw_f,t,school_group,3))*sigma(4,4);
+ability_h = const_values.normal_arr(h_draws(draw_f,t,school_group,3))*const_values.sigma(4,4);
 ability_hi = h_draws(draw_f,t,school_group,3);
-Q = normal_arr(h_draws(draw_f,t,school_group,4))*sigma(5,5);
+Q = const_values.normal_arr(h_draws(draw_f,t,school_group,4))*const_values.sigma(5,5);
 Q_INDEX = h_draws(draw_f,t,school_group,4);
 H_HSD = 1; H_HSG = 0; H_SC = 0; H_CG = 0; H_PC = 0; HS = 1; HE = HE1;  HE_INDEX = 1;
 if h_draws(draw_f,t,school_group,2)<P_HSD_1     %husband schooling HSD
@@ -173,13 +175,13 @@ elseif HS == 5
     H_PC = 1;H_HSD = 0; H_HSG = 0; H_SC = 0; H_CG = 0; 
 end         
 if HS==2 && school_group==2
-    similar_educ = EDUC_MATCH_2;
+    similar_educ = const_values.EDUC_MATCH_2;
 elseif HS==3 && school_group==3	
-    similar_educ = EDUC_MATCH_3;
+    similar_educ = const_values.EDUC_MATCH_3;
 elseif HS==4 && school_group==4	
-    similar_educ = EDUC_MATCH_4;
+    similar_educ = const_values.EDUC_MATCH_4;
 elseif HS==5 && school_group==5	
-    similar_educ = EDUC_MATCH_5;
+    similar_educ = const_values.EDUC_MATCH_5;
 else
     similar_educ = 0;
 end	

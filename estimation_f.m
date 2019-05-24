@@ -9,10 +9,6 @@ function objective_function = estimation_f(param, f_type, display, global_param,
 % define values
 H = 0;
 W = 1;
-MARRIED = 1;
-UNMARRIED = 2;
-UNEMP = 1;
-EMP = 2;
 global WE1;WE1= 0;
 global WE2;WE2 = 2;
 global WE3;WE3 = 4;
@@ -101,8 +97,7 @@ DUMP_EMAX = 0;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 x_idx = get_global_param_idx(f_type);
 global_param(x_idx) = param;
-global sigma;
-sigma = zeros(5,5);
+global sigma;sigma = zeros(5,5);
 % Utility parameters:  
 global alpha;alpha = global_param(1);        % CRRA income parameter 
 global alpha1_w_m;alpha1_w_m = global_param(2);        % women utility from children when married
@@ -222,16 +217,20 @@ sigma(5,5) = exp(global_param(103));             % variance match quality
 
 p = gcp();
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%                                    SOLVING BACKWARD                             %%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+obj = estimation_parameters(global_param, epsilon_b, w_draws, h_draws, w_draws_b, tax_brackets, deductions_exemption);
+
+%obj_w = WorkerObjWrapper(obj);
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%               SOLVING BACKWARD                    %%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 tic();
 % when t = T_MAX
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%   EMAX FOR SINGLE MEN     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 for HS = 1 : 5  %HUSBAND SCHOOLING
-    F(HS) = parfeval(p, @single_men, 1, HS, T_MAX,...
+    F(HS) = parfeval(p, @single_men, 2, obj, HS, T_MAX,...
         EMAX_W(T_MAX, :, :, :, :, :, :, :, HS, :, :, :),...
         EMAX_H(T_MAX, :, :, :, :, :, :, :, HS, :, :, :),...
         DRAW_B, TERMINAL, wives);
@@ -239,15 +238,16 @@ end % end husband schooling loop
 
 % collect results
 for HS = 1 : 5  %HUSBAND SCHOOLING
-    [idx, EMAX_H_T] = fetchNext(F);
+    [idx, EMAX_H_T, iter_count] = fetchNext(F);
     EMAX_H(T_MAX, :, :, :, :, :, :, :, idx, :, :, :) = EMAX_H_T(1, :, :, :, :, :, :, :, 1, :, :, :);
+    fprintf('HUSBAND SCHOOLING %d at time %d did %d iteration\n', idx, T_MAX, iter_count);
 end % end husband schooling loop
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%     emax for single women     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 for WS = 2 : 5 % no need to calclate emax of HSD single women - HSG to PC
-    F(WS-1) = parfeval(p, @single_women, 1, WS, T_MAX,...
+    F(WS-1) = parfeval(p, @single_women, 2, obj, WS, T_MAX,...
         EMAX_W(T_MAX, :, :, :, :, :, :, :, :, WS-1, :, :),...
         EMAX_H(T_MAX, :, :, :, :, :, :, :, :, WS-1, :, :),...
         DRAW_B, TERMINAL, husbands_2, husbands_3, husbands_4, husbands_5);
@@ -255,15 +255,16 @@ end %close wife's schooling loop
 
 % collect results
 for WS = 2 : 5
-    [idx, EMAX_W_T] = fetchNext(F);
+    [idx, EMAX_W_T, iter_count] = fetchNext(F);
     EMAX_W(T_MAX, :, :, :, :, :, :, :, :, idx, :, :) = EMAX_W_T(1, :, :, :, :, :, :, :, :, 1, :, :);
+    fprintf('WIFE SCHOOLING %d at time %d did %d iteration\n', idx, T_MAX, iter_count);
 end %close wife's schooling loop
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%   Emax for Married Couple     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 for WS = 2 : 5 % no need to calclate emax of HSD single women
-    F(WS-1) = parfeval(p, @married_couple, 2, WS, T_MAX, ...
+    F(WS-1) = parfeval(p, @married_couple, 3, obj, WS, T_MAX, ...
         EMAX_W(T_MAX, :, :, :, :, :, :, :, :, WS-1, :, :),...
         EMAX_H(T_MAX, :, :, :, :, :, :, :, :, WS-1, :, :),...
         DRAW_B, TERMINAL);
@@ -271,9 +272,10 @@ end %close wife schooling loop
 
 % collect results
 for WS = 2 : 5
-    [idx, EMAX_W_T, EMAX_H_T] = fetchNext(F);
+    [idx, EMAX_W_T, EMAX_H_T, iter_count] = fetchNext(F);
     EMAX_W(T_MAX, :, :, :, :, :, :, :, :, idx, :, :) = EMAX_W_T(1, :, :, :, :, :, :, :, :, 1, :, :);
     EMAX_H(T_MAX, :, :, :, :, :, :, :, :, idx, :, :) = EMAX_H_T(1, :, :, :, :, :, :, :, :, 1, :, :);
+    fprintf('MARRIED WIFE SCHOOLING %d at time %d did %d iteration\n', idx, T_MAX, iter_count);
 end
 
 toc()
@@ -284,7 +286,7 @@ for t = T_MAX-1 : -1 :  1 %TIME
 %%%%%%%%%%%%%%%%%%%%%%%   EMAX FOR SINGLE MEN     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     for HS = 1 : 5  %HUSBAND SCHOOLING
-         F(HS) = parfeval(p, @single_men, 1, HS, t,...
+         F(HS) = parfeval(p, @single_men, 2, obj, HS, t,...
             EMAX_W(t:t+1, :, :, :, :, :, :, :, HS, :, :, :),...
             EMAX_H(t:t+1, :, :, :, :, :, :, :, HS, :, :, :),...
             DRAW_B, TERMINAL, wives);
@@ -292,15 +294,16 @@ for t = T_MAX-1 : -1 :  1 %TIME
     
     % collect results
     for HS = 1 : 5  %HUSBAND SCHOOLING
-        [idx, EMAX_H_T] = fetchNext(F);
+        [idx, EMAX_H_T, iter_count] = fetchNext(F);
         EMAX_H(t, :, :, :, :, :, :, :, idx, :, :, :) = EMAX_H_T(1, :, :, :, :, :, :, :, 1, :, :, :);
+        fprintf('HUSBAND SCHOOLING %d at time %d did %d iteration\n', idx, t, iter_count);
     end % end husband schooling loop
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%     emax for single women     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     for WS = 2 : 5 % no need to calclate emax of HSD single women - HSG to PC
-        F(WS-1) = parfeval(p, @single_women, 1, WS, t,...
+        F(WS-1) = parfeval(p, @single_women, 2, obj, WS, t,...
             EMAX_W(t:t+1, :, :, :, :, :, :, :, :, WS-1, :, :),...
             EMAX_H(t:t+1, :, :, :, :, :, :, :, :, WS-1, :, :),...
             DRAW_B, TERMINAL, husbands_2, husbands_3, husbands_4, husbands_5);
@@ -308,15 +311,16 @@ for t = T_MAX-1 : -1 :  1 %TIME
     
     % collect results
     for WS = 2 : 5
-        [idx, EMAX_W_T] = fetchNext(F);
+        [idx, EMAX_W_T, iter_count] = fetchNext(F);
         EMAX_W(t, :, :, :, :, :, :, :, :, idx, :, :) = EMAX_W_T(1, :, :, :, :, :, :, :, :, 1, :, :);
+        fprintf('WIFE SCHOOLING %d at time %d did %d iteration\n', idx, t, iter_count);
     end %close wife's schooling loop
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%   Emax for Married Couple     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     for WS = 2 : 5 % no need to calclate emax of HSD single women
-        F(WS-1) = parfeval(p, @married_couple, 2, WS, t, ...
+        F(WS-1) = parfeval(p, @married_couple, 3, obj, WS, t, ...
             EMAX_W(t:t+1, :, :, :, :, :, :, :, :, WS-1, :, :),...
             EMAX_H(t:t+1, :, :, :, :, :, :, :, :, WS-1, :, :),...
             DRAW_B, TERMINAL);
@@ -324,13 +328,18 @@ for t = T_MAX-1 : -1 :  1 %TIME
     
     % collect results
     for WS = 2 : 5
-        [idx, EMAX_W_T, EMAX_H_T] = fetchNext(F);
+        [idx, EMAX_W_T, EMAX_H_T, iter_count] = fetchNext(F);
         EMAX_W(t, :, :, :, :, :, :, :, :, idx, :, :) = EMAX_W_T(1, :, :, :, :, :, :, :, :, 1, :, :);
         EMAX_H(t, :, :, :, :, :, :, :, :, idx, :, :) = EMAX_H_T(1, :, :, :, :, :, :, :, :, 1, :, :);
+        fprintf('MARRIED WIFE SCHOOLING %d at time %d did %d iteration\n', idx, t, iter_count);
     end
     
 end % T backward loop
 toc()
+
+objective_function = 0;
+
+return
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%               SOLVING FORWARD                  %%%%%%%%%%%%%%%%%%%%%%%

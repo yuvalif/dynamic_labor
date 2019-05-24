@@ -1,13 +1,39 @@
-function [wage, JOB_OFFER] = calculate_wage(sex, H_HSD, H_HSG, H_SC, H_CG, H_PC, HE, HSD, HSG, SC, CG, PC, WE, w_draw, epsilon, prev_state_w, ability_w, ability_h,t)
+function [wage, JOB_OFFER] = calculate_wage(const_values, sex, H_HSD, H_HSG, H_SC, H_CG, H_PC, HE, HSD, HSG, SC, CG, PC, WE, w_draw, epsilon, prev_state_w, ability_w, ability_h, t)
 
-global beta11_w; global beta12_w; global beta13_w; global beta14_w;
-global beta21_w; global beta22_w; global beta23_w; global beta24_w;
-global beta31_w; global beta32_w; global beta33_w; global beta34_w;
-global beta10_h; global beta11_h; global beta12_h; global beta13_h; global beta14_h;
-global beta20_h; global beta21_h; global beta22_h; global beta23_h; global beta24_h;
-global beta30_h; global beta31_h; global beta32_h; global beta33_h; global beta34_h;
-global row0_w;   global row11_w;  global row12_w;  global row13_w;  global row14_w; global row2_w;
-global sigma;
+beta11_w = const_values.beta11_w; 
+beta12_w = const_values.beta12_w; 
+beta13_w = const_values.beta13_w;
+beta14_w = const_values.beta14_w;
+beta21_w = const_values.beta21_w;
+beta22_w = const_values.beta22_w;
+beta23_w = const_values.beta23_w;
+beta24_w = const_values.beta24_w;
+beta31_w = const_values.beta31_w;
+beta32_w = const_values.beta32_w;
+beta33_w = const_values.beta33_w;
+beta34_w = const_values.beta34_w;
+beta10_h = const_values.beta10_h;
+beta11_h = const_values.beta11_h;
+beta12_h = const_values.beta12_h;
+beta13_h = const_values.beta13_h;
+beta14_h = const_values.beta14_h;
+beta20_h = const_values.beta20_h;
+beta21_h = const_values.beta21_h;
+beta22_h = const_values.beta22_h;
+beta23_h = const_values.beta23_h;
+beta24_h = const_values.beta24_h;
+beta30_h = const_values.beta30_h;
+beta31_h = const_values.beta31_h;
+beta32_h = const_values.beta32_h;
+beta33_h = const_values.beta33_h;
+beta34_h = const_values.beta34_h;
+row0_w = const_values.row0_w;
+row11_w = const_values.row11_w;
+row12_w = const_values.row12_w;
+row13_w = const_values.row13_w;
+row14_w = const_values.row14_w;
+row2_w = const_values.row2_w;
+sigma = const_values.sigma;
 
 if (sex == 0)   % husband
     % JOB OFFER PROBABILITY + WAGE HUSBAND
