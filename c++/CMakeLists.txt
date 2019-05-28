@@ -14,6 +14,7 @@ add_library(dynamic_labor
     value_to_index.cpp 
     calculate_utility.cpp
     marriage_decision.cpp
+    single_men.cpp
     )
 set_target_properties(dynamic_labor PROPERTIES CXX_STANDARD 17)
 add_executable (dynamic_labor_run dynamic_labor.cpp)

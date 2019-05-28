@@ -14,7 +14,7 @@ unsigned group_exp(unsigned e) {
         return 5;
 }
 
-void value_to_index(unsigned WE, unsigned HE, unsigned N_KIDS, unsigned BP, unsigned CS, 
+void value_to_index(unsigned WE, unsigned HE, unsigned N_KIDS, double BP, unsigned CS, 
         unsigned& exp_wi, unsigned& exp_hi, unsigned& kidsi, unsigned& BPi, unsigned& CSi) {
 
     exp_wi = group_exp(WE);
