@@ -28,10 +28,8 @@ const double beta0 = 0.983;  // discount rate
 const std::array<double, 3> normal_arr = {-1.150, 0.0, 1.150};     // low, medium, high
 const std::array<double, 11> bp_vector = {0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0};
 const std::array<double, 11> cs_vector = {0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0};
-//TODO epsilon_b;
-//TODO w_draws;
-//TODO h_draws_b;
-//TODO w_draws_b;
+
+const unsigned TERMINAL = 45;
 
 // emax dimensions:
 const unsigned T_MAX     = 28;

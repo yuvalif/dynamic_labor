@@ -1,4 +1,5 @@
 #pragma once
+
 #include <array>
 
 // a Matrix is a 2D array of doubles (with static size)

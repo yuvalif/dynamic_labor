@@ -11,7 +11,7 @@
 #include "nash.h"
 #include <cstdlib>
 
-unsigned single_men(const Parameters& p, unsigned HS, unsigned t, const Emax& EMAX_W, Emax& EMAX_H, unsigned TERMINAL) {
+unsigned single_men(const Parameters& p, unsigned HS, unsigned t, const Emax& EMAX_W, Emax& EMAX_H) {
     Husband husband;
     unsigned T_END; unsigned AGE;
     unsigned age_index;

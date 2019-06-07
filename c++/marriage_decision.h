@@ -1,4 +1,5 @@
 #pragma once
+
 #include "calculate_utility.h"
 
 struct MarriageDecision {

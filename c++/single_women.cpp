@@ -9,8 +9,7 @@
 #include "nash.h"
 #include "marriage_decision.h"
 
-unsigned single_women(const Parameters& p, unsigned WS, unsigned t, Emax& EMAX_W, const Emax& EMAX_H, unsigned TERMINAL) { 
-
+unsigned single_women(const Parameters& p, unsigned WS, unsigned t, Emax& EMAX_W, const Emax& EMAX_H) { 
     unsigned iter_count = 0;
 
     unsigned U_W = 0; unsigned U_H = 0; unsigned N_KIDS_H = 0;
@@ -73,7 +72,8 @@ unsigned single_women(const Parameters& p, unsigned WS, unsigned t, Emax& EMAX_W
                         // PROBABILITY OF MEETING A POTENTIAL HUSBAND
                         if (h_draw_p() < P_HUSBAND) {
                             CHOOSE_HUSBAND = 1;
-                            husband = draw_husband(p, t, age_index, WS);
+                            // TODO: check that school_group is WS
+                            husband = draw_husband(p, t, age_index, WS, WS);
                         }
                         if (CHOOSE_HUSBAND == 1) {
                             wage_h = calculate_wage_h(p, husband, epsilon());
@@ -100,7 +100,7 @@ unsigned single_women(const Parameters& p, unsigned WS, unsigned t, Emax& EMAX_W
                         if (CHOOSE_HUSBAND == 1 && BP > -1) {
                             // marriage decision - outside option value wife
                             const MarriageDecision decision = marriage_decision(utility, BP, wife.WE, husband.HE);
-                        
+
                             if (decision.M == 1) {
                                 ADD_EMAX = ADD_EMAX + utility.U_W[decision.max_weighted_utility_index];
                             } else {

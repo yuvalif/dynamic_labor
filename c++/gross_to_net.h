@@ -1,4 +1,5 @@
 #pragma once
+
 struct NetIncome {
     double net_income_s_h{};
     double net_income_s_w{}; 

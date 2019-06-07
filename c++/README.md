@@ -1,6 +1,7 @@
 ```
 to compile the project (cmake is needed) do:
-cd build
+mkdir build
+cd build 
 cmake ..
 make
 ```

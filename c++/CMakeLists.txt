@@ -5,7 +5,10 @@ project (dynamic_labor)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+set(CMAKE_BUILD_TYPE Debug)
+
 add_library(dynamic_labor 
+    emax.cpp
     random_pools.cpp 
     nash.cpp 
     draw_wife.cpp 
@@ -17,8 +20,12 @@ add_library(dynamic_labor
     marriage_decision.cpp
     single_men.cpp
     single_women.cpp
+    load_files.cpp
+    objective_function.cpp
     )
 set_target_properties(dynamic_labor PROPERTIES CXX_STANDARD 17)
 add_executable (dynamic_labor_run dynamic_labor.cpp)
 target_link_libraries (dynamic_labor_run dynamic_labor)
+
+# TODO: add dynamic_labor_estimate target for automatic model estimation
 

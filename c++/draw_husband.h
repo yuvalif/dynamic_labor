@@ -17,5 +17,5 @@ struct Husband {
     unsigned similar_educ;
 };
 
-Husband draw_husband(const Parameters& p, unsigned t, unsigned age_index, unsigned school_group);
+Husband draw_husband(const Parameters& p, unsigned t, unsigned age_index, unsigned school_group, unsigned WS);
 

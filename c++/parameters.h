@@ -1,14 +1,26 @@
+#pragma once
+
 #include <array>
 #include <vector>
 #include <cmath>
 #include "matrix.h"
 
-const unsigned TAX_LINES = 56;
+// TODO auto-generate these numbers based on the actual files
+const size_t PARAMETER_LIST_LEN = 104;
+const size_t TAX_ROW = 56;
+const size_t TAX_COL = 43;
+const size_t DED_COL = 30;
+const size_t WIVES_ROW = 47;
+const size_t WIVES_COL = 41;
+const size_t HUSBANDS_ROW = 33;
+const size_t HUSBANDS_COL = 26;
 
-using TaxBrackets = Matrix<TAX_LINES, 43>;
-using DeductionExceptions = Matrix<TAX_LINES, 30>;
-using Wives = Matrix<47, 41>;
-using Husbands = Matrix<33, 26>;
+
+using ParameterList = std::array<double, PARAMETER_LIST_LEN>;
+using TaxBrackets = Matrix<TAX_ROW, TAX_COL>;
+using DeductionExceptions = Matrix<TAX_ROW, DED_COL>;
+using Wives = Matrix<WIVES_ROW, WIVES_COL>;
+using Husbands = Matrix<HUSBANDS_ROW, HUSBANDS_COL>;
 
 struct Parameters {
     // utility parameters
@@ -129,7 +141,7 @@ struct Parameters {
     const Husbands husbands5;
 
     // initialization of parameters from list
-    Parameters(const std::vector<double>& parameter_list, 
+    Parameters(const ParameterList& parameter_list, 
             const TaxBrackets& _tax, 
             const DeductionExceptions& _ded, 
             const Wives& _wives,
