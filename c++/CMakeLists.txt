@@ -9,6 +9,7 @@ add_library(dynamic_labor
     random_pools.cpp 
     nash.cpp 
     draw_wife.cpp 
+    draw_husband.cpp 
     gross_to_net.cpp 
     calculate_wage.cpp 
     value_to_index.cpp 

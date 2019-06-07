@@ -1,12 +1,14 @@
 #include <cmath>
 #include "parameters.h"
 #include "draw_wife.h"
+#include "draw_husband.h"
 
-double calculate_wage_h(const Parameters& p, unsigned H_HSD, unsigned H_HSG, unsigned H_SC, unsigned H_CG, unsigned H_PC, 
-        unsigned HE, double ability_h_value, double epsilon) {
-    const double tmp1 = ability_h_value + p.beta10_h*(HE*H_HSD) + p.beta11_h*(HE*H_HSG) + p.beta12_h*(HE*H_SC) + p.beta13_h*(HE*H_CG) + p.beta14_h*(HE*H_PC) +
-        p.beta20_h*pow(HE*H_HSD,2) + p.beta21_h*pow(HE*H_HSG,2) + p.beta22_h*pow(HE*H_SC,2) + p.beta23_h*pow(HE*H_CG,2) + p.beta24_h*pow(HE*H_PC,2) +
-        p.beta30_h*H_HSD + p.beta31_h*H_HSG + p.beta32_h*H_SC + p.beta33_h*H_CG + p.beta34_h*H_PC;
+double calculate_wage_h(const Parameters& p, const Husband& husband, double epsilon) {
+    const double tmp1 = husband.ability_h_value + p.beta10_h*(husband.HE*husband.H_HSD) + p.beta11_h*(husband.HE*husband.H_HSG) + 
+        p.beta12_h*(husband.HE*husband.H_SC) + p.beta13_h*(husband.HE*husband.H_CG) + p.beta14_h*(husband.HE*husband.H_PC) +
+        p.beta20_h*pow(husband.HE*husband.H_HSD,2) + p.beta21_h*pow(husband.HE*husband.H_HSG,2) + p.beta22_h*pow(husband.HE*husband.H_SC,2) + 
+        p.beta23_h*pow(husband.HE*husband.H_CG,2) + p.beta24_h*pow(husband.HE*husband.H_PC,2) +
+        p.beta30_h*husband.H_HSD + p.beta31_h*husband.H_HSG + p.beta32_h*husband.H_SC + p.beta33_h*husband.H_CG + p.beta34_h*husband.H_PC;
     const double tmp2 = epsilon*p.sigma[1];
     return exp(tmp1 + tmp2);
 }

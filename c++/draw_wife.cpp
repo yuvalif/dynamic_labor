@@ -152,6 +152,7 @@ Wife draw_wife(const Parameters& p, unsigned t, unsigned age_index, unsigned sch
             break;
     }
 
+    // TODO: throw exception on default
     if (result.WS == 1) {
         result.HSD = 1; result.HSG = 0; result.SC = 0; result.CG = 0; result.PC = 0;
     } else if (result.WS == 2) {

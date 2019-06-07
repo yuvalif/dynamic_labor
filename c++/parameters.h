@@ -8,6 +8,7 @@ const unsigned TAX_LINES = 56;
 using TaxBrackets = Matrix<TAX_LINES, 43>;
 using DeductionExceptions = Matrix<TAX_LINES, 30>;
 using Wives = Matrix<47, 41>;
+using Husbands = Matrix<33, 26>;
 
 struct Parameters {
     // utility parameters
@@ -121,12 +122,22 @@ struct Parameters {
     const TaxBrackets tax;
     const DeductionExceptions ded;
     const Wives wives;
+    const Husbands husbands1;
+    const Husbands husbands2;
+    const Husbands husbands3;
+    const Husbands husbands4;
+    const Husbands husbands5;
 
     // initialization of parameters from list
     Parameters(const std::vector<double>& parameter_list, 
             const TaxBrackets& _tax, 
             const DeductionExceptions& _ded, 
-            const Wives& _wives) : 
+            const Wives& _wives,
+            const Husbands _husbands1,
+            const Husbands _husbands2,
+            const Husbands _husbands3,
+            const Husbands _husbands4,
+            const Husbands _husbands5) : 
         alpha(parameter_list[1]),
         alpha1_w_m(parameter_list[2]),
         alpha1_w_s(parameter_list[3]),
@@ -228,7 +239,12 @@ struct Parameters {
         sigma{exp(parameter_list[99]), exp(parameter_list[100]), exp(parameter_list[101]), exp(parameter_list[102]), exp(parameter_list[103])},
         tax(_tax),
         ded(_ded),
-        wives(_wives)
+        wives(_wives),
+        husbands1(_husbands1),
+        husbands2(_husbands2),
+        husbands3(_husbands3),
+        husbands4(_husbands4),
+        husbands5(_husbands5)
     {}
 };
 
