@@ -10,13 +10,13 @@ MarriageDecision marriage_decision(const Utility& utility, double BP, unsigned W
 
     bool BP_FLAG_PLUS{false};
     bool BP_FLAG_MINUS{false};
-    const auto outside_option_w_v = std::max(utility.U_W_S[1], utility.U_W_S[2]);
+    MarriageDecision result;
+    result.outside_option_w_v = std::max(utility.U_W_S[1], utility.U_W_S[2]);
+    result.outside_option_h_v = utility.U_H_S;
     const auto outside_option_w = (utility.U_W_S[1] > utility.U_W_S[2]) ? UNEMP : EMP;
-    const auto outside_option_h_v = utility.U_H_S;
 
     unsigned max_iterations = 10;
 
-    MarriageDecision result;
 
     result.M = 0;
     result.prev_state_w = 0;
@@ -38,7 +38,7 @@ MarriageDecision marriage_decision(const Utility& utility, double BP, unsigned W
         const auto max_U_H = utility.U_H[max_weighted_utility_index];
         result.max_weighted_utility_index = max_weighted_utility_index;
 
-        if (max_U_H >= outside_option_h_v && max_U_W >= outside_option_w_v) {
+        if (max_U_H >= result.outside_option_h_v && max_U_W >= result.outside_option_w_v) {
             // the max in married for both is better than outside
             result.M = 1 ;
             if (max_weighted_utility_index < 12) {  
@@ -53,10 +53,10 @@ MarriageDecision marriage_decision(const Utility& utility, double BP, unsigned W
             result.WE = WE+1;
             result.HE = HE+1;
             return result;
-        } else if (max_U_H < outside_option_h_v && max_U_H < outside_option_w_v) { 
+        } else if (max_U_H < result.outside_option_h_v && max_U_H < result.outside_option_w_v) { 
             // the outside option is better for both - no marriage
             break;
-        } else if (max_U_H  >= outside_option_h_v && max_U_W < outside_option_w_v) { 
+        } else if (max_U_H  >= result.outside_option_h_v && max_U_W < result.outside_option_w_v) { 
             // the outside option is better for wife
             // increase the wife bargaining power
             BP -= 0.1;
@@ -65,7 +65,7 @@ MarriageDecision marriage_decision(const Utility& utility, double BP, unsigned W
                 // no solution - boundry reached or infinite loop of BP
                 break;
             }
-        } else if (max_U_H < outside_option_h_v && max_U_W >= outside_option_w_v) {
+        } else if (max_U_H < result.outside_option_h_v && max_U_W >= result.outside_option_w_v) {
             // the outside option is better for husband
             // increase the husband bargaining power
             BP += 0.1;
@@ -79,7 +79,8 @@ MarriageDecision marriage_decision(const Utility& utility, double BP, unsigned W
 
     // no marriage
     result.M = 0;
-    if (outside_option_w_v == 1) {  
+    // TODO: check equality to 1 of double
+    if (result.outside_option_w_v == 1) {  
         // 3-unmarried+wife unemployed
         result.prev_state_w = 0;
         result.WE = WE;

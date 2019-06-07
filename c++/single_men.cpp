@@ -11,11 +11,7 @@
 #include "nash.h"
 #include <cstdlib>
 
-unsigned single_men(const Parameters& p, unsigned HS, unsigned t, Emax& EMAX_W, Emax& EMAX_H, unsigned TERMINAL) {
-
-    const unsigned W = 1;
-    const unsigned H = 0;
-
+unsigned single_men(const Parameters& p, unsigned HS, unsigned t, const Emax& EMAX_W, Emax& EMAX_H, unsigned TERMINAL) {
     Husband husband;
     unsigned T_END; unsigned AGE;
     unsigned age_index;
@@ -83,8 +79,6 @@ unsigned single_men(const Parameters& p, unsigned HS, unsigned t, Emax& EMAX_W, 
                 const unsigned JOB_OFFER_W = (wage_w > 0) ? 1 : 0;
 
                 // calculate husbands and wives utility from each option -inf for unavailable
-                
-        
                 double BP = 0.5;
                 const Utility utility = calculate_utility(p, EMAX_W, EMAX_H, N_KIDS, N_KIDS_H, wage_h, wage_w, CHOOSE_WIFE, 
                         JOB_OFFER_H, JOB_OFFER_W, M, wife, HS, t, ability_hi, husband.HE, BP, T_END, 1, age_index);
@@ -103,7 +97,7 @@ unsigned single_men(const Parameters& p, unsigned HS, unsigned t, Emax& EMAX_W, 
                     if (decision.M == 1) {
                         ADD_EMAX += utility.U_H[decision.max_weighted_utility_index];
                     } else {
-                        ADD_EMAX += utility.U_H_S;
+                        ADD_EMAX += decision.outside_option_h_v;
                     }
                 } else {
                     ADD_EMAX = ADD_EMAX + utility.U_H_S;
