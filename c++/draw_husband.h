@@ -12,9 +12,9 @@ struct Husband {
     unsigned HE;
     unsigned ability_h_value;
     unsigned ability_hi;
-    unsigned Q;
+    double Q;
     unsigned Q_INDEX;
-    unsigned similar_educ;
+    double similar_educ;
 };
 
 Husband draw_husband(const Parameters& p, unsigned t, unsigned age_index, unsigned school_group, unsigned WS);

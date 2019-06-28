@@ -1,5 +1,6 @@
 #include "single_men.h"
 #include "single_women.h"
+#include "married_couple.h"
 #include "parameters.h"
 #include "const_parameters.h"
 #include "moments.h"
@@ -17,6 +18,11 @@ unsigned calculate_emax(const Parameters& p, Emax& EMAX_W, Emax& EMAX_H) {
         // EMAX FOR SINGLE WOMEN
         for (auto WS = 2; WS <= 5; ++WS) {
             iter_count = single_women(p, WS, t, EMAX_W, EMAX_H);
+        } // end wife schooling loop
+        
+        // EMAX FOR MARRIED COUPLE
+        for (auto WS = 2; WS <= 5; ++WS) {
+            iter_count = married_couple(p, WS, t, EMAX_W, EMAX_H);
         } // end wife schooling loop
     }
     return iter_count;

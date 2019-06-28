@@ -9,10 +9,7 @@ Husband::Husband() : H_HSD(0), H_HSG(0), H_SC(0), H_CG(0), H_PC(0),
 
 Husband draw_husband(const Parameters& p, unsigned t, unsigned age_index, unsigned school_group, unsigned WS) {
     Husband result;
-    // overriding some defaults
 
-    result.H_HSG = 0; result.HE = HE1;
-    result.H_HSD = 1; result.H_SC = 0; result.H_CG = 0;
     result.ability_hi = h_draw_3();
     result.ability_h_value = normal_arr[result.ability_hi]*p.sigma[4];
     result.Q_INDEX = h_draw_3();
@@ -117,27 +114,8 @@ Husband draw_husband(const Parameters& p, unsigned t, unsigned age_index, unsign
     }
     // TODO: add exception on default
 
-    if (HS == 1) {
-        result.H_HSD = 1; result.H_HSG = 0; result.H_SC = 0; result.H_CG = 0; result.H_PC = 0;
-    } else if (HS == 2) {
-        result.H_HSG = 1; result.H_HSD = 0; result.H_SC = 0; result.H_CG = 0; result.H_PC = 0;
-    } else if (HS == 3) {
-        result.H_SC = 1; result.H_HSD = 0; result.H_HSG = 0;  result.H_CG = 0; result.H_PC = 0;
-    } else if (HS == 4) {
-        result.H_CG = 1; result.H_HSD = 0; result.H_HSG = 0; result.H_SC = 0;  result.H_PC = 0;
-    } else if (HS == 5) {
-        result.H_PC = 1; result.H_HSD = 0; result.H_HSG = 0; result.H_SC = 0; result.H_CG = 0; 
-    }
-    if (HS==2 && school_group==2) {
-        result.similar_educ = p.EDUC_MATCH_2;
-    } else if (HS==3 && school_group==3) {
-        result.similar_educ = p.EDUC_MATCH_3;
-    } else if (HS==4 && school_group==4) {
-        result.similar_educ = p.EDUC_MATCH_4;
-    } else if (HS==5 && school_group==5) {
-        result.similar_educ = p.EDUC_MATCH_5;
-    } else {
-        result.similar_educ = 0;
+    if (HS == school_group) {
+        result.similar_educ = p.EDUC_MATCH[school_group];
     }
 
     return result;

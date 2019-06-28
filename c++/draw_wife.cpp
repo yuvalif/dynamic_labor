@@ -7,12 +7,42 @@ Wife::Wife() :
     HSD(0), HSG(0), SC(0), CG(0), PC(0),
     WS(2), // if no wife, the default is 2, WS goes from 2 to 5, so in martix we use WS-1
     WE(0), prev_state_w(0),
-    ability_w_value(0), ability_wi(1), Q(0), Q_INDEX(0), similar_educ(0) { }
+    ability_w_value(0), ability_wi(1), Q(0), Q_INDEX(0), similar_educ(0),
+    AGE(0), age_index(0), T_END(0) { }
+
+bool update_wife_schooling(unsigned WS, unsigned t, Wife& wife) {
+    wife.WS = WS;
+    if (WS == 2) {
+        wife.HSG = 1; wife.AGE = 18;
+        wife.T_END = TERMINAL - wife.AGE+1; // TERMINAL = 45, T=28
+        wife.age_index = 0;
+    } else if (WS == 3) {
+        wife.SC = 1; wife.AGE = 20;
+        wife.T_END = TERMINAL - wife.AGE+1; // TERMINAL = 45, T=26
+        wife.age_index = 2;
+        if (t > wife.T_END) {
+            return false;
+        }
+    } else if (WS == 4) {
+        wife.CG = 1; wife.AGE = 22;
+        wife.T_END = TERMINAL - wife.AGE+1; // TERMINAL = 45, T=24
+        wife.age_index = 4;
+        if (t > wife.T_END) {
+            return false;
+        }
+    } else {
+        wife.PC = 1; wife.AGE = 25;
+        wife.T_END = TERMINAL - wife.AGE+1; // TERMINAL = 45, T=21
+        wife.age_index = 7;
+        if (t > wife.T_END) {
+            return false;
+        }
+    }
+    return true;
+}
 
 Wife draw_wife(const Parameters& p, unsigned t, unsigned age_index, unsigned school_group) {
     Wife result;
-    // overriding some of the defaults
-    result.HSG = 1; result.WE = WE1;
     result.ability_wi = h_draw_3();
     result.ability_w_value = normal_arr[result.ability_wi]*p.sigma[4];
     result.Q_INDEX = h_draw_3();
@@ -59,122 +89,104 @@ Wife draw_wife(const Parameters& p, unsigned t, unsigned age_index, unsigned sch
             break;
             // husband schooling SC
         case 11:
-            result.WS = 3; result.HSG = 1; result.WE = WE1; result.prev_state_w = 0;
+            result.WS = 3; result.SC = 1; result.WE = WE1; result.prev_state_w = 0;
             break;
         case 12:
-            result.WS = 3; result.HSG = 1; result.WE = WE2; result.prev_state_w = 0;
+            result.WS = 3; result.SC = 1; result.WE = WE2; result.prev_state_w = 0;
             break;
         case 13:
-            result.WS = 3; result.HSG = 1; result.WE = WE3; result.prev_state_w = 0;
+            result.WS = 3; result.SC = 1; result.WE = WE3; result.prev_state_w = 0;
             break;
         case 14:
-            result.WS = 3; result.HSG = 1; result.WE = WE4; result.prev_state_w = 0;
+            result.WS = 3; result.SC = 1; result.WE = WE4; result.prev_state_w = 0;
             break;
         case 15:
-            result.WS = 3; result.HSG = 1; result.WE = WE5; result.prev_state_w = 0;
+            result.WS = 3; result.SC = 1; result.WE = WE5; result.prev_state_w = 0;
             break;
         case 16:
-            result.WS = 3; result.HSG = 1; result.WE = WE1; result.prev_state_w = 1;
+            result.WS = 3; result.SC = 1; result.WE = WE1; result.prev_state_w = 1;
             break;
         case 17:
-            result.WS = 3; result.HSG = 1; result.WE = WE2; result.prev_state_w = 1;
+            result.WS = 3; result.SC = 1; result.WE = WE2; result.prev_state_w = 1;
             break;
         case 18:
-            result.WS = 3; result.HSG = 1; result.WE = WE3; result.prev_state_w = 1;
+            result.WS = 3; result.SC = 1; result.WE = WE3; result.prev_state_w = 1;
             break;
         case 19:
-            result.WS = 3; result.HSG = 1; result.WE = WE4; result.prev_state_w = 1;
+            result.WS = 3; result.SC = 1; result.WE = WE4; result.prev_state_w = 1;
             break;
         case 20:
-            result.WS = 3; result.HSG = 1; result.WE = WE5; result.prev_state_w = 1;
+            result.WS = 3; result.SC = 1; result.WE = WE5; result.prev_state_w = 1;
             break;
             // husband schooling CG
         case 21:
-            result.WS = 4; result.HSG = 1; result.WE = WE1; result.prev_state_w = 0;
+            result.WS = 4; result.CG = 1; result.WE = WE1; result.prev_state_w = 0;
             break;
         case 22:
-            result.WS = 4; result.HSG = 1; result.WE = WE2; result.prev_state_w = 0;
+            result.WS = 4; result.CG = 1; result.WE = WE2; result.prev_state_w = 0;
             break;
         case 23:
-            result.WS = 4; result.HSG = 1; result.WE = WE3; result.prev_state_w = 0;
+            result.WS = 4; result.CG = 1; result.WE = WE3; result.prev_state_w = 0;
             break;
         case 24:
-            result.WS = 4; result.HSG = 1; result.WE = WE4; result.prev_state_w = 0;
+            result.WS = 4; result.CG = 1; result.WE = WE4; result.prev_state_w = 0;
             break;
         case 25:
-            result.WS = 4; result.HSG = 1; result.WE = WE5; result.prev_state_w = 0;
+            result.WS = 4; result.CG = 1; result.WE = WE5; result.prev_state_w = 0;
             break;
         case 26:
-            result.WS = 4; result.HSG = 1; result.WE = WE1; result.prev_state_w = 1;
+            result.WS = 4; result.CG = 1; result.WE = WE1; result.prev_state_w = 1;
             break;
         case 27:
-            result.WS = 4; result.HSG = 1; result.WE = WE2; result.prev_state_w = 1;
+            result.WS = 4; result.CG = 1; result.WE = WE2; result.prev_state_w = 1;
             break;
         case 28:
-            result.WS = 4; result.HSG = 1; result.WE = WE3; result.prev_state_w = 1;
+            result.WS = 4; result.CG = 1; result.WE = WE3; result.prev_state_w = 1;
             break;
         case 29:
-            result.WS = 4; result.HSG = 1; result.WE = WE4; result.prev_state_w = 1;
+            result.WS = 4; result.CG = 1; result.WE = WE4; result.prev_state_w = 1;
             break;
         case 30:
-            result.WS = 4; result.HSG = 1; result.WE = WE5; result.prev_state_w = 1;
+            result.WS = 4; result.CG = 1; result.WE = WE5; result.prev_state_w = 1;
             break;
             // husband schooling PC
         case 31:
-            result.WS = 5; result.HSG = 1; result.WE = WE1; result.prev_state_w = 0;
+            result.WS = 5; result.PC = 1; result.WE = WE1; result.prev_state_w = 0;
             break;
         case 32:
-            result.WS = 5; result.HSG = 1; result.WE = WE2; result.prev_state_w = 0;
+            result.WS = 5; result.PC = 1; result.WE = WE2; result.prev_state_w = 0;
             break;
         case 33:
-            result.WS = 5; result.HSG = 1; result.WE = WE3; result.prev_state_w = 0;
+            result.WS = 5; result.PC = 1; result.WE = WE3; result.prev_state_w = 0;
             break;
         case 34:
-            result.WS = 5; result.HSG = 1; result.WE = WE4; result.prev_state_w = 0;
+            result.WS = 5; result.PC = 1; result.WE = WE4; result.prev_state_w = 0;
             break;
         case 35:
-            result.WS = 5; result.HSG = 1; result.WE = WE5; result.prev_state_w = 0;
+            result.WS = 5; result.PC = 1; result.WE = WE5; result.prev_state_w = 0;
             break;
         case 36:
-            result.WS = 5; result.HSG = 1; result.WE = WE1; result.prev_state_w = 1;
+            result.WS = 5; result.PC = 1; result.WE = WE1; result.prev_state_w = 1;
             break;
         case 37:
-            result.WS = 5; result.HSG = 1; result.WE = WE2; result.prev_state_w = 1;
+            result.WS = 5; result.PC = 1; result.WE = WE2; result.prev_state_w = 1;
             break;
         case 38:
-            result.WS = 5; result.HSG = 1; result.WE = WE3; result.prev_state_w = 1;
+            result.WS = 5; result.PC = 1; result.WE = WE3; result.prev_state_w = 1;
             break;
         case 39:
-            result.WS = 5; result.HSG = 1; result.WE = WE4; result.prev_state_w = 1;
+            result.WS = 5; result.PC = 1; result.WE = WE4; result.prev_state_w = 1;
             break;
         case 40:
-            result.WS = 5; result.HSG = 1; result.WE = WE5; result.prev_state_w = 1;
+            result.WS = 5; result.PC = 1; result.WE = WE5; result.prev_state_w = 1;
             break;
     }
-
     // TODO: throw exception on default
-    if (result.WS == 1) {
-        result.HSD = 1; result.HSG = 0; result.SC = 0; result.CG = 0; result.PC = 0;
-    } else if (result.WS == 2) {
-        result.HSG = 1; result.HSD = 0; result.SC = 0; result.CG = 0; result.PC = 0;
-    } else if (result.WS == 3) {
-        result.SC = 1; result.HSD = 0; result.HSG = 0; result.CG = 0; result.PC = 0;
-    }else if (result.WS == 4) {
-        result.CG = 1; result.HSD = 0; result.HSG = 0; result.SC = 0;  result.PC = 0;
-    } else if (result.WS == 5) {
-        result.PC = 1; result.HSD = 0; result.HSG = 0; result.SC = 0; result.CG = 0; 
-    }
+    
+    // TODO: can WS be 1?    
 
-    if (result.WS == 2 && school_group == 2) {
-        result.similar_educ = p.EDUC_MATCH_2;
-    } else if (result.WS == 3 && school_group == 3) {	
-        result.similar_educ = p.EDUC_MATCH_3;
-    } else if (result.WS == 4 && school_group == 4) {
-        result.similar_educ = p.EDUC_MATCH_4;
-    } else if (result.WS == 5 && school_group == 5) {
-        result.similar_educ = p.EDUC_MATCH_5;
-    } else {
-        result.similar_educ = 0;
+    if (result.WS == school_group) {
+        result.similar_educ = p.EDUC_MATCH[school_group];
     }
 
     return result;

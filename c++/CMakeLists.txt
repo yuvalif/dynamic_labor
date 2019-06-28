@@ -20,6 +20,7 @@ add_library(dynamic_labor
     marriage_decision.cpp
     single_men.cpp
     single_women.cpp
+    married_couple.cpp
     load_files.cpp
     objective_function.cpp
     )

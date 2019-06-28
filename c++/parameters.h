@@ -126,10 +126,7 @@ struct Parameters {
     const double p2_h;           // probability of meeting a potential husband - husband age square
     const double MATCH_Q_DECREASE;   // probability of match quality decrease
     const double MATCH_Q_INCREASE;   // probability of match quality increase
-    const double EDUC_MATCH_2;   // education match parameter
-    const double EDUC_MATCH_3;   // education match parameter
-    const double EDUC_MATCH_4;   // education match parameter
-    const double EDUC_MATCH_5;   // education match parameter
+    const std::array<double,5> EDUC_MATCH;   // education match parameters
     const std::array<double,5> sigma;   // diagonal of random shocks variance-covariance matrix
     const TaxBrackets tax;
     const DeductionExceptions ded;
@@ -244,10 +241,7 @@ struct Parameters {
         p2_h(parameter_list[92]),
         MATCH_Q_DECREASE(exp(parameter_list[93])/(1.0+exp(parameter_list[93]))),
         MATCH_Q_INCREASE(exp(parameter_list[94])/(1.0+exp(parameter_list[94]))),
-        EDUC_MATCH_2(parameter_list[95]),
-        EDUC_MATCH_3(parameter_list[96]),
-        EDUC_MATCH_4(parameter_list[97]),
-        EDUC_MATCH_5(parameter_list[98]),
+        EDUC_MATCH{0.0, parameter_list[95], parameter_list[96], parameter_list[97], parameter_list[98]},
         sigma{exp(parameter_list[99]), exp(parameter_list[100]), exp(parameter_list[101]), exp(parameter_list[102]), exp(parameter_list[103])},
         tax(_tax),
         ded(_ded),

@@ -51,6 +51,7 @@ unsigned single_men(const Parameters& p, unsigned HS, unsigned t, const Emax& EM
 
     for (auto H_EXP_INDEX = 1; H_EXP_INDEX <= exp_h_len; ++H_EXP_INDEX) { 
         // HUSBAND EXPERENCE - 5 GRID LEVEL
+        husband.HE = exp_vector[H_EXP_INDEX];
         for (auto ability_hi = 1; ability_hi < ability_h; ++ability_hi) {   
             // husband ability - high, medium, low
             husband.ability_h_value = normal_arr[ability_hi]*p.sigma[4];
@@ -58,8 +59,6 @@ unsigned single_men(const Parameters& p, unsigned HS, unsigned t, const Emax& EM
             for (auto draw_b = 1; draw_b <= DRAW_B; ++draw_b) {
                 // DRAW A WIFE 
                 Wife wife;
-                unsigned M = 0; unsigned N_KIDS = 0; unsigned N_KIDS_H = 0;
-                husband.HE = exp_vector[H_EXP_INDEX];
                 // PROBABILITY OF MEETING A POTENTIAL HUSBAND
                 const auto P_WIFE = exp(p.p0_h+p.p1_h*(AGE+t)+p.p2_h*pow(AGE+t,2))/(1.0+exp(p.p0_h+p.p1_h*(AGE+t)+p.p2_h*pow(AGE+t,2))); 
                 unsigned CHOOSE_WIFE = 0;
@@ -80,9 +79,10 @@ unsigned single_men(const Parameters& p, unsigned HS, unsigned t, const Emax& EM
 
                 // calculate husbands and wives utility from each option -inf for unavailable
                 double BP = 0.5;
+                const unsigned M = 0; const unsigned N_KIDS = 0; const unsigned N_KIDS_H = 0; const unsigned single_men = 1;
                 const Utility utility = calculate_utility(p, EMAX_W, EMAX_H, N_KIDS, N_KIDS_H, wage_h, wage_w, CHOOSE_WIFE, 
-                        JOB_OFFER_H, JOB_OFFER_W, M, wife, HS, t, ability_hi, husband.HE, BP, T_END, 1, age_index);
-                //   MAXIMIZATION - MARRIAGE + WORK DESICION 
+                        JOB_OFFER_H, JOB_OFFER_W, M, wife, HS, t, ability_hi, husband.HE, BP, T_END, single_men, age_index);
+                // MAXIMIZATION - MARRIAGE + WORK DESICION 
                 if (CHOOSE_WIFE == 1) {
                     BP = nash(p, utility, BP); // Nash bargaining at first period of marriage  
                 }
