@@ -7,6 +7,40 @@ Husband::Husband() : H_HSD(0), H_HSG(0), H_SC(0), H_CG(0), H_PC(0),
                         HE(0), ability_h_value(0), ability_hi(1),
                         Q(0), Q_INDEX(1), similar_educ(0) {}
 
+bool update_husband_schooling(unsigned HS, unsigned t, Husband& husband) {
+    if (HS == 1) {
+        husband.H_HSD = 1; husband.AGE = 18;
+        husband.T_END = TERMINAL - husband.AGE+1; // TERMINAL = 45, T=28
+        husband.age_index = 0;
+    } else if (HS == 2) {
+        husband.H_HSG = 1; husband.AGE = 18;
+        husband.T_END = TERMINAL - husband.AGE+1; // TERMINAL = 45, T=28
+        husband.age_index = 0;
+    } else if (HS == 3) {
+        husband.H_SC = 1; husband.AGE = 20;
+        husband.T_END = TERMINAL - husband.AGE+1; // TERMINAL = 45, T=26
+        husband.age_index = 2;
+        if (t > husband.T_END) {
+            return false;
+        }
+    } else if (HS == 4) {
+        husband.H_CG = 1; husband.AGE = 22;
+        husband.T_END = TERMINAL - husband.AGE+1; // TERMINAL = 45, T=24
+        husband.age_index = 4;
+        if (t > husband.T_END) {
+            return false;
+        }
+    } else {
+        husband.H_PC = 1; husband.AGE = 25;
+        husband.T_END = TERMINAL - husband.AGE+1; // TERMINAL = 45, T=21
+        husband.age_index = 7;
+        if (t > husband.T_END) {
+            return false; 
+        }
+    }
+    return true;
+}
+
 Husband draw_husband(const Parameters& p, unsigned t, unsigned age_index, unsigned school_group, unsigned WS) {
     Husband result;
 

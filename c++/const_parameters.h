@@ -41,7 +41,7 @@ const unsigned ability_w = 3;      // ability wife (high,medium,low)
 const unsigned ability_h = 3;      // ability husband (high,medium,low)
 const unsigned marr      = 2;      // marital status
 const unsigned school_h  = 5;      // only husbands schooling since we solve for a representative women given her education
-const unsigned school_w  = 4;      // only husbands schooling since we solve for a representative women given her education
+const unsigned school_w  = 4;      // TODO
 const unsigned match     = 3;      // match quality (high,medium,low)
 const unsigned BP_W      = 7;      // wife bargening power(0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8)
 

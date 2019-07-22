@@ -13,7 +13,7 @@ MarriageDecision marriage_decision(const Utility& utility, double BP, unsigned W
     MarriageDecision result;
     result.outside_option_w_v = std::max(utility.U_W_S[1], utility.U_W_S[2]);
     result.outside_option_h_v = utility.U_H_S;
-    const auto outside_option_w = (utility.U_W_S[1] > utility.U_W_S[2]) ? UNEMP : EMP;
+    result.outside_option_w = (utility.U_W_S[1] > utility.U_W_S[2]) ? UNEMP : EMP;
 
     unsigned max_iterations = 10;
 

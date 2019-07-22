@@ -16,35 +16,8 @@ unsigned single_men(const Parameters& p, unsigned HS, unsigned t, const Emax& EM
     unsigned T_END; unsigned AGE;
     unsigned age_index;
 
-    if (HS == 1) {
-        husband.H_HSD = 1; AGE = 18;
-        T_END = TERMINAL - AGE+1; // TERMINAL = 45, T=28
-        age_index = 0;
-    } else if (HS == 2) {
-        husband.H_HSG = 1; AGE = 18;
-        T_END = TERMINAL - AGE+1; // TERMINAL = 45, T=28
-        age_index = 0;
-    } else if (HS == 3) {
-        husband.H_SC = 1; AGE = 20;
-        T_END = TERMINAL - AGE+1; // TERMINAL = 45, T=26
-        age_index = 2;
-        if (t > T_END) {
-            return 0;
-        }
-    } else if (HS == 4) {
-        husband.H_CG = 1; AGE = 22;
-        T_END = TERMINAL - AGE+1; // TERMINAL = 45, T=24
-        age_index = 4;
-        if (t > T_END) {
-            return 0;
-        }
-    } else {
-        husband.H_PC = 1; AGE = 25;
-        T_END = TERMINAL - AGE+1; // TERMINAL = 45, T=21
-        age_index = 7;
-        if (t > T_END) {
-            return 0;
-        }
+    if (!update_husband_schooling(HS, t, husband)) {
+        return 0;
     }
 
     unsigned iter_count = 0;

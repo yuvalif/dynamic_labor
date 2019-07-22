@@ -1,3 +1,4 @@
+#include <assert.h>
 #include "draw_wife.h"
 #include "parameters.h"
 #include "const_parameters.h"
@@ -11,15 +12,18 @@ Wife::Wife() :
     AGE(0), age_index(0), T_END(0) { }
 
 bool update_wife_schooling(unsigned WS, unsigned t, Wife& wife) {
+    assert(WS > 1);
     wife.WS = WS;
     if (WS == 2) {
         wife.HSG = 1; wife.AGE = 18;
         wife.T_END = TERMINAL - wife.AGE+1; // TERMINAL = 45, T=28
         wife.age_index = 0;
+        wife.HSD = 0; wife.HSG = 1;  wife.SC = 0;  wife.CG = 0; wife.PC = 0;
     } else if (WS == 3) {
         wife.SC = 1; wife.AGE = 20;
         wife.T_END = TERMINAL - wife.AGE+1; // TERMINAL = 45, T=26
         wife.age_index = 2;
+        wife.HSD = 0; wife.HSG = 0;  wife.SC = 1;  wife.CG = 0; wife.PC = 0;
         if (t > wife.T_END) {
             return false;
         }
@@ -27,6 +31,7 @@ bool update_wife_schooling(unsigned WS, unsigned t, Wife& wife) {
         wife.CG = 1; wife.AGE = 22;
         wife.T_END = TERMINAL - wife.AGE+1; // TERMINAL = 45, T=24
         wife.age_index = 4;
+        wife.HSD = 0; wife.HSG = 0;  wife.SC = 0;  wife.CG = 1; wife.PC = 0;
         if (t > wife.T_END) {
             return false;
         }
@@ -34,6 +39,7 @@ bool update_wife_schooling(unsigned WS, unsigned t, Wife& wife) {
         wife.PC = 1; wife.AGE = 25;
         wife.T_END = TERMINAL - wife.AGE+1; // TERMINAL = 45, T=21
         wife.age_index = 7;
+        wife.HSD = 0; wife.HSG = 0;  wife.SC = 0;  wife.CG = 0; wife.PC = 1;
         if (t > wife.T_END) {
             return false;
         }

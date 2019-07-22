@@ -14,8 +14,6 @@ Matrix<ROW, COL> load_matrix(const std::string& file_name) {
     if (!file.is_open()) {
         throw std::runtime_error("failed to open: '" + file_name + "'");
     }
-    std::string line;
-    size_t line_count = 0;
     Matrix<ROW, COL> m;
     for (size_t i = 0; i < ROW; ++i) {
         for (size_t j = 0; j < COL; ++j) {
@@ -35,8 +33,6 @@ std::array<double, ROW> load_array(const std::string& file_name) {
     if (!file.is_open()) {
         throw std::runtime_error("failed to open: " + file_name);
     }
-    std::string line;
-    size_t line_count = 0;
     std::array<double, ROW> arr;
     for (size_t i = 0; i < ROW; ++i) {
         file >> arr[i];
@@ -69,6 +65,9 @@ Moments load_moments(const std::string& wage_moments_file_name,
         const std::string& marr_fer_moments_file_name,
         const std::string& emp_moments_file_name,
         const std::string& general_moments_file_name) {
-    return Moments();
+    return Moments(load_matrix<WAGE_MOM_ROW, WAGE_MOM_COL>(wage_moments_file_name),
+            load_matrix<MARR_MOM_ROW, MARR_MOM_COL>(marr_fer_moments_file_name),
+            load_matrix<EMP_MOM_ROW, EMP_MOM_COL>(emp_moments_file_name),
+            load_matrix<GEN_MOM_ROW, GEN_MOM_COL>(general_moments_file_name));
 }
 
