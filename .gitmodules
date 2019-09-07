@@ -1,0 +1,4 @@
+[submodule "c++/cpp-text-table"]
+	path = c++/cpp-text-table
+	url = https://github.com/haarcuba/cpp-text-table.git
+	branch = master

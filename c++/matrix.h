@@ -73,3 +73,19 @@ double total_sum(const Matrix<ROW, COL>& m) {
     return result;
 }
 
+template<size_t ROW, size_t COL>
+class MeanMatrix {
+    private:
+        std::array<std::array<double, COL>, ROW> sum{{{{0}}}};
+        UMatrix<ROW, COL> count{{{{0}}}};
+    public:
+        void accumulate(size_t row, size_t col, double value) {
+            sum[row][col] += value;
+            ++count[row][col];
+        }
+
+        double mean(size_t row, size_t col) const {
+            return sum[row][col]/(double)count[row][col]; 
+        }
+};
+

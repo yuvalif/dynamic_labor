@@ -3,23 +3,28 @@
 class Parameters;
 
 struct Wife {
-    Wife();
-    unsigned HSD;
-    unsigned HSG;
-    unsigned SC;
-    unsigned CG;
-    unsigned PC;
-    unsigned WS;
-    unsigned WE;
-    unsigned prev_state_w;
-    unsigned ability_w_value;
-    unsigned ability_wi;
-    double Q;
-    unsigned Q_INDEX;
-    double similar_educ;
-    unsigned AGE;
-    unsigned age_index;
-    unsigned T_END;
+    // following are indicators for the wife's schooling
+    // they have values of 0/1 and only one of them could be 1
+    unsigned HSD = 0;
+    unsigned HSG = 1;
+    unsigned SC = 0;
+    unsigned CG = 0;
+    unsigned PC = 0;
+
+    // wife schooling, can get values of 1-4 (value of 0 is not ppossible)
+    unsigned WS = 1;
+    // wife experience
+    unsigned WE = 0;
+
+    unsigned prev_state_w = 0;
+    unsigned ability_w_value = 0;
+    unsigned ability_wi = 0;
+    double Q = 0.0;
+    unsigned Q_INDEX = 0;
+    double similar_educ = 0;
+    unsigned AGE = 0;
+    unsigned age_index = 0;
+    unsigned T_END = 0;
 };
 
 // draw a wife

@@ -1,7 +1,7 @@
 #include "emax.h"
 
 Emax make_emax() {
-    return Emax(boost::extents[T_MAX][exp_w_len][exp_h_len][kids][prev_w][ability_w][ability_h][marr][school_h][school_w][match][BP_W]);
+    return Emax(boost::extents[T_MAX][EXP_W_LEN][EXP_H_LEN][KIDS_LEN][PREV_WORK_LEN][ABILITY_LEN][ABILITY_LEN][MARITAL_LEN][SCHOOL_LEN][SCHOOL_LEN][MATCH_Q_LEN][BP_W_LEN]);
 }
 
 /*

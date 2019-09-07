@@ -2,24 +2,25 @@
 #include "marriage_decision.h"
 #include <stdexcept>
 #include <string>
+#include <cassert>
 
 MarriageDecision marriage_decision(const Utility& utility, double BP, unsigned WE, unsigned HE) {
+
+    MarriageDecision result;
+    result.outside_option_w_v = std::max(utility.U_W_S[0], utility.U_W_S[1]);
+    result.outside_option_h_v = utility.U_H_S;
+    result.outside_option_w = (utility.U_W_S[0] > utility.U_W_S[1]) ? UNEMP : EMP;
+    result.M = 0;
+    result.prev_state_w = 0;
+    
     if (BP < 0) {
-        throw std::runtime_error("BP must be positive value: " + std::to_string(BP));
+        // no marriage is possible to begin with
+        return result;
     }
 
     bool BP_FLAG_PLUS{false};
     bool BP_FLAG_MINUS{false};
-    MarriageDecision result;
-    result.outside_option_w_v = std::max(utility.U_W_S[1], utility.U_W_S[2]);
-    result.outside_option_h_v = utility.U_H_S;
-    result.outside_option_w = (utility.U_W_S[1] > utility.U_W_S[2]) ? UNEMP : EMP;
-
     unsigned max_iterations = 10;
-
-
-    result.M = 0;
-    result.prev_state_w = 0;
 
     while (true) {
         if (max_iterations == 0) {
@@ -33,7 +34,8 @@ MarriageDecision marriage_decision(const Utility& utility, double BP, unsigned W
         }
 
         const auto max_weighted_utility_index = std::max_element(weighted_utility.begin(), weighted_utility.end()) - weighted_utility.begin();
-        const auto max_weighted_utility = weighted_utility[max_weighted_utility_index];
+        assert(max_weighted_utility_index < UTILITY_SIZE);
+        [[maybe_unused]] const auto max_weighted_utility = weighted_utility[max_weighted_utility_index];
         const auto max_U_W = utility.U_W[max_weighted_utility_index];
         const auto max_U_H = utility.U_H[max_weighted_utility_index];
         result.max_weighted_utility_index = max_weighted_utility_index;
@@ -41,14 +43,14 @@ MarriageDecision marriage_decision(const Utility& utility, double BP, unsigned W
         if (max_U_H >= result.outside_option_h_v && max_U_W >= result.outside_option_w_v) {
             // the max in married for both is better than outside
             result.M = 1 ;
-            if (max_weighted_utility_index < 12) {  
-                // 1-12 WOMEN UNEMPLOYED
+            if (max_weighted_utility_index < 11) {  
+                // 0-10 WOMEN UNEMPLOYED
                 result.prev_state_w = 0;
                 result.WE = WE;
                 result.HE = HE+1;
                 return result;
             }
-            // 12-22: wife employed  + husband employed
+            // 11-21: wife employed  + husband employed
             result.prev_state_w = 1;
             result.WE = WE+1;
             result.HE = HE+1;

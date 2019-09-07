@@ -3,13 +3,14 @@
 #include "calculate_utility.h"
 #include <algorithm>
 #include <array>
+#include <cassert>
 
 double nash(const Parameters& p, const Utility& utility, double BP) {
     // marriage decision - outside option value wife
-    const auto outside_option_w_v = std::max(utility.U_W_S[1], utility.U_W_S[2]);
-    const auto outside_option_w = (utility.U_W_S[1] > utility.U_W_S[2]) ? UNEMP : EMP;
+    const auto outside_option_w_v = std::max(utility.U_W_S[0], utility.U_W_S[1]);
+    [[maybe_unused]] const auto outside_option_w = (utility.U_W_S[0] > utility.U_W_S[1]) ? UNEMP : EMP;
     const auto outside_option_h_v = utility.U_H_S;
-    const auto outside_option_h = EMP;
+    [[maybe_unused]] const auto outside_option_h = EMP;
 
     UtilityArray weighted_utility;
 
@@ -29,6 +30,7 @@ double nash(const Parameters& p, const Utility& utility, double BP) {
     }
 
     const auto max_weighted_utility_index = std::max_element(weighted_utility.begin(), weighted_utility.end()) - weighted_utility.begin();
+    assert(max_weighted_utility_index < UTILITY_SIZE);
     const auto max_nash_value_index = std::max_element(nash_value.begin(), nash_value.end()) - nash_value.begin();
     const auto max_nash_value = nash_value[max_nash_value_index];
 
@@ -38,36 +40,41 @@ double nash(const Parameters& p, const Utility& utility, double BP) {
         if (max_nash_value_index == max_weighted_utility_index) {
             return 0.5;
         } else {
-            // TODO: 11 or 22? bp_vector is 11
             UtilityArray weighted_utility_option;
             for (auto i = 0U; i < UTILITY_SIZE; ++i) {
-                weighted_utility_option[i] = utility.U_H[i]*bp_vector[i%11] + utility.U_W[i]*(1.0-bp_vector[i%11]);  // weighted utility
+                weighted_utility_option[i] = utility.U_H[i]*bp_vector[i%CS_SIZE] + utility.U_W[i]*(1.0-bp_vector[i%CS_SIZE]);  // weighted utility
             }
             const auto weighted_utility_option_max = *(std::max_element(weighted_utility_option.begin(), weighted_utility_option.end()));
-            // 22 elements vector, with 1 for all the alpha-bp where 3 is bigger than 4, all possible alphas
-            std::array<unsigned, UTILITY_SIZE> possibilities{};
-            for (auto i = 0U; i < UTILITY_SIZE; ++i) {
+            // 11 elements vector, with 1 for all the alpha-bp where 3 is bigger than 4, all possible alphas
+            std::array<unsigned, CS_SIZE> possibilities{};
+            for (auto i = 0U; i < CS_SIZE; ++i) {
                 if (weighted_utility_option[i] == weighted_utility_option_max) {
                     possibilities[i] = 1;
                 }
             }
-            int ind1 = 0; int ind2 = 0;
-            for (int i = 1; i <= 5; ++i) {
-                if (possibilities[i-1] == 1) {
+            // initialize the indexes to alway be further from the center
+            int ind1 = -1; int ind2 = CS_SIZE;
+            // search for the last "1" in the index range of: 0-4
+            for (auto i = 0; i < 5; ++i) {
+                if (possibilities[i] == 1) {
                     ind1 = i;
                 }
             }
+            // search for the first "1" in the index range of: 6-10
             for (int i = 5; i > 0; --i) {
-                if (possibilities[6+i-1] == 1) {
-                    ind2 = 6+i;
+                if (possibilities[5+i] == 1) {
+                    ind2 = 5+i;
                 }
             }
-            if (ind1 != 0 || ind2 != 0) {
+            // TODO: what about the case of middle element (5)?
+            if (ind1 != -1 || ind2 != CS_SIZE) {
                 // need to update BP
-                if (abs(6-ind1)<abs(6-ind2)) { 
-                    return (ind1-1)*0.1;
+                if (5 - ind1 < ind2 - 5) {
+                    // ind1 is closer to the center
+                    return (double)ind1*0.1;
                 }
-                return (ind2-1)*0.1;    
+                // ind2 is closer to the center
+                return (double)ind2*0.1;    
             }
         }
     }

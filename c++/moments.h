@@ -52,29 +52,24 @@ struct Moments {
     const GenMoments general_moments;
 };
 
+using SchoolingMeanMatrix = MeanMatrix<T_MAX, SCHOOL_LEN>;
+
+using SchoolingMatrix = UMatrix<T_MAX, SCHOOL_LEN>;
+
 struct EstimatedMoments {
     WageMoments wage_moments;
     MarrMoments marr_fer_moments;
     EmpMoments emp_moments;
     GenMoments general_moments;
     
-    Matrix<T_MAX, school_h> ability_h_up{0.0};
-    Matrix<T_MAX, school_h> ability_h_down{0.0};
-    Matrix<T_MAX, school_h> ability_h_eq{0.0};
-    Matrix<T_MAX, school_h> ability_w_up{0.0};
-    Matrix<T_MAX, school_h> ability_w_down{0.0};
-    Matrix<T_MAX, school_h> ability_w_eq{0.0};
-    Matrix<T_MAX, school_h> match_w_up{0.0};
-    Matrix<T_MAX, school_h> match_w_down{0.0};
-    Matrix<T_MAX, school_h> match_w_eq{0.0};
-    UMatrix<T_MAX, school_h> count_ability_h_up{0};
-    UMatrix<T_MAX, school_h> count_ability_h_down{0};
-    UMatrix<T_MAX, school_h> count_ability_h_eq{0};
-    UMatrix<T_MAX, school_h> count_ability_w_up{0};
-    UMatrix<T_MAX, school_h> count_ability_w_down{0};
-    UMatrix<T_MAX, school_h> count_ability_w_eq{0};
-    UMatrix<T_MAX, school_h> count_match_w_up{0};
-    UMatrix<T_MAX, school_h> count_match_w_down{0};
-    UMatrix<T_MAX, school_h> count_match_w_eq{0};
+    SchoolingMeanMatrix ability_h_up;
+    SchoolingMeanMatrix ability_h_down;
+    SchoolingMeanMatrix ability_h_eq;
+    SchoolingMeanMatrix ability_w_up;
+    SchoolingMeanMatrix ability_w_down;
+    SchoolingMeanMatrix ability_w_eq;
+    SchoolingMeanMatrix match_w_up;
+    SchoolingMeanMatrix match_w_down;
+    SchoolingMeanMatrix match_w_eq;
 };
 

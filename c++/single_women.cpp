@@ -20,18 +20,16 @@ unsigned single_women(const Parameters& p, unsigned WS, unsigned t, Emax& EMAX_W
         return 0;
     }
 
-    for (auto W_EXP_INDEX = 1; W_EXP_INDEX <= exp_w_len; ++W_EXP_INDEX) { 
-        // WIFE EXPERENCE - 5 GRID LEVEL
-        wife.WE = exp_vector[W_EXP_INDEX];
-        for (auto ability_wi = 1; ability_wi < ability_w; ++ability_wi) {
+    for (auto w_exp_i : EXP_W_VALUES) { 
+        wife.WE = exp_vector[w_exp_i];
+        for (auto ability_wi : ABILITY_VALUES) {
             // wife ability - high, medium, low
-            wife.ability_w_value = normal_arr[ability_wi]*p.sigma[4];
+            wife.ability_w_value = normal_arr[ability_wi]*p.sigma[3];
             double ADD_EMAX = 0;
-            for (auto N_KIDS_IND = 1;  N_KIDS_IND <= kids; ++N_KIDS_IND) {
-                const auto N_KIDS = N_KIDS_IND-1;
-                for (auto prev = 1; prev <= 2; ++prev) { 
+            for (auto n_kids : KIDS_VALUES) {
+                for (auto prev : PREV_WORK_VALUES) { 
                     wife.prev_state_w = prev - 1;
-                    for (auto draw_b = 1; draw_b <=  DRAW_B; ++draw_b) {
+                    for (auto draw_b = 0U; draw_b <  DRAW_B; ++draw_b) {
                         // DRAW A HUSBAND 
                         const auto HS = 1; 
                         // in forward solving school_group represents wife's education
@@ -69,7 +67,7 @@ unsigned single_women(const Parameters& p, unsigned WS, unsigned t, Emax& EMAX_W
                         // if offer and is from previous period if already married
                         double BP = 0.5;
                         const auto M = 1; const auto single_men = 0;
-                        const Utility utility = calculate_utility(p, EMAX_W, EMAX_H, N_KIDS, N_KIDS_H, wage_h, wage_w, CHOOSE_HUSBAND,
+                        const Utility utility = calculate_utility(p, EMAX_W, EMAX_H, n_kids, N_KIDS_H, wage_h, wage_w, CHOOSE_HUSBAND,
                                 JOB_OFFER_H, JOB_OFFER_W, M, wife, HS, t, husband.ability_hi, husband.HE, BP, wife.T_END, single_men, wife.age_index);
                         //   MAXIMIZATION - MARRIAGE + WORK DESICION 
                         if (CHOOSE_HUSBAND == 1) {
@@ -90,7 +88,7 @@ unsigned single_women(const Parameters& p, unsigned WS, unsigned t, Emax& EMAX_W
                         }
                         ++iter_count;
                     }   // end draw backward loop
-                    EMAX_W[t][W_EXP_INDEX][1][N_KIDS_IND][prev][ability_wi][1][UNMARRIED][1][WS][1][1] = ADD_EMAX/DRAW_B;
+                    EMAX_W[t][w_exp_i][1][n_kids][prev][ability_wi][1][UNMARRIED][1][WS][1][1] = ADD_EMAX/DRAW_B;
                 } // end prev_state_w        
             } // end of kids loop
         } // end single wemen ability loop

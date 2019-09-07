@@ -1,141 +1,126 @@
 #include "gross_to_net.h"
 #include "parameters.h"
 
+
+// tax matrix
+// -----+-------------------+------------------------------------------------------------------------------------------------------------------------------+----------
+//      | single                                                                                                                                           | married 
+// -----+-------------------------------------------------------------------+------------------------------------------------------------------------------+----------
+// year | br1 | br2 | br3 | br4 | br5 | br6 | br7 | br8 | br9 | br10 | br11 | %br1 | %br2 | %br3 | %br4 | %br5 | %br6 | %br7 | %br8 | %br9 | %br10 | %br11 | ...
+// -----+-------------------------------------------------------------------+------------------------------------------------------------------------------+----------
+
+const auto TAX_PERCENT_OFFSET = 12;
+
+// deduction matrix
+// -----+-------------------------------------------------------------+--------------------------------------------+--------------------------------------------+--------
+//      |                                                             | 0 kids                                     | 1 kid                                      | 2 kids
+// -----+-------------------------------------------------------------+--------------------------------------------+--------------------------------------------+--------
+// year | ded married | ded single | ex married | ex single | ex kids | int1% | int1 | int2# | int3% | int2 | int3 | int1% | int1 | int2# | int3% | int2 | int3 | ...
+// -----+-------------------------------------------------------------+--------------------------------------------+--------------------------------------------+--------
+
+const auto DED_OFFSET = 6U;
+const auto DED_KIDS_OFFSET = 6U;
+const auto DED_INTERVAL1_OFFSET = DED_OFFSET + 1;
+const auto DED_INTERVAL2_OFFSET = DED_OFFSET + 4;
+const auto DED_INTERVAL3_OFFSET = DED_OFFSET + 5;
+
+
 // similar handling for husband and wife in case of singles
-double gross_to_net_single(const Parameters &p, unsigned row_number, unsigned N_KIDS, double wage, double exemptions) {
-    if (wage > 0) {
-        const auto deductions_s = p.ded[row_number][3]; 
-        const unsigned shift = 0; // single 2-22, married 23-42
-        const auto reduced_income_s_w = wage - deductions_s - exemptions;
+double gross_to_net_single(const Parameters &p, unsigned row_number, unsigned kids, double wage, double exemptions, double deductions) {
+    if (wage > 0.0) {
+        const auto reduced_income = wage - deductions - exemptions;
         //  CALCULATE INCOME TAX
         double tax = 0.0;
-        if (reduced_income_s_w > 0) {
-            for (auto i = 2; i <= 10; ++i) {
-                if (reduced_income_s_w < p.tax[row_number][i+shift]) {
-                    tax += (reduced_income_s_w - p.tax[row_number][(i-1)+shift])*p.tax[row_number][11+(i-1)+shift];
+        if (reduced_income > 0) {
+            for (auto i = 1; i < 10; ++i) {
+                if (reduced_income < p.tax[row_number][i]) {
+                    tax += (reduced_income - p.tax[row_number][i])*p.tax[row_number][i+TAX_PERCENT_OFFSET];
                     break;
                 }
-                tax += (p.tax[row_number][i+shift] - p.tax[row_number][(i-1)+shift])*p.tax[row_number][11+(i-1)+shift];
+                tax += (p.tax[row_number][i+1] - p.tax[row_number][i])*p.tax[row_number][i+TAX_PERCENT_OFFSET];
             }
         }
         // CALCULATE EICT
         double EICT = 0.0;
 
-        if (wage < p.ded[row_number][8+6*N_KIDS]) { 
-            // first interval credit rate
-            EICT = wage*p.ded[row_number][7+6*N_KIDS];
+        const auto kids_offset = DED_KIDS_OFFSET*kids;
+        if (wage < p.ded[row_number][DED_INTERVAL1_OFFSET+kids_offset]) {
+            // first interval  credit rate
+            EICT = wage*p.ded[row_number][DED_INTERVAL1_OFFSET-1+kids_offset];
             tax = 0.0;
-        } else if (wage > p.ded[row_number][8+6*N_KIDS] && wage < p.ded[row_number][11+6*N_KIDS]) {
+        } else if (wage < p.ded[row_number][DED_INTERVAL2_OFFSET+kids_offset]) {
             // second (flat) interval - max EICT
-            EICT = p.ded[row_number][9+6*N_KIDS];
+            EICT = p.ded[row_number][DED_INTERVAL2_OFFSET-2+kids_offset]; 
             tax = 0.0;
-        } else if (wage > p.ded[row_number][11+6*N_KIDS] && wage < p.ded[row_number][12+6*N_KIDS]) {
-            // third interval - phaseout rate
-            EICT = wage*p.ded[row_number][10+6*N_KIDS];
+        } else if (wage < p.ded[row_number][DED_INTERVAL3_OFFSET+kids_offset]) {
+            EICT = wage*p.ded[row_number][DED_INTERVAL3_OFFSET-2+kids_offset];
             tax = 0.0;
-        } else {
-            // income too high for EICT
-            EICT = 0;                                                       
         }
         return wage - tax + EICT;   
     }
     return 0.0;
 }
 
-NetIncome gross_to_net(const Parameters &p, unsigned N_KIDS, double wage_w, double wage_h, unsigned t, unsigned age_index) {
+// similar handling for husband and wife in case of singles
+double gross_to_net_married(const Parameters &p, unsigned row_number, unsigned kids, double wage_h, double wage_w, double exemptions, double deductions) {
+    if (wage_h > 0.0) {
+        const auto reduced_income = wage_h + wage_w - deductions - exemptions;
+        //  CALCULATE INCOME TAX
+        double tax = 0.0;
+        if (reduced_income > 0) {
+            for (auto i = 23; i < 10; ++i) {
+                if (reduced_income < p.tax[row_number][i]) {
+                    tax += (reduced_income - p.tax[row_number][i])*p.tax[row_number][i+TAX_PERCENT_OFFSET];
+                    break;
+                }
+                tax += (p.tax[row_number][i+1] - p.tax[row_number][i])*p.tax[row_number][i+TAX_PERCENT_OFFSET];
+            }
+        }
+        // CALCULATE EICT
+        double EICT = 0.0;
+
+        const auto kids_offset = DED_KIDS_OFFSET*kids;
+        const auto tot_income = wage_h + wage_w;
+        if (tot_income < p.ded[row_number][DED_INTERVAL1_OFFSET+kids_offset]) {
+            // first interval  credit rate
+            EICT = tot_income*p.ded[row_number][DED_INTERVAL1_OFFSET-1+kids_offset];
+            tax = 0.0;
+        } else if (tot_income < p.ded[row_number][DED_INTERVAL2_OFFSET+kids_offset]) {
+            // second (flat) interval - max EICT
+            EICT = p.ded[row_number][DED_INTERVAL2_OFFSET-2+kids_offset]; 
+            tax = 0.0;
+        } else if (tot_income < p.ded[row_number][DED_INTERVAL3_OFFSET+kids_offset]) {
+            EICT = tot_income*p.ded[row_number][DED_INTERVAL3_OFFSET-2+kids_offset];
+            tax = 0.0;
+        }
+        return tot_income - tax + EICT;   
+    }
+    return 0.0;
+}
+
+NetIncome gross_to_net(const Parameters &p, unsigned kids, double wage_w, double wage_h, unsigned t, unsigned age_index) {
     // the tax brackets and the deductions and exemptions starts at 1980 and
     // ends at 2035. most of the sample turn 18 at 1980 (NLSY79)
     const auto row_number = t + age_index; // row number on matrix 1980-2035. 
 
-    const auto deductions_m = p.ded[row_number][2];
-    const auto exemptions_m = p.ded[row_number][4] + p.ded[row_number][6]*N_KIDS;
-    const auto exemptions_s_w = p.ded[row_number][5] + p.ded[row_number][6]*N_KIDS;
-    const auto exemptions_s_h = p.ded[row_number][5];
+    const auto deductions_m = p.ded[row_number][1];
+    const auto deductions_s = p.ded[row_number][2];
+    const auto exemptions_m = p.ded[row_number][3] + p.ded[row_number][5]*kids;
+    const auto exemptions_s_w = p.ded[row_number][4] + p.ded[row_number][5]*kids;
+    const auto exemptions_s_h = p.ded[row_number][4];
 
     NetIncome result;
 
     // CALCULATE NET INCOME FOR SINGLE WOMEN
-    result.net_income_s_w = gross_to_net_single(p, row_number, N_KIDS, wage_w, exemptions_s_w);
+    result.net_income_s_w = gross_to_net_single(p, row_number, kids, wage_w, exemptions_s_w, deductions_s);
 
     // CALCULATE NET INCOME FOR SINGLE MEN
-    result.net_income_s_h = gross_to_net_single(p, row_number, 0 /*no kids*/, wage_h, exemptions_s_h); 
+    result.net_income_s_h = gross_to_net_single(p, row_number, 0 /*no kids*/, wage_h, exemptions_s_h, deductions_s); 
 
     // CALCULATE NET INCOME FOR MARRIED COUPLE
-    if (wage_h > 0) {
-        const unsigned shift = 21; // single 2-22, married 23-42
+    result.net_income_m = gross_to_net_married(p, row_number, kids, wage_h, wage_w, exemptions_m, deductions_m);
+    result.net_income_m_unemp = gross_to_net_married(p, row_number, kids, wage_h, 0.0 /*no wage_w*/, exemptions_m, deductions_m);
 
-        // NET SALARY FOR MARRIED COUPLE IF WOMEN CHOOSE TO WORK 
-        {
-            const auto reduced_income_m = wage_h + wage_w  - deductions_m - exemptions_m;
-            // CALCULATE INCOME TAX
-            double tax = 0.0;
-            if (reduced_income_m > 0) {
-                for (auto i = 2; i <= 10; ++i) {
-                    if (reduced_income_m < p.tax[row_number][i+shift]) {
-                        tax += (reduced_income_m - p.tax[row_number][(i-1)+shift])*p.tax[row_number][11+(i-1)+shift];
-                        break;
-                    }
-                    tax += (p.tax[row_number][i+shift] - p.tax[row_number][(i-1)+shift])*p.tax[row_number][11+(i-1)+shift];
-                }
-            }  
-            // CALCULATE EICT
-            double EICT = 0.0;
-            const auto tot_inc = wage_h + wage_w;
-            if (tot_inc < p.ded[row_number][8+6*N_KIDS]) {
-                // first interval  credit rate
-                EICT = tot_inc*p.ded[row_number][7+6*N_KIDS];
-                tax = 0;
-            } else if (tot_inc > p.ded[row_number][8+6*N_KIDS] && tot_inc < p.ded[row_number][11+6*N_KIDS]) {
-                // second (flat) interval - max EICT
-                EICT = p.ded[row_number][9+6*N_KIDS];
-                tax = 0;
-            } else if (tot_inc > p.ded[row_number][11+6*N_KIDS] && tot_inc < p.ded[row_number][12+6*N_KIDS]) {
-                // third interval - phaseout rate
-                EICT = tot_inc*p.ded[row_number][10+6*N_KIDS];
-                tax = 0;
-            } else {
-                // income too high for EICT
-                EICT = 0;
-            }
-            result.net_income_m = tot_inc - tax + EICT;
-        }
-        // NET SALARY IF MARRIED AND WOMEN CHOOSES NOT TO WORK
-        {
-            const auto reduced_income_m_unemp = wage_h - deductions_m - exemptions_m;
-            // CALCULATE INCOME TAX
-            double tax = 0.0;
-            if (reduced_income_m_unemp > 0) {
-                for (auto i = 2; i <= 10; ++i) {
-                    if (reduced_income_m_unemp < p.tax[row_number][i+shift]) {
-                        tax += (reduced_income_m_unemp - p.tax[row_number][(i-1)+shift])*p.tax[row_number][11+(i-1)+shift];
-                        break;
-                    }
-                    tax += (p.tax[row_number][i+shift] - p.tax[row_number][(i-1)+shift])*p.tax[row_number][11+(i-1)+shift];
-                }
-            }   
-            // CALCULATE EICT
-            double EICT = 0.0;
-            const auto tot_inc = wage_h;
-            if (tot_inc < p.ded[row_number][8+6*N_KIDS]) {
-                // first interval  credit rate
-                EICT = tot_inc*p.ded[row_number][7+6*N_KIDS];
-                tax = 0;
-            } else if (tot_inc > p.ded[row_number][8+6*N_KIDS] && tot_inc < p.ded[row_number][11+6*N_KIDS]) {
-                // second (flat) interval - max EICT
-                EICT = p.ded[row_number][9+6*N_KIDS];
-                tax = 0;
-            } else if (tot_inc > p.ded[row_number][11+6*N_KIDS] && tot_inc < p.ded[row_number][12+6*N_KIDS]) {
-                // third interval - phaseout rate)
-                EICT = tot_inc*p.ded[row_number][10+6*N_KIDS];
-                tax = 0;
-            } else {
-                // income too high for EICT
-                EICT = 0;
-            }    
-            result.net_income_m_unemp =  tot_inc - tax + EICT;
-        }
-    }
     return result;
 }
-
 
