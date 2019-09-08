@@ -89,8 +89,7 @@ Utility calculate_utility(const Parameters& p, const Emax& EMAX_W, const Emax& E
 
                 result.U_H[CS_SIZE+i] = UC_H2+p.t1_h*HSG+p.t2_h*SC+p.t3_h*CG+p.t4_h*PC+p.t5_h*(wife.WE+1.0) + p.t6_h*H_HSD+p.t7_h*H_HSG+p.t8_h*H_SC+p.t9_h*H_CG+
                     p.t10_h*H_PC+p.t11_h*(HE+1.0)+p.t12_h+p.t13_h*kids+p.t14_h*(wife.Q+wife.similar_educ)+p.t16_h+p.t17_h;
-            } else {
-                // t < T_END
+            } else if (t < T_END) {
                 // the loop goes from 28 to 1, but for SC, CG and PC the loop is shorter
                 unsigned exp_wi; unsigned exp_hi; unsigned BPi;	unsigned CSi;
                 // calculate EMAX indexes when women unemployed
@@ -101,6 +100,9 @@ Utility calculate_utility(const Parameters& p, const Emax& EMAX_W, const Emax& E
                 value_to_index(wife.WE+1, HE+1, BP, CS, exp_wi, exp_hi, BPi, CSi);
                 result.U_W[CS_SIZE+i] = UC_W2+beta0*EMAX_W[t+1][exp_wi][exp_hi][kids][EMP] [wife.ability_wi][ability_hi][MARRIED][HS_IDX][WS_IDX][wife.Q_INDEX][BPi];
                 result.U_H[CS_SIZE+i] = UC_H2+beta0*EMAX_H[t+1][exp_wi][exp_hi][kids][EMP] [wife.ability_wi][ability_hi][MARRIED][HS_IDX][WS_IDX][wife.Q_INDEX][BPi];
+            } else {
+                // TODO: fix this
+                return result;
             }
         }
 

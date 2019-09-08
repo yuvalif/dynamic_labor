@@ -85,7 +85,9 @@ class MeanMatrix {
         }
 
         double mean(size_t row, size_t col) const {
-            return sum[row][col]/(double)count[row][col]; 
+            const auto c = count[row][col];
+            if (c == 0) return 0.0;
+            return sum[row][col]/(double)c; 
         }
 };
 

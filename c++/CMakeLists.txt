@@ -6,7 +6,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -Wno-sign-compare -O3 -ffast-math")
-#set(CMAKE_BUILD_TYPE Debug)
+set(CMAKE_BUILD_TYPE Debug)
 
 add_library(dynamic_labor 
     emax.cpp
@@ -30,7 +30,6 @@ set_target_properties(dynamic_labor PROPERTIES CXX_STANDARD 17)
 add_executable (dynamic_labor_run dynamic_labor.cpp)
 target_link_libraries (dynamic_labor_run dynamic_labor)
 
-# Add "tags" target and make my_project depending on this target.
 set_source_files_properties(tags PROPERTIES GENERATED true)
 add_custom_target(tags
     COMMAND ctags -R --c++-kinds=+p --fields=+iaS --extra=+q .

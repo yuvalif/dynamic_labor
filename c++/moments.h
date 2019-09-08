@@ -55,6 +55,7 @@ struct Moments {
 using SchoolingMeanMatrix = MeanMatrix<T_MAX, SCHOOL_LEN>;
 
 using SchoolingMatrix = UMatrix<T_MAX, SCHOOL_LEN>;
+using SchoolingArray = std::array<unsigned, SCHOOL_LEN>;
 
 struct EstimatedMoments {
     WageMoments wage_moments;

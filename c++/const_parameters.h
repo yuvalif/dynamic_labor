@@ -18,7 +18,7 @@ const auto CS_SIZE = 11;
 const std::array<double, CS_SIZE> cs_vector = {0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0};
 const std::array<double, CS_SIZE> bp_vector = cs_vector;
 
-const int TERMINAL = 45;
+const int TERMINAL = 44;
 
 // emax dimensions:
 const int T_MAX = 28;
