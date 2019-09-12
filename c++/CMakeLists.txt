@@ -5,6 +5,18 @@ project(dynamic_labor)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+find_package(CxxTest)
+if(CXXTEST_FOUND)
+    include_directories(${CXXTEST_INCLUDE_DIR})
+    enable_testing()
+    CXXTEST_ADD_TEST(unittest_nash nash_test.cpp ${CMAKE_CURRENT_SOURCE_DIR}/nash_test.h)
+    CXXTEST_ADD_TEST(unittest_draw draw_test.cpp ${CMAKE_CURRENT_SOURCE_DIR}/draw_test.h)
+    CXXTEST_ADD_TEST(unittest_gross_to_net gross_to_net_test.cpp ${CMAKE_CURRENT_SOURCE_DIR}/gross_to_net_test.h)
+    CXXTEST_ADD_TEST(unittest_marriage_decision marriage_decision_test.cpp ${CMAKE_CURRENT_SOURCE_DIR}/marriage_decision_test.h)
+    CXXTEST_ADD_TEST(unittest_matrix matrix_test.cpp ${CMAKE_CURRENT_SOURCE_DIR}/matrix_test.h)
+    CXXTEST_ADD_TEST(unittest_value_to_index value_to_index_test.cpp ${CMAKE_CURRENT_SOURCE_DIR}/value_to_index_test.h)
+endif()
+
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -Wno-sign-compare -O3 -ffast-math")
 set(CMAKE_BUILD_TYPE Debug)
 

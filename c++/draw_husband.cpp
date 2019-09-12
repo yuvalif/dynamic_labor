@@ -5,31 +5,32 @@
 #include "random_pools.h"
 
 bool update_husband_schooling(unsigned HS, unsigned t, Husband& husband) {
+    // T_END is used together with the t index which get values 0-27
     if (HS == 0) {
         husband.H_HSD = 1; husband.AGE = 18;
-        husband.T_END = TERMINAL - husband.AGE; // TERMINAL = 45, T=27
+        husband.T_END = TERMINAL - husband.AGE - 1; // TERMINAL = 45, T=27
         husband.age_index = 0;
     } else if (HS == 1) {
         husband.H_HSG = 1; husband.AGE = 18;
-        husband.T_END = TERMINAL - husband.AGE; // TERMINAL = 45, T=27
+        husband.T_END = TERMINAL - husband.AGE - 1; // TERMINAL = 45, T=27
         husband.age_index = 0;
     } else if (HS == 2) {
         husband.H_SC = 1; husband.AGE = 20;
-        husband.T_END = TERMINAL - husband.AGE; // TERMINAL = 45, T=25
+        husband.T_END = TERMINAL - husband.AGE - 1; // TERMINAL = 45, T=25
         husband.age_index = 2;
         if (t > husband.T_END) {
             return false;
         }
     } else if (HS == 3) {
         husband.H_CG = 1; husband.AGE = 22;
-        husband.T_END = TERMINAL - husband.AGE; // TERMINAL = 45, T=23
+        husband.T_END = TERMINAL - husband.AGE - 1; // TERMINAL = 45, T=23
         husband.age_index = 4;
         if (t > husband.T_END) {
             return false;
         }
     } else {
         husband.H_PC = 1; husband.AGE = 25;
-        husband.T_END = TERMINAL - husband.AGE; // TERMINAL = 45, T=20
+        husband.T_END = TERMINAL - husband.AGE - 1; // TERMINAL = 45, T=20
         husband.age_index = 7;
         if (t > husband.T_END) {
             return false; 

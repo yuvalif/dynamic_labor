@@ -18,8 +18,8 @@
 
 unsigned calculate_emax(const Parameters& p, Emax& EMAX_W, Emax& EMAX_H) {
     unsigned iter_count = 0;
-    for (auto t = T_MAX - 1; t >= 0; --t) {
-        // TIME
+    // running until the one before last period
+    for (auto t = T_MAX - 2; t >= 0; --t) {
         // EMAX FOR SINGLE MEN
         for (auto HS : SCHOOL_H_VALUES) {
             iter_count = single_men(p, HS, t, EMAX_W, EMAX_H);
@@ -198,7 +198,7 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m, const 
             std::array<unsigned, CS_SIZE> CS_DISTRIBUTION;
 
             // make choices for all periods
-            for (auto t = 0U; t < T_MAX; ++t) {
+            for (auto t = 0U; t < wife.T_END; ++t) {
                 unsigned CHOOSE_HUSBAND = 0;
                 prev_state_w_T_minus_1 = prev_state_w;
                 // TODO: do we use prev_state_h_T_minus_1 ?

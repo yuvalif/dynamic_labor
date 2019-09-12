@@ -3,8 +3,9 @@
 #include <boost/range/irange.hpp>
 
 // number of draws backward/forward
-const unsigned DRAW_B = 30;
-const unsigned DRAW_F = 100;
+// TODO: use 1 only for testing
+const unsigned DRAW_B = 1;//30;
+const unsigned DRAW_F = 1;//100;
 
 const unsigned UNEMP = 0;
 const unsigned EMP = 1;
@@ -18,10 +19,10 @@ const auto CS_SIZE = 11;
 const std::array<double, CS_SIZE> cs_vector = {0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0};
 const std::array<double, CS_SIZE> bp_vector = cs_vector;
 
-const int TERMINAL = 44;
+const int TERMINAL = 45;
 
 // emax dimensions:
-const int T_MAX = 28;
+const int T_MAX = 28; // 28 periods, 45years - 18years
 const int EXP_W_LEN  = 5; const auto EXP_W_VALUES = boost::irange(0, EXP_W_LEN);
 const int EXP_H_LEN  = 5; const auto EXP_H_VALUES = boost::irange(0, EXP_H_LEN);
 // number of children: (0, 1, 2, 3+)

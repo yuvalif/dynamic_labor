@@ -13,6 +13,8 @@ Utility calculate_utility(const Parameters& p, const Emax& EMAX_W, const Emax& E
         double wage_h, double wage_w, unsigned CHOOSE_PARTNER, unsigned CHOOSE_WORK_H, unsigned CHOOSE_WORK_W,
         unsigned M, const Wife& wife, unsigned HS, unsigned t, unsigned ability_hi, unsigned HE, double BP, 
         unsigned T_END, unsigned single_men, unsigned age_index) {
+
+    assert(t <= T_END);
     unsigned WS_IDX = 1;
     unsigned HS_IDX = HS;
     if (single_men == 1) {
@@ -100,9 +102,6 @@ Utility calculate_utility(const Parameters& p, const Emax& EMAX_W, const Emax& E
                 value_to_index(wife.WE+1, HE+1, BP, CS, exp_wi, exp_hi, BPi, CSi);
                 result.U_W[CS_SIZE+i] = UC_W2+beta0*EMAX_W[t+1][exp_wi][exp_hi][kids][EMP] [wife.ability_wi][ability_hi][MARRIED][HS_IDX][WS_IDX][wife.Q_INDEX][BPi];
                 result.U_H[CS_SIZE+i] = UC_H2+beta0*EMAX_H[t+1][exp_wi][exp_hi][kids][EMP] [wife.ability_wi][ability_hi][MARRIED][HS_IDX][WS_IDX][wife.Q_INDEX][BPi];
-            } else {
-                // TODO: fix this
-                return result;
             }
         }
 
