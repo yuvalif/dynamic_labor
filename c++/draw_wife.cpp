@@ -5,38 +5,24 @@
 #include "random_pools.h"
 
 bool update_wife_schooling(unsigned WS, unsigned t, Wife& wife) {
-    assert(WS > 0);
-    wife.WS = WS;
     // T_END is used together with the t index which get values 0-27
+    wife.WS = WS;
+    wife.AGE = AGE_VALUES[WS];
+    wife.age_index = AGE_INDEX_VALUES[WS];
+    wife.T_END = TERMINAL - wife.AGE - 1;
+    if (t > wife.T_END) {
+        return false;
+    }
     if (WS == 1) {
-        wife.HSG = 1; wife.AGE = 18;
-        wife.T_END = TERMINAL - wife.AGE - 1; // TERMINAL = 45, T=27
-        wife.age_index = 0;
-        wife.HSD = 0; wife.HSG = 1; wife.SC = 0;  wife.CG = 0; wife.PC = 0;
+        wife.HSG = 1;
     } else if (WS == 2) {
-        wife.SC = 1; wife.AGE = 20;
-        wife.T_END = TERMINAL - wife.AGE - 1; // TERMINAL = 45, T=25
-        wife.age_index = 2;
-        wife.HSD = 0; wife.HSG = 0; wife.SC = 1;  wife.CG = 0; wife.PC = 0;
-        if (t > wife.T_END) {
-            return false;
-        }
+        wife.SC = 1;
     } else if (WS == 3) {
-        wife.CG = 1; wife.AGE = 22;
-        wife.T_END = TERMINAL - wife.AGE - 1; // TERMINAL = 45, T=23
-        wife.age_index = 4;
-        wife.HSD = 0; wife.HSG = 0; wife.SC = 0;  wife.CG = 1; wife.PC = 0;
-        if (t > wife.T_END) {
-            return false;
-        }
+        wife.CG = 1;
+    } else if (WS == 4) {
+        wife.PC = 1;
     } else {
-        wife.PC = 1; wife.AGE = 25;
-        wife.T_END = TERMINAL - wife.AGE - 1; // TERMINAL = 45, T=20
-        wife.age_index = 7;
-        wife.HSD = 0; wife.HSG = 0; wife.SC = 0;  wife.CG = 0; wife.PC = 1;
-        if (t > wife.T_END) {
-            return false;
-        }
+        assert(false);
     }
     return true;
 }

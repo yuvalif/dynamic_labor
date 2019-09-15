@@ -3,16 +3,14 @@
 class Parameters;
 
 struct Husband {
-    // following are indicators for the wife's schooling
-    // they have values of 0/1 and only one of them could be 1
-    unsigned H_HSD = 1;
+    unsigned H_HSD = 0;
     unsigned H_HSG = 0;
     unsigned H_SC = 0;
     unsigned H_CG = 0;
     unsigned H_PC = 0;
     // husband experience
     unsigned HE = 0;
-    unsigned ability_h_value = 0;
+    double ability_h_value = 0;
     unsigned ability_hi = 0;
     double Q = 0.0;
     unsigned Q_INDEX = 0;

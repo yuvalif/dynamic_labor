@@ -1,6 +1,6 @@
 #include "gross_to_net.h"
 #include "parameters.h"
-
+#include <iostream>
 
 // tax matrix
 // -----+-------------------+------------------------------------------------------------------------------------------------------------------------------+----------
@@ -9,7 +9,7 @@
 // year | br1 | br2 | br3 | br4 | br5 | br6 | br7 | br8 | br9 | br10 | br11 | %br1 | %br2 | %br3 | %br4 | %br5 | %br6 | %br7 | %br8 | %br9 | %br10 | %br11 | ...
 // -----+-------------------------------------------------------------------+------------------------------------------------------------------------------+----------
 
-const auto TAX_PERCENT_OFFSET = 12;
+const auto TAX_PERCENT_OFFSET = 11;
 
 // deduction matrix
 // -----+-------------------------------------------------------------+--------------------------------------------+--------------------------------------------+--------
@@ -24,74 +24,63 @@ const auto DED_INTERVAL1_OFFSET = DED_OFFSET + 1;
 const auto DED_INTERVAL2_OFFSET = DED_OFFSET + 4;
 const auto DED_INTERVAL3_OFFSET = DED_OFFSET + 5;
 
+double calculate_tax(const Parameters &p, double reduced_income, unsigned row_number) {
+    double tax = 0.0;
+    if (reduced_income > 0) {
+        for (auto i = 2; i <= 11; ++i) {
+            const auto lower_bracket = p.tax[row_number][i-1];
+            const auto upper_bracket = p.tax[row_number][i];
+            const auto percent = p.tax[row_number][i-1+TAX_PERCENT_OFFSET];
+            if (reduced_income <= upper_bracket) {
+                tax += (reduced_income - lower_bracket)*percent;
+                break;
+            }
+            tax += (upper_bracket - lower_bracket)*percent;
+        }
+    }
+    return tax;
+}
+
+double calculate_eict(const Parameters &p, double wage, unsigned row_number, unsigned kids) {
+    double EICT = 0.0;
+
+    const auto kids_offset = DED_KIDS_OFFSET*kids;
+    if (wage < p.ded[row_number][DED_INTERVAL1_OFFSET+kids_offset]) {
+        // first interval  credit rate
+        EICT = wage*p.ded[row_number][DED_INTERVAL1_OFFSET-1+kids_offset];
+    } else if (wage < p.ded[row_number][DED_INTERVAL2_OFFSET+kids_offset]) {
+        // second (flat) interval - max EICT
+        EICT = p.ded[row_number][DED_INTERVAL2_OFFSET-2+kids_offset]; 
+    } else if (wage < p.ded[row_number][DED_INTERVAL3_OFFSET+kids_offset]) {
+        EICT = wage*p.ded[row_number][DED_INTERVAL3_OFFSET-2+kids_offset];
+    }
+
+    return EICT;
+}
 
 // similar handling for husband and wife in case of singles
 double gross_to_net_single(const Parameters &p, unsigned row_number, unsigned kids, double wage, double exemptions, double deductions) {
     if (wage > 0.0) {
         const auto reduced_income = wage - deductions - exemptions;
-        //  CALCULATE INCOME TAX
         double tax = 0.0;
-        if (reduced_income > 0) {
-            for (auto i = 1; i < 10; ++i) {
-                if (reduced_income < p.tax[row_number][i]) {
-                    tax += (reduced_income - p.tax[row_number][i])*p.tax[row_number][i+TAX_PERCENT_OFFSET];
-                    break;
-                }
-                tax += (p.tax[row_number][i+1] - p.tax[row_number][i])*p.tax[row_number][i+TAX_PERCENT_OFFSET];
-            }
+        const auto EICT = calculate_eict(p, wage, row_number, kids);
+        if (EICT == 0.0) {
+            tax = calculate_tax(p, reduced_income, row_number);
         }
-        // CALCULATE EICT
-        double EICT = 0.0;
 
-        const auto kids_offset = DED_KIDS_OFFSET*kids;
-        if (wage < p.ded[row_number][DED_INTERVAL1_OFFSET+kids_offset]) {
-            // first interval  credit rate
-            EICT = wage*p.ded[row_number][DED_INTERVAL1_OFFSET-1+kids_offset];
-            tax = 0.0;
-        } else if (wage < p.ded[row_number][DED_INTERVAL2_OFFSET+kids_offset]) {
-            // second (flat) interval - max EICT
-            EICT = p.ded[row_number][DED_INTERVAL2_OFFSET-2+kids_offset]; 
-            tax = 0.0;
-        } else if (wage < p.ded[row_number][DED_INTERVAL3_OFFSET+kids_offset]) {
-            EICT = wage*p.ded[row_number][DED_INTERVAL3_OFFSET-2+kids_offset];
-            tax = 0.0;
-        }
         return wage - tax + EICT;   
     }
     return 0.0;
 }
 
-// similar handling for husband and wife in case of singles
 double gross_to_net_married(const Parameters &p, unsigned row_number, unsigned kids, double wage_h, double wage_w, double exemptions, double deductions) {
     if (wage_h > 0.0) {
         const auto reduced_income = wage_h + wage_w - deductions - exemptions;
-        //  CALCULATE INCOME TAX
         double tax = 0.0;
-        if (reduced_income > 0) {
-            for (auto i = 23; i < 10; ++i) {
-                if (reduced_income < p.tax[row_number][i]) {
-                    tax += (reduced_income - p.tax[row_number][i])*p.tax[row_number][i+TAX_PERCENT_OFFSET];
-                    break;
-                }
-                tax += (p.tax[row_number][i+1] - p.tax[row_number][i])*p.tax[row_number][i+TAX_PERCENT_OFFSET];
-            }
-        }
-        // CALCULATE EICT
-        double EICT = 0.0;
-
-        const auto kids_offset = DED_KIDS_OFFSET*kids;
         const auto tot_income = wage_h + wage_w;
-        if (tot_income < p.ded[row_number][DED_INTERVAL1_OFFSET+kids_offset]) {
-            // first interval  credit rate
-            EICT = tot_income*p.ded[row_number][DED_INTERVAL1_OFFSET-1+kids_offset];
-            tax = 0.0;
-        } else if (tot_income < p.ded[row_number][DED_INTERVAL2_OFFSET+kids_offset]) {
-            // second (flat) interval - max EICT
-            EICT = p.ded[row_number][DED_INTERVAL2_OFFSET-2+kids_offset]; 
-            tax = 0.0;
-        } else if (tot_income < p.ded[row_number][DED_INTERVAL3_OFFSET+kids_offset]) {
-            EICT = tot_income*p.ded[row_number][DED_INTERVAL3_OFFSET-2+kids_offset];
-            tax = 0.0;
+        const auto EICT = calculate_eict(p, tot_income, row_number, kids);
+        if (EICT == 0.0) {
+            tax = calculate_tax(p, reduced_income, row_number);
         }
         return tot_income - tax + EICT;   
     }

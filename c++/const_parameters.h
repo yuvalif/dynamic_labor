@@ -3,9 +3,13 @@
 #include <boost/range/irange.hpp>
 
 // number of draws backward/forward
-// TODO: use 1 only for testing
-const unsigned DRAW_B = 1;//30;
-const unsigned DRAW_F = 1;//100;
+// allow to be set as a compilation flag, defaults to 100
+#ifndef DRAWS
+#define DRAWS 100
+#endif
+
+const unsigned DRAW_B = 1;
+const unsigned DRAW_F = 1;
 
 const unsigned UNEMP = 0;
 const unsigned EMP = 1;
@@ -48,4 +52,7 @@ const std::array<unsigned, EXP_W_LEN> exp_vector = {0, 2, 4, 8, 16};
 // TODO: should we use: {0.0, 1.5, 3.5, 7.5, 15.0} ?
 
 const std::array<double, ABILITY_LEN> normal_arr = {-1.150, 0.0, 1.150};     // low, medium, high
+
+const std::array<unsigned, SCHOOL_LEN> AGE_INDEX_VALUES = {0, 0, 2, 4, 7};
+const std::array<unsigned, SCHOOL_LEN> AGE_VALUES = {18, 18, 20, 22, 25};
 

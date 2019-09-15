@@ -5,24 +5,14 @@ project(dynamic_labor)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(CxxTest)
-if(CXXTEST_FOUND)
-    include_directories(${CXXTEST_INCLUDE_DIR})
-    enable_testing()
-    CXXTEST_ADD_TEST(unittest_nash nash_test.cpp ${CMAKE_CURRENT_SOURCE_DIR}/nash_test.h)
-    CXXTEST_ADD_TEST(unittest_draw draw_test.cpp ${CMAKE_CURRENT_SOURCE_DIR}/draw_test.h)
-    CXXTEST_ADD_TEST(unittest_gross_to_net gross_to_net_test.cpp ${CMAKE_CURRENT_SOURCE_DIR}/gross_to_net_test.h)
-    CXXTEST_ADD_TEST(unittest_marriage_decision marriage_decision_test.cpp ${CMAKE_CURRENT_SOURCE_DIR}/marriage_decision_test.h)
-    CXXTEST_ADD_TEST(unittest_matrix matrix_test.cpp ${CMAKE_CURRENT_SOURCE_DIR}/matrix_test.h)
-    CXXTEST_ADD_TEST(unittest_value_to_index value_to_index_test.cpp ${CMAKE_CURRENT_SOURCE_DIR}/value_to_index_test.h)
-endif()
-
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -Wno-sign-compare -O3 -ffast-math")
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -Wno-sign-compare -O3 -ffast-math -DDRAWS=100")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -Wno-sign-compare -O0 -DDRAWS=1")
 set(CMAKE_BUILD_TYPE Debug)
 
 add_library(dynamic_labor 
     emax.cpp
     random_pools.cpp 
+    parameters.cpp
     nash.cpp 
     draw_wife.cpp 
     draw_husband.cpp 
@@ -47,6 +37,21 @@ add_custom_target(tags
     COMMAND ctags -R --c++-kinds=+p --fields=+iaS --extra=+q .
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 add_dependencies(dynamic_labor tags)
+
+find_package(CxxTest)
+if(CXXTEST_FOUND)
+    include_directories(${CXXTEST_INCLUDE_DIR})
+    enable_testing()
+    CXXTEST_ADD_TEST(unittest_calculate_wage calculate_wage_test.cpp ${CMAKE_CURRENT_SOURCE_DIR}/calculate_wage_test.h)
+    target_link_libraries (unittest_calculate_wage dynamic_labor)
+    CXXTEST_ADD_TEST(unittest_nash nash_test.cpp ${CMAKE_CURRENT_SOURCE_DIR}/nash_test.h)
+    CXXTEST_ADD_TEST(unittest_draw draw_test.cpp ${CMAKE_CURRENT_SOURCE_DIR}/draw_test.h)
+    CXXTEST_ADD_TEST(unittest_gross_to_net gross_to_net_test.cpp ${CMAKE_CURRENT_SOURCE_DIR}/gross_to_net_test.h)
+    target_link_libraries (unittest_gross_to_net dynamic_labor)
+    CXXTEST_ADD_TEST(unittest_marriage_decision marriage_decision_test.cpp ${CMAKE_CURRENT_SOURCE_DIR}/marriage_decision_test.h)
+    CXXTEST_ADD_TEST(unittest_matrix matrix_test.cpp ${CMAKE_CURRENT_SOURCE_DIR}/matrix_test.h)
+    CXXTEST_ADD_TEST(unittest_value_to_index value_to_index_test.cpp ${CMAKE_CURRENT_SOURCE_DIR}/value_to_index_test.h)
+endif()
 
 # TODO: add dynamic_labor_estimate target for automatic model estimation
 
