@@ -22,17 +22,17 @@ unsigned calculate_emax(const Parameters& p, Emax& EMAX_W, Emax& EMAX_H) {
     for (auto t = T_MAX - 2; t >= 0; --t) {
         // EMAX FOR SINGLE MEN
         for (auto HS : SCHOOL_H_VALUES) {
-            iter_count = single_men(p, HS, t, EMAX_W, EMAX_H);
+            iter_count += single_men(p, HS, t, EMAX_W, EMAX_H);
         } // end husband schooling loop
 
         // EMAX FOR SINGLE WOMEN
         for (auto WS : SCHOOL_W_VALUES) {
-            iter_count = single_women(p, WS, t, EMAX_W, EMAX_H);
+            iter_count += single_women(p, WS, t, EMAX_W, EMAX_H);
         } // end wife schooling loop
 
         // EMAX FOR MARRIED COUPLE
         for (auto WS : SCHOOL_W_VALUES) {
-            iter_count = married_couple(p, WS, t, EMAX_W, EMAX_H);
+            iter_count += married_couple(p, WS, t, EMAX_W, EMAX_H);
         } // end wife schooling loop
     }
     return iter_count;

@@ -8,6 +8,20 @@
 #include <cmath>
 #include <limits>
 #include <array>
+#include <iostream>
+
+void print_utility(const Utility& u) {
+    std::cout << std::endl << "Married Wife Utility: " ;
+    for (const auto x : u.U_W) std::cout << x << ", ";
+    std::cout << std::endl;
+    std::cout << "Married Husband Utility: ";
+    for (const auto x : u.U_H) std::cout << x << ", ";
+    std::cout << std::endl;
+    std::cout << "Single Wife Utility: ";
+    for (const auto x : u.U_W_S) std::cout << x << ", ";
+    std::cout << std::endl;
+    std::cout << "Single Husband Utility: " << u.U_H_S << std::endl;
+}
 
 Utility calculate_utility(const Parameters& p, const Emax& EMAX_W, const Emax& EMAX_H, unsigned kids, unsigned kids_h,
         double wage_h, double wage_w, unsigned CHOOSE_PARTNER, unsigned CHOOSE_WORK_H, unsigned CHOOSE_WORK_W,

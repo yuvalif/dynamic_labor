@@ -23,3 +23,5 @@ Utility calculate_utility(const Parameters& p, const Emax& EMAX_W, const Emax& E
         unsigned M, const Wife& wife, unsigned HS, unsigned t, unsigned ability_hi, unsigned HE, double BP, 
         unsigned T_END, unsigned single_men, unsigned age_index);
 
+void print_utility(const Utility& u);
+
