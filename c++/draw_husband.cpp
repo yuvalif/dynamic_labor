@@ -6,6 +6,7 @@
 
 bool update_husband_schooling(unsigned HS, unsigned t, Husband& husband) {
     // T_END is used together with the t index which get values 0-27
+    husband.HS = HS;
     husband.AGE = AGE_VALUES[HS];
     husband.age_index = AGE_INDEX_VALUES[HS];
     husband.T_END = TERMINAL - husband.AGE - 1;
@@ -29,13 +30,16 @@ bool update_husband_schooling(unsigned HS, unsigned t, Husband& husband) {
     return true;
 }
 
+void update_ability(const Parameters& p, unsigned ability, Husband& husband) {
+    husband.ability_hi = ability;
+    husband.ability_h_value = normal_arr[ability]*p.sigma[3];
+}
+
 Husband draw_husband(const Parameters& p, unsigned t, unsigned age_index, unsigned school_group, unsigned WS) {
     Husband result;
 
-    result.ability_hi = h_draw_3();
+    update_ability(p, h_draw_3(), result);
     result.Q_INDEX = h_draw_3();
-    // the 5 sigma values are indexed: 0-4
-    result.ability_h_value = normal_arr[result.ability_hi]*p.sigma[3];
     result.Q = normal_arr[result.Q_INDEX]*p.sigma[4];
 
     assert(WS > 0 && WS < 5);

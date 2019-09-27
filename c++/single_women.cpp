@@ -12,8 +12,6 @@
 unsigned single_women(const Parameters& p, unsigned WS, unsigned t, Emax& EMAX_W, const Emax& EMAX_H) { 
     unsigned iter_count = 0;
 
-    const unsigned N_KIDS_H = 0;
-
     Wife wife;
 
     if (!update_wife_schooling(WS, t, wife)) {
@@ -26,7 +24,7 @@ unsigned single_women(const Parameters& p, unsigned WS, unsigned t, Emax& EMAX_W
             // wife ability - high, medium, low
             wife.ability_w_value = normal_arr[ability_wi]*p.sigma[3];
             double ADD_EMAX = 0;
-            for (auto n_kids : KIDS_VALUES) {
+            for (auto kids : KIDS_VALUES) {
                 for (auto prev : PREV_WORK_VALUES) { 
                     wife.prev_state_w = prev - 1;
                     for (auto draw_b = 0U; draw_b <  DRAW_B; ++draw_b) {
@@ -48,9 +46,9 @@ unsigned single_women(const Parameters& p, unsigned WS, unsigned t, Emax& EMAX_W
                         // PROBABILITY OF MEETING A POTENTIAL HUSBAND
                         if (h_draw_p() < P_HUSBAND) {
                             CHOOSE_HUSBAND = 1;
-                            // TODO: check that school_group is WS
                             husband = draw_husband(p, t, wife.age_index, WS, WS);
                         }
+                        update_husband_schooling(HS, t, husband);
                         if (CHOOSE_HUSBAND == 1) {
                             wage_h = calculate_wage_h(p, husband, epsilon());
                         }
@@ -58,17 +56,15 @@ unsigned single_women(const Parameters& p, unsigned WS, unsigned t, Emax& EMAX_W
                         wage_w =  calculate_wage_w(p, wife, w_draw_p(), epsilon());
                         // MAXIMIZATION - MARRIAGE + WORK DESICION
 
-                        const unsigned JOB_OFFER_H = (wage_h > 0) ? 1 : 0;
-                        const unsigned JOB_OFFER_W = (wage_w > 0) ? 1 : 0;
-
                         // calculate husbands and wives utility from each option -inf for unavailable
                         // at this point the BP IS .5 
                         // IF NO MARRIAGE AND NO OFFER, BP is calculated by nash 
                         // if offer and is from previous period if already married
                         double BP = 0.5;
-                        const auto M = 1; const auto single_men = 0;
-                        const Utility utility = calculate_utility(p, EMAX_W, EMAX_H, n_kids, N_KIDS_H, wage_h, wage_w, CHOOSE_HUSBAND,
-                                JOB_OFFER_H, JOB_OFFER_W, M, wife, HS, t, husband.ability_hi, husband.HE, BP, wife.T_END, single_men, wife.age_index);
+                        const auto M = MARRIED; 
+                        const auto single_men = false;
+                        const Utility utility = calculate_utility(p, EMAX_W, EMAX_H, kids, wage_h, wage_w, CHOOSE_HUSBAND,
+                                M, wife, husband, t, BP, single_men);
                         //   MAXIMIZATION - MARRIAGE + WORK DESICION 
                         if (CHOOSE_HUSBAND == 1) {
                             BP = nash(p, utility, BP); // Nash bargaining at first period of marriage  
@@ -76,9 +72,9 @@ unsigned single_women(const Parameters& p, unsigned WS, unsigned t, Emax& EMAX_W
 
                         if (CHOOSE_HUSBAND == 1 && BP > -1) {
                             // marriage decision - outside option value wife
-                            const MarriageDecision decision = marriage_decision(utility, BP, wife.WE, husband.HE);
+                            const MarriageDecision decision = marriage_decision(utility, BP, wife, husband);
 
-                            if (decision.M == 1) {
+                            if (decision.M == MARRIED) {
                                 ADD_EMAX = ADD_EMAX + utility.U_W[decision.max_weighted_utility_index];
                             } else {
                                 ADD_EMAX = ADD_EMAX + decision.outside_option_w_v;
@@ -88,7 +84,7 @@ unsigned single_women(const Parameters& p, unsigned WS, unsigned t, Emax& EMAX_W
                         }
                         ++iter_count;
                     }   // end draw backward loop
-                    EMAX_W[t][w_exp_i][1][n_kids][prev][ability_wi][1][UNMARRIED][1][WS][1][1] = ADD_EMAX/DRAW_B;
+                    EMAX_W[t][w_exp_i][1][kids][prev][ability_wi][1][UNMARRIED][1][WS][1][1] = ADD_EMAX/(double)DRAW_B;
                 } // end prev_state_w        
             } // end of kids loop
         } // end single wemen ability loop

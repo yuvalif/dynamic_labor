@@ -1,17 +1,17 @@
 #include "calculate_utility.h"
 #include "marriage_decision.h"
+#include "draw_wife.h"
+#include "draw_husband.h"
 #include <stdexcept>
 #include <string>
 #include <cassert>
 
-MarriageDecision marriage_decision(const Utility& utility, double BP, unsigned WE, unsigned HE) {
+MarriageDecision marriage_decision(const Utility& utility, double BP, Wife& wife, Husband& husband) {
 
     MarriageDecision result;
     result.outside_option_w_v = std::max(utility.U_W_S[0], utility.U_W_S[1]);
     result.outside_option_h_v = utility.U_H_S;
     result.outside_option_w = (utility.U_W_S[0] > utility.U_W_S[1]) ? UNEMP : EMP;
-    result.M = 0;
-    result.prev_state_w = 0;
     
     if (BP < 0) {
         // no marriage is possible to begin with
@@ -35,25 +35,23 @@ MarriageDecision marriage_decision(const Utility& utility, double BP, unsigned W
 
         const auto max_weighted_utility_index = std::max_element(weighted_utility.begin(), weighted_utility.end()) - weighted_utility.begin();
         assert(max_weighted_utility_index < UTILITY_SIZE);
-        [[maybe_unused]] const auto max_weighted_utility = weighted_utility[max_weighted_utility_index];
         const auto max_U_W = utility.U_W[max_weighted_utility_index];
         const auto max_U_H = utility.U_H[max_weighted_utility_index];
         result.max_weighted_utility_index = max_weighted_utility_index;
 
         if (max_U_H >= result.outside_option_h_v && max_U_W >= result.outside_option_w_v) {
             // the max in married for both is better than outside
-            result.M = 1 ;
+            result.M = MARRIED;
             if (max_weighted_utility_index < 11) {  
                 // 0-10 WOMEN UNEMPLOYED
-                result.prev_state_w = 0;
-                result.WE = WE;
-                result.HE = HE+1;
+                wife.prev_state_w = 0;
+                ++husband.HE;
                 return result;
             }
             // 11-21: wife employed  + husband employed
-            result.prev_state_w = 1;
-            result.WE = WE+1;
-            result.HE = HE+1;
+            wife.prev_state_w = 1;
+            ++wife.WE;
+            ++husband.HE;
             return result;
         } else if (max_U_H < result.outside_option_h_v && max_U_H < result.outside_option_w_v) { 
             // the outside option is better for both - no marriage
@@ -80,17 +78,16 @@ MarriageDecision marriage_decision(const Utility& utility, double BP, unsigned W
     }
 
     // no marriage
-    result.M = 0;
-    // TODO: check equality to 1 of double
+    result.M = UNMARRIED;
     if (result.outside_option_w_v == 1) {  
         // 3-unmarried+wife unemployed
-        result.prev_state_w = 0;
-        result.WE = WE;
+        wife.prev_state_w = 0;
         return result;
+    } else {
+        // 3-unmarried+wife employed
+        wife.prev_state_w = 1;
+        ++wife.WE;
     }
-    // 3-unmarried+wife employed
-    result.prev_state_w = 1;
-    result.WE = WE+1;
-    return result;   
+    return result;
 }
 

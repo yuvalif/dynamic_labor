@@ -72,7 +72,7 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m, const 
     SchoolingMatrix emp_m_eq_below{{{0}}};
     SchoolingMatrix emp_m_up_above{{{0}}};
     SchoolingMatrix emp_m_eq_above{{{0}}};
-    // TODO unused?
+    // FIXME unused?
     //SchoolingMatrix count_emp_m{{{0}}};
     //SchoolingMatrix count_emp_um{{{0}}};
     SchoolingMatrix count_emp_m_up{{{0}}};
@@ -145,9 +145,12 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m, const 
 
     // school_group 0 is only for calculating the emax if single men
     for (auto school_group : SCHOOL_W_VALUES) {
+        // FIXME index must be 0 if no husband
         Husband husband;
+        update_ability(p, 0, husband);
         Wife wife;
         const unsigned IGNORE_T = 0;
+        // FIXME is husband/wide schooling the same?
         update_husband_schooling(school_group, IGNORE_T, husband);
         update_wife_schooling(school_group, IGNORE_T, wife);
 
@@ -159,7 +162,7 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m, const 
                 prev_state_w = 1;
             }
             unsigned prev_state_w_T_minus_1 = 0;
-            // TODO: prev_state_h and prev_state_h_T_minus_1 not used?
+            // FIXME prev_state_h and prev_state_h_T_minus_1 not used?
             // unsigned prev_state_h = 0;
             // unsigned prev_state_h_T_minus_1 = 0;
 
@@ -168,31 +171,30 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m, const 
             unsigned count_age3 = 0; // the age of the 3rd oldest child under6
             unsigned count_age4 = 0; // the age of the 4th oldest child under6
             unsigned count_age5 = 0; // the age of the 5th oldest child under6
-            // TODO: year_married not used?
+            // FIXME year_married not used?
             // unsigned year_married = 0;
             unsigned M = 0;
             unsigned M_T_minus_1 = 0;
             unsigned DIVORCE = 0;
-            // TODO: should we use the newborn indicator insie or outside of the loop?
+            // FIXME should we use the newborn indicator insie or outside of the loop?
             //unsigned NEW_BORN = 0;
-            unsigned N_KIDS_H = 0;
             unsigned N_KIDS = 0;
             unsigned N_KIDS_M = 0;
             unsigned N_KIDS_UM = 0;
             unsigned duration = 0;
-            // TODO: duration_minus_1 is not used?
+            // FIXME duration_minus_1 is not used?
             // unsigned duration_minus_1 = 0;
             double Q = 0;
             double Q_minus_1 = 0.0;
-            unsigned HS = 1;
+            // FIXME why not use school_group ?
+            const unsigned HS = 1;
             unsigned HE = 0;
             float BP = 0.5;
-            // TODO: similar_educ is not used?
+            // FIXME similar_educ is not used?
             // unsigned similar_educ = 0;
             auto ability_wi = w_draw_3();
             auto ability_w = normal_arr[ability_wi]*p.sigma[4];
             unsigned ability_h = 0;
-            unsigned ability_hi = 1; // index must be 1 if no husband
             std::array<unsigned, CS_SIZE> BP_INITIAL_DISTRIBUTION;
             std::array<unsigned, CS_SIZE> BP_DISTRIBUTION;
             std::array<unsigned, CS_SIZE> CS_DISTRIBUTION;
@@ -201,9 +203,9 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m, const 
             for (auto t = 0U; t < wife.T_END; ++t) {
                 unsigned CHOOSE_HUSBAND = 0;
                 prev_state_w_T_minus_1 = prev_state_w;
-                // TODO: do we use prev_state_h_T_minus_1 ?
+                // FIXME do we use prev_state_h_T_minus_1 ?
                 //prev_state_h_T_minus_1 = prev_state_h;
-                // TODO: duration_minus_1 is not used?
+                // FIXME duration_minus_1 is not used?
                 //duration_minus_1 = duration;
                 unsigned NEW_BORN = 0;
                 // DRAW HUSBAND
@@ -211,7 +213,7 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m, const 
                     BP = 0.5;
                     duration = 0;
                     Q = 0;
-                    // TODO: similar_educ is not used?
+                    // FIXME similar_educ is not used?
                     // similar_educ = 0;
                     const auto P_HUSBAND = exp(p.p0_w+p.p1_w*(wife.AGE+t)+p.p2_w*pow(wife.AGE+t,2))/
                         (1.0+exp(p.p0_w+p.p1_w*(wife.AGE+t)+p.p2_w*pow(wife.AGE+t,2)));
@@ -232,17 +234,14 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m, const 
                 }
                 const auto wage_w = calculate_wage_w(p, wife, w_draw_p(), epsilon());
 
-                const auto single_men = 0;
+                const auto single_men = false;
                 const auto CHOOSE_WIFE = 1;
-                const auto JOB_OFFER_H = wage_h > 0.0;
-                const auto JOB_OFFER_W = wage_w > 0.0;
 
                 // MAXIMIZATION - MARRIAGE + WORK DESICION
                 if (M == 0 &&  CHOOSE_HUSBAND == 1) {
                     BP = 0.5;
-                    const Utility utility = calculate_utility(p, EMAX_W, EMAX_H, N_KIDS, N_KIDS_H, wage_h, wage_w,
-                            CHOOSE_WIFE, JOB_OFFER_H, JOB_OFFER_W, M, wife, HS, t, ability_hi,
-                            husband.HE, BP, wife.T_END, single_men, wife.age_index);
+                    const Utility utility = calculate_utility(p, EMAX_W, EMAX_H, N_KIDS, wage_h, wage_w,
+                            CHOOSE_WIFE, M, wife, husband, t, BP, single_men);
                     BP = nash(p, utility, BP); // Nash bargaining at first period of marriage  
                     const auto BP_INDEX = round(BP*10)+1;
                     if (BP != -1) {
@@ -253,18 +252,18 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m, const 
                 } //CALCULATE INITIAL BP
                 // at this point the BP IS .5 IF NO MARRIAGE AND NO OFFER, is calculated by nash if offer
                 // and is from previous period if already married           
-                const Utility utility = calculate_utility(p, EMAX_W, EMAX_H, N_KIDS, N_KIDS_H, wage_h, wage_w,
-                        CHOOSE_WIFE, JOB_OFFER_H, JOB_OFFER_W, M, wife, HS, t, ability_hi,
-                        husband.HE, BP, wife.T_END, single_men, wife.age_index);
+                const Utility utility = calculate_utility(p, EMAX_W, EMAX_H, N_KIDS, wage_h, wage_w,
+                        CHOOSE_WIFE, M, wife, husband, t, BP, single_men);
 
-                const MarriageDecision decision = marriage_decision(utility, BP, wife.WE, HE);
+                const auto decision = marriage_decision(utility, BP, wife, husband);
+                // FIXME M or decision.M ?
                 if (M == 1 || CHOOSE_HUSBAND == 1) {
                     M_T_minus_1 = M;
                     // marriage decision - outside option value wife
                     if (decision.M == 1) {
                         ++marriage_choice[t][school_group];
                     }
-                    if (decision.prev_state_w == 1) {
+                    if (wife.prev_state_w == 1) {
                         ++emp_choice_w[t+wife.age_index][school_group];
                     }
                 } else if (M == 0 && CHOOSE_HUSBAND == 0) {
@@ -404,7 +403,7 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m, const 
                     } 
                 }
                 // EMPLOYMENT TRANSITION MATRIX
-                // TODO: reorder if statements to decre4ase lines of code
+                // TODO: reorder if statements to decrease lines of code
                 if (prev_state_w == 1 && prev_state_w_T_minus_1 == 0) {
                     // for transition matrix - unemployment to employment
                     if (M ==1) {
@@ -458,7 +457,7 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m, const 
                 // TODO: reorder if statement to make code shorter
                 if (M == 1) {
                     if (wage_h > 0) {
-                        wages_m_h.accumulate(HE,HS, wage_h); // husband always works
+                        wages_m_h.accumulate(HE, HS, wage_h); // husband always works
                     }
                     emp_m[t+age_index][school_group] += prev_state_w; // employment married women  
                     if (school_group > HS) { 
@@ -613,7 +612,7 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m, const 
 
     // calculate wage moments
     for (auto t = 0; t < T_MAX; ++t) {
-        estimated.wage_moments[t][0] = t; // TODO experience?
+        estimated.wage_moments[t][0] = t; // FIXME experience?
         auto offset = 1;
         for (auto school_group = 0; school_group < SCHOOL_LEN; ++school_group) {
             estimated.wage_moments[t][school_group+offset] = wages_m_h.mean(t, school_group); 
@@ -656,7 +655,7 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m, const 
             ++offset;
         }
         // women wage by match: UP, EQUAL, DOWN 
-        // TODO what about t?
+        // FIXME what about t?
         for (auto school_group = 0; school_group < SCHOOL_LEN; ++school_group) {
             estimated.general_moments[0][school_group+offset] = wages_m_w_up.mean(0, school_group);
             ++offset;
@@ -811,17 +810,17 @@ double objective_function(const Parameters& p, const Moments& m, bool display_mo
     // objective function calculation
     // calculate square difference between actual and estimated moments
     const auto wage_moments_diff = square_diff(estimated_moments.wage_moments, m.wage_moments); 
-    // TODO: why splitting wage_sd to: w_wage_sd and wage_sd
+    // FIXME why splitting wage_sd to: w_wage_sd and wage_sd
     const auto marr_fer_moments_diff = square_diff(estimated_moments.marr_fer_moments, m.marr_fer_moments); 
     const auto emp_moments_diff = square_diff(estimated_moments.emp_moments, m.emp_moments); 
-    // TODO: what to do with general_moments_diff?
+    // FIXME what to do with general_moments_diff?
     //const auto general_moments_diff = square_diff(estimated_moments.general_moments, m.general_moments);
     // weight the difference by last row of actual moment
-    // TODO: use t_MAX?
+    // FIXME use t_MAX?
     const auto wage_moments_weighted_diff = divide_by_square(wage_moments_diff, m.wage_moments[T_MAX-1]);
     const auto marr_fer_moments_weighted_diff = divide(marr_fer_moments_diff, m.marr_fer_moments[T_MAX-1]); 
     const auto emp_moments_weighted_diff = divide(emp_moments_diff, m.emp_moments[T_MAX-1]); 
-    // TODO: how to do general moments?
+    // FIXME how to do general moments?
     
     const auto value = total_sum(wage_moments_weighted_diff) + total_sum(marr_fer_moments_weighted_diff) + total_sum(emp_moments_weighted_diff);
 

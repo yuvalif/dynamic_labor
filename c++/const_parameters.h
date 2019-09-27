@@ -13,11 +13,16 @@ const unsigned DRAW_F = 1;
 
 const unsigned UNEMP = 0;
 const unsigned EMP = 1;
-const unsigned MARRIED = 0;
-const unsigned UNMARRIED = 1;
+const unsigned UNMARRIED = 0;
+const unsigned MARRIED = 1;
+
+const unsigned NO_KIDS = 0;
 
 const double beta0 = 0.983;  // discount rate
 
+// use this instead of: std::numeric_limits<double>::lowest()
+// so it is more clear when the number is prited
+const double MINIMUM_UTILITY = -99999.0;
 
 const auto CS_SIZE = 11;
 const std::array<double, CS_SIZE> cs_vector = {0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0};
@@ -44,7 +49,7 @@ const auto SCHOOL_W_VALUES = boost::irange(1, SCHOOL_LEN);
 // match quality: (high, medium, low)
 const int MATCH_Q_LEN = 3; const auto MATCH_Q_VALUES = boost::irange(0, MATCH_Q_LEN);
 // wife bargening power: (0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8)
-// TODO 7 or 11?
+// FIXME 7 or 11?
 const int BP_W_LEN  = 7; const auto BP_W_VALUES = boost::irange(0, BP_W_LEN);
 
 // 5 points grid for experience, use interpulations for the values between

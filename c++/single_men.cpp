@@ -25,7 +25,7 @@ unsigned single_men(const Parameters& p, unsigned HS, unsigned t, const Emax& EM
         husband.HE = exp_vector[h_exp_i];
         for (auto ability_hi : ABILITY_VALUES) {   
             // husband ability - high, medium, low
-            husband.ability_h_value = normal_arr[ability_hi]*p.sigma[4];
+            update_ability(p, ability_hi, husband);
             double ADD_EMAX = 0.0;
             for (auto draw_b = 0U; draw_b < DRAW_B; ++draw_b) {
                 // DRAW A WIFE 
@@ -45,14 +45,11 @@ unsigned single_men(const Parameters& p, unsigned HS, unsigned t, const Emax& EM
                     wage_w = calculate_wage_w(p, wife, w_draw_p(), epsilon());
                 }
 
-                const unsigned JOB_OFFER_H = (wage_h > 0) ? 1 : 0;
-                const unsigned JOB_OFFER_W = (wage_w > 0) ? 1 : 0;
-
                 // calculate husbands and wives utility from each option -inf for unavailable
                 double BP = 0.5;
-                const unsigned M = 0; const unsigned single_men = 1; const unsigned NO_KIDS = 0;
-                const Utility utility = calculate_utility(p, EMAX_W, EMAX_H, NO_KIDS, NO_KIDS, wage_h, wage_w, CHOOSE_WIFE, 
-                        JOB_OFFER_H, JOB_OFFER_W, M, wife, HS, t, ability_hi, husband.HE, BP, husband.T_END, single_men, husband.age_index);
+                const bool single_men = true; 
+                const Utility utility = calculate_utility(p, EMAX_W, EMAX_H, NO_KIDS, wage_h, wage_w, CHOOSE_WIFE, 
+                        UNMARRIED, wife, husband, t, BP, single_men);
                 // MAXIMIZATION - MARRIAGE + WORK DESICION 
                 if (CHOOSE_WIFE == 1) {
                     BP = nash(p, utility, BP); // Nash bargaining at first period of marriage  
@@ -60,12 +57,10 @@ unsigned single_men(const Parameters& p, unsigned HS, unsigned t, const Emax& EM
                 // at this point the BP IS .5 IF NO MARRIAGE AND NO OFFER, 
                 // is calculated by nash if offer and is from previous period if already married 
 
-                if (CHOOSE_WIFE == 1 && BP > -1.0) {
+                if (CHOOSE_WIFE == 1 && BP != -1.0) {
                     // marriage decision - outside option value wife
-                    // TODO take WE from wife or from decision ?
-                    // take HE from decision?
-                    const MarriageDecision decision = marriage_decision(utility, BP, wife.WE, husband.HE);
-                    if (decision.M == 1) {
+                    const auto decision = marriage_decision(utility, BP, wife, husband);
+                    if (decision.M == MARRIED) {
                         ADD_EMAX += utility.U_H[decision.max_weighted_utility_index];
                     } else {
                         ADD_EMAX += decision.outside_option_h_v;
@@ -74,7 +69,7 @@ unsigned single_men(const Parameters& p, unsigned HS, unsigned t, const Emax& EM
                     ADD_EMAX = ADD_EMAX + utility.U_H_S;
                 }
             }
-            EMAX_H[t][1][h_exp_i][1][1][1][ability_hi][UNMARRIED][HS][1][1][1] = ADD_EMAX/DRAW_B;
+            EMAX_H[t][1][h_exp_i][1][1][1][ability_hi][UNMARRIED][HS][1][1][1] = ADD_EMAX/(double)DRAW_B;
             ++iter_count;
         }
     }

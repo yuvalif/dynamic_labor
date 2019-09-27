@@ -4,14 +4,14 @@
 
 struct MarriageDecision {
     unsigned M;
-    unsigned prev_state_w;
-    unsigned WE;
-    unsigned HE;
     unsigned max_weighted_utility_index;
     double outside_option_w_v;
     double outside_option_h_v;
     unsigned outside_option_w;
 };
 
-MarriageDecision marriage_decision(const Utility& utility, double BP, unsigned WE, unsigned HE);
+class Wife;
+class Husband;
+
+MarriageDecision marriage_decision(const Utility& utility, double BP, Wife& wife, Husband& husband);
 

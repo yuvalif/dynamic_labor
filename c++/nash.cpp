@@ -8,9 +8,7 @@
 double nash(const Parameters& p, const Utility& utility, double BP) {
     // marriage decision - outside option value wife
     const auto outside_option_w_v = std::max(utility.U_W_S[0], utility.U_W_S[1]);
-    [[maybe_unused]] const auto outside_option_w = (utility.U_W_S[0] > utility.U_W_S[1]) ? UNEMP : EMP;
     const auto outside_option_h_v = utility.U_H_S;
-    [[maybe_unused]] const auto outside_option_h = EMP;
 
     UtilityArray weighted_utility;
 
@@ -19,7 +17,7 @@ double nash(const Parameters& p, const Utility& utility, double BP) {
     }
 
     UtilityArray nash_value;
-    std::fill(nash_value.begin(), nash_value.end(), std::numeric_limits<double>::lowest());
+    std::fill(nash_value.begin(), nash_value.end(), MINIMUM_UTILITY);
 
     // leave only positive surplus for both
     for (auto i = 0U; i < UTILITY_SIZE; ++i) {
@@ -35,7 +33,7 @@ double nash(const Parameters& p, const Utility& utility, double BP) {
     const auto max_nash_value = nash_value[max_nash_value_index];
 
     // find the value of the bargaining power
-    if (max_nash_value > std::numeric_limits<double>::lowest()) {
+    if (max_nash_value > MINIMUM_UTILITY) {
         // there is at least one option with positive surplus for both
         if (max_nash_value_index == max_weighted_utility_index) {
             return 0.5;
@@ -60,13 +58,12 @@ double nash(const Parameters& p, const Utility& utility, double BP) {
                     ind1 = i;
                 }
             }
-            // search for the first "1" in the index range of: 6-10
+            // search for the first "1" in the index range of: 10-6
             for (int i = 5; i > 0; --i) {
                 if (possibilities[5+i] == 1) {
                     ind2 = 5+i;
                 }
             }
-            // TODO: what about the case of middle element (5)?
             if (ind1 != -1 || ind2 != CS_SIZE) {
                 // need to update BP
                 if (5 - ind1 < ind2 - 5) {
@@ -76,6 +73,7 @@ double nash(const Parameters& p, const Utility& utility, double BP) {
                 // ind2 is closer to the center
                 return (double)ind2*0.1;    
             }
+            // in case there there are no "1" smaller or larger than 5 we return -1
         }
     }
 
