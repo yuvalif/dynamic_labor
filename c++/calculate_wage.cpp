@@ -1,9 +1,11 @@
 #include <cmath>
+#include <cassert>
 #include "parameters.h"
 #include "draw_wife.h"
 #include "draw_husband.h"
 
 double calculate_wage_h(const Parameters& p, const Husband& husband, double epsilon) {
+    assert(husband.H_SC + husband.H_HSD + husband.H_HSG + husband.H_CG + husband.H_PC == 1);
     const double tmp1 = husband.ability_h_value + p.beta10_h*(husband.HE*husband.H_HSD) + p.beta11_h*(husband.HE*husband.H_HSG) + 
         p.beta12_h*(husband.HE*husband.H_SC) + p.beta13_h*(husband.HE*husband.H_CG) + p.beta14_h*(husband.HE*husband.H_PC) +
         p.beta20_h*pow(husband.HE*husband.H_HSD,2) + p.beta21_h*pow(husband.HE*husband.H_HSG,2) + p.beta22_h*pow(husband.HE*husband.H_SC,2) + 
@@ -14,6 +16,7 @@ double calculate_wage_h(const Parameters& p, const Husband& husband, double epsi
 }
 
 double calculate_wage_w(const Parameters& p, const Wife& wife, double w_draw, double epsilon) {
+    assert(wife.SC + wife.HSD + wife.HSG + wife.CG + wife.PC == 1);
     const double PROB_TMP = p.row0_w*wife.prev_state_w + p.row11_w*wife.HSG + p.row12_w*wife.SC + p.row13_w*wife.CG + p.row14_w*wife.PC + p.row2_w*wife.WE;
     const double PROB_W = exp(PROB_TMP)/(1.0+exp(PROB_TMP));
     if (PROB_W > w_draw) {

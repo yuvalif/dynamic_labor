@@ -34,12 +34,6 @@ public:
         }
     }
 
-	void test_empty_husband() {
-        print_parameters(p);
-        Husband husband;
-        loop_over_all_husband_values(husband, 0.0, 10.0);
-    }
-
 	void test_husband_hsd() {
         Husband husband;
         husband.H_HSD = 1;
@@ -68,11 +62,6 @@ public:
         Husband husband;
         husband.H_SC = 1;
         loop_over_all_husband_values(husband, 10000.0, 400000.0);
-    }
-
-	void test_empty_wife() {
-        Wife wife;
-        loop_over_all_wife_values(wife, 0.0, 10.0);
     }
 
 	void test_wife_hsg() {

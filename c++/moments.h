@@ -6,7 +6,7 @@
 const size_t WAGE_MOM_ROW = 36;
 const size_t WAGE_MOM_COL = 10;
 const size_t MARR_MOM_ROW = 28;
-const size_t MARR_MOM_COL = 9;
+const size_t MARR_MOM_COL = 13; // should be 9
 const size_t EMP_MOM_ROW = 28;
 const size_t EMP_MOM_COL = 13;
 const size_t GEN_MOM_ROW = 62;

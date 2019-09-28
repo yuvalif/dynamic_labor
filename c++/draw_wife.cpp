@@ -15,12 +15,16 @@ bool update_wife_schooling(unsigned WS, unsigned t, Wife& wife) {
     }
     if (WS == 1) {
         wife.HSG = 1;
+        wife.SC = 0; wife.CG = 0; wife.PC = 0;
     } else if (WS == 2) {
         wife.SC = 1;
+        wife.HSG = 0; wife.CG = 0; wife.PC = 0;
     } else if (WS == 3) {
         wife.CG = 1;
+        wife.HSG = 0; wife.SC = 0; wife.PC = 0;
     } else if (WS == 4) {
         wife.PC = 1;
+        wife.HSG = 0; wife.SC = 0; wife.CG = 0;
     } else {
         assert(false);
     }
@@ -32,7 +36,7 @@ Wife draw_wife(const Parameters& p, unsigned t, unsigned age_index, unsigned sch
     result.ability_wi = h_draw_3();
     result.Q_INDEX = h_draw_3();
     // TODO move wife ability function
-    result.ability_w_value = normal_arr[result.ability_wi]*p.sigma[2];
+    result.ability_w_value = normal_arr[result.ability_wi]*p.sigma[3];
     result.Q = normal_arr[result.Q_INDEX]*p.sigma[4];
 
     const auto& wives_arr = p.wives[t+age_index];

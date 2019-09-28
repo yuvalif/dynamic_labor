@@ -3,6 +3,7 @@
 class Parameters;
 
 struct Husband {
+    unsigned ID = 0;
     unsigned H_HSD = 0;
     unsigned H_HSG = 0;
     unsigned H_SC = 0;
@@ -29,4 +30,6 @@ Husband draw_husband(const Parameters& p, unsigned t, unsigned age_index, unsign
 bool update_husband_schooling(unsigned HS, unsigned t, Husband& husband);
 
 void update_ability(const Parameters& p, unsigned ability, Husband& husband);
+
+void print_husband(const Husband& husband);
 

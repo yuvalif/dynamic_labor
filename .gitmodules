@@ -2,3 +2,7 @@
 	path = c++/cpp-text-table
 	url = https://github.com/haarcuba/cpp-text-table.git
 	branch = master
+[submodule "c++/argh"]
+	path = c++/argh
+	url = https://github.com/adishavit/argh.git
+	branch = master

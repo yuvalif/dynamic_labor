@@ -3,11 +3,11 @@
 #include "calculate_utility.h"
 
 struct MarriageDecision {
-    unsigned M;
-    unsigned max_weighted_utility_index;
-    double outside_option_w_v;
-    double outside_option_h_v;
-    unsigned outside_option_w;
+    unsigned M = 0;
+    unsigned max_weighted_utility_index = 0;
+    double outside_option_w_v = MINIMUM_UTILITY;
+    double outside_option_h_v = MINIMUM_UTILITY;
+    unsigned outside_option_w = 0;
 };
 
 class Wife;
