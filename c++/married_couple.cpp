@@ -64,7 +64,7 @@ unsigned married_couple(const Parameters& p, int WS, unsigned t, Emax& EMAX_W, E
                                                 p.row13_w*wife.CG + p.row14_w*wife.PC + p.row2_w*wife.WE;
                                             const auto PROB_W = exp(PROB_TMP)/(1.0+exp(PROB_TMP));
                                             auto wage_w = 0.0;
-                                            if (PROB_W > w_draw_p()) {
+                                            if (PROB_W > draw_p()) {
                                                 const auto tmp1 = wife.ability_w_value + p.beta11_w*wife.WE*wife.HSG + p.beta12_w*wife.WE*wife.SC + 
                                                     p.beta13_w*wife.WE*wife.CG + p.beta14_w*wife.WE*wife.PC +
                                                     pow(p.beta21_w*wife.WE*wife.HSG,2) + pow(p.beta22_w*wife.WE*wife.SC,2) + 

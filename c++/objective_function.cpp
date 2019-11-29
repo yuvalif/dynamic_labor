@@ -15,6 +15,7 @@
 #include "moments.h"
 #include "emax.h"
 #include "random_pools.h"
+#include "print_moments.h"
 
 unsigned calculate_emax(const Parameters& p, Emax& EMAX_W, Emax& EMAX_H) {
     unsigned iter_count = 0;
@@ -174,7 +175,7 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m, const 
             double BP = INITIAL_BP;
             // FIXME similar_educ is not used?
             // unsigned similar_educ = 0;
-            auto ability_wi = w_draw_3();
+            auto ability_wi = draw_3();
             auto ability_w = normal_arr[ability_wi]*p.sigma[3];
             unsigned ability_h = 0;
             std::array<unsigned, CS_SIZE> BP_INITIAL_DISTRIBUTION;
@@ -198,7 +199,7 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m, const 
                     // probability of meeting a potential husband
                     const auto choose_hudband_p = exp(p.p0_w+p.p1_w*(wife.AGE+t)+p.p2_w*pow(wife.AGE+t,2))/
                         (1.0+exp(p.p0_w+p.p1_w*(wife.AGE+t)+p.p2_w*pow(wife.AGE+t,2)));
-                    if (h_draw_p() < choose_hudband_p) {
+                    if (draw_p() < choose_hudband_p) {
                         CHOOSE_HUSBAND = 1;
                         husband = draw_husband(p, t, wife.age_index, wife.WS, wife.WS);
                         const auto dont_skip = update_husband_schooling(husband.HS, IGNORE_T, husband);
@@ -210,7 +211,7 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m, const 
 
                 // potential or current husband wage
                 const auto wage_h = (decision.M == 1 || CHOOSE_HUSBAND == 1) ? calculate_wage_h(p, husband, epsilon()) : 0.0;
-                const auto wage_w = calculate_wage_w(p, wife, w_draw_p(), epsilon());
+                const auto wage_w = calculate_wage_w(p, wife, draw_p(), epsilon());
 
                 const auto NOT_SINGLE_MEN = false;
                 const auto CHOOSE_WIFE = 1;
@@ -244,15 +245,19 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m, const 
                         ++marriage_choice[t][school_group];
                     }
                     if (wife.prev_state_w == 1) {
+                        // getting married and employed
                         ++emp_choice_w[t+wife.age_index][school_group];
+                    } else {
+                        // getting married and unemployed
+                        // FIXME which moment to increment?
                     }
                 } else if (decision.M == 0 && CHOOSE_HUSBAND == 0) {
                     // remains unmarried
                     if (decision.outside_option_w == 1) { 
-                        // unmarried+wife unemployed
-                        // TODO which moment to increment?
+                        // unmarried and unemployed
+                        // FIXME which moment to increment?
                     } else { 
-                        // unmarried+wife employed
+                        // unmarried and employed
                         ++emp_choice_w[t+wife.age_index][school_group];
                     }
                 }
@@ -287,7 +292,7 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m, const 
                     p.c8*wife.PC*(wife.AGE+t) + p.c9*wife.PC*pow(wife.AGE+t,2) + p.c10*N_KIDS + p.c11*husband.HS*decision.M + p.c12*decision.M;
                 const auto child_prob = boost::math::cdf(normal_dist, c_lamda);
                 // FIXME: use array for count_ageN
-                if (w_draw_p() < child_prob && wife.AGE+t < 40)  { 
+                if (draw_p() < child_prob && wife.AGE+t < 40)  { 
                     NEW_BORN = 1;
                     if (N_KIDS < 3) {
                         ++N_KIDS;
@@ -341,7 +346,7 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m, const 
                     DIVORCE = 0;
                     ++duration;
                     Q_minus_1 = wife.Q;
-                    const auto MATCH_QUALITY_CHANGE_PROBABIITY = h_draw_p();
+                    const auto MATCH_QUALITY_CHANGE_PROBABIITY = draw_p();
                     if (MATCH_QUALITY_CHANGE_PROBABIITY < p.MATCH_Q_DECREASE && wife.Q_INDEX > 0) {
                         --wife.Q_INDEX;
                         wife.Q = normal_arr[wife.Q_INDEX]*p.sigma[4];
@@ -562,24 +567,24 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m, const 
 
     // calculate employment moments
     for (auto t = 0; t < T_MAX; ++t) {
-        estimated.emp_moments[t][0] = t;
+        estimated.emp_moments[t][0] = t+18;
         auto offset = 1;
-        for (auto school_group = 0; school_group < SCHOOL_LEN; ++school_group) {
-            estimated.emp_moments[t][school_group+offset] = mean(emp_choice_w, count_emp_choice_w, t, school_group);
+        for (auto school_group : SCHOOL_W_VALUES) {
+            estimated.emp_moments[t][offset] = mean(emp_choice_w, count_emp_choice_w, t, school_group);
             ++offset;
         }
-        for (auto school_group = 0; school_group < SCHOOL_LEN; ++school_group) {
-            estimated.emp_moments[t][school_group+offset] = mean(emp_m, married, t, school_group);
+        for (auto school_group : SCHOOL_W_VALUES) {
+            estimated.emp_moments[t][offset] = mean(emp_m, married, t, school_group);
             ++offset;
         }
-        for (auto school_group = 0; school_group < SCHOOL_LEN; ++school_group) {
+        for (auto school_group : SCHOOL_W_VALUES) {
             const auto unmarried = DRAW_F - married[t][school_group];
             if (unmarried == 0) {
-                estimated.emp_moments[t][school_group+offset] = 0.0;
+                estimated.emp_moments[t][offset] = 0.0;
             } else {
-                estimated.emp_moments[t][school_group+offset] = emp_um[t][school_group]/(double)unmarried;
-            ++offset;
+                estimated.emp_moments[t][offset] = emp_um[t][school_group]/(double)unmarried;
             }
+            ++offset;
         }
     }
 
@@ -745,142 +750,6 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m, const 
     return estimated;
 }
 
-#include "cpp-text-table/TextTable.h"
-
-void print_mean_table(const std::string& table_name, const SchoolingMeanMatrix& m) {
-    TextTable table_headline('-', '|', '+' );
-    table_headline.add(table_name);
-    table_headline.endOfRow();
-
-    TextTable table('-', '|', '+');
-    // header
-    table.add("Time");
-    for (auto school_group : SCHOOL_H_VALUES) {
-        table.add(std::to_string(school_group));
-        table.setAlignment(school_group+1, TextTable::Alignment::RIGHT);
-    }
-    table.endOfRow();
-    // rows
-    for (auto t = 0U; t < T_MAX; ++t) {
-        table.add(std::to_string(t));
-        for (auto school_group : SCHOOL_H_VALUES) {
-            table.add(std::to_string(m.mean(t, school_group)));
-        }
-        table.endOfRow();
-    }
-    std::cout << table_headline;
-    std::cout << table;
-}
-
-void print_wage_moments(const WageMoments& m, bool estimated) {
-    TextTable table_headline('-', '|', '+' );
-    if (estimated) {
-        table_headline.add("Estimated Wage Moments");
-    } else {
-        table_headline.add("Actual Wage Moments");
-    }
-    table_headline.endOfRow();
-
-    TextTable table('-', '|', '+');
-    // header
-    table.add("Experience");
-    for (auto school_group : SCHOOL_W_VALUES) {
-        table.add(std::to_string(school_group+1));
-        table.setAlignment(school_group, TextTable::Alignment::RIGHT);
-    }
-    for (auto school_group : SCHOOL_H_VALUES) {
-        table.add(std::to_string(school_group+1));
-        table.setAlignment(school_group+5, TextTable::Alignment::RIGHT);
-    }
-    table.endOfRow();
-    // rows
-    const auto max_t = estimated ? T_MAX : WAGE_MOM_ROW;
-    for (auto t = 0U; t < max_t; ++t) {
-        table.add(std::to_string(m[t][0]));
-        for (auto school_group : SCHOOL_W_VALUES) {
-            table.add(std::to_string(m[t][school_group]));
-        }
-        for (auto school_group : SCHOOL_H_VALUES) {
-            table.add(std::to_string(m[t][school_group+5]));
-        }
-        table.endOfRow();
-    }
-    std::cout << table_headline;
-    std::cout << table;
-}
-
-void print_emp_moments(const EmpMoments& m) {
-    TextTable table_headline('-', '|', '+' );
-    table_headline.add("Employment Moments");
-    table_headline.endOfRow();
-
-    TextTable table('-', '|', '+');
-    // header
-    table.add("Age");
-    for (auto school_group : SCHOOL_W_VALUES) {
-        table.add(std::to_string(school_group+1));
-        table.setAlignment(school_group, TextTable::Alignment::RIGHT);
-    }
-    for (auto school_group : SCHOOL_W_VALUES) {
-        table.add(std::to_string(school_group+1));
-        table.setAlignment(school_group+4, TextTable::Alignment::RIGHT);
-    }
-    for (auto school_group : SCHOOL_W_VALUES) {
-        table.add(std::to_string(school_group+1));
-        table.setAlignment(school_group+8, TextTable::Alignment::RIGHT);
-    }
-    table.endOfRow();
-    // rows
-    for (auto t = 0U; t < EMP_MOM_ROW; ++t) {
-        table.add(std::to_string(m[t][0]));
-        for (auto school_group : SCHOOL_W_VALUES) {
-            table.add(std::to_string(m[t][school_group]));
-        }
-        for (auto school_group : SCHOOL_W_VALUES) {
-            table.add(std::to_string(m[t][school_group+4]));
-        }
-        for (auto school_group : SCHOOL_W_VALUES) {
-            table.add(std::to_string(m[t][school_group+8]));
-        }
-        table.endOfRow();
-    }
-    std::cout << table_headline;
-    std::cout << table;
-}
-
-void print_marr_moments(const MarrMoments& m) {
-    TextTable table_headline('-', '|', '+' );
-    table_headline.add("Marriage/Fertility Moments");
-    table_headline.endOfRow();
-
-    TextTable table('-', '|', '+');
-    // header
-    table.add("Age");
-    for (auto school_group : SCHOOL_W_VALUES) {
-        table.add(std::to_string(school_group+1));
-        table.setAlignment(school_group, TextTable::Alignment::RIGHT);
-    }
-    for (auto school_group : SCHOOL_W_VALUES) {
-        table.add(std::to_string(school_group+1));
-        table.setAlignment(school_group+4, TextTable::Alignment::RIGHT);
-    }
-    table.endOfRow();
-
-    // rows
-    for (auto t = 0U; t < EMP_MOM_ROW; ++t) {
-        table.add(std::to_string(m[t][0]));
-        for (auto school_group : SCHOOL_W_VALUES) {
-            table.add(std::to_string(m[t][school_group]));
-        }
-        for (auto school_group : SCHOOL_W_VALUES) {
-            table.add(std::to_string(m[t][school_group+4]));
-        }
-        table.endOfRow();
-    }
-    std::cout << table_headline;
-    std::cout << table;
-}
-
 double objective_function(const Parameters& p, const Moments& m, bool display_moments, bool no_emax) {
     auto EMAX_W = make_emax();
     auto EMAX_H = make_emax();
@@ -891,6 +760,8 @@ double objective_function(const Parameters& p, const Moments& m, bool display_mo
         const auto t_end = std::chrono::high_resolution_clock::now();
         std::cout << "emax calculation did " << iter_count << " iterations, over " 
             << std::chrono::duration<double, std::milli>(t_end-t_start).count() << " milliseconds" << std::endl;;
+    } else {
+        std::cout << "running static model (no emax calculation)" << std::endl;
     }
 
     const auto estimated_moments = calculate_moments(p, m, EMAX_W, EMAX_H);    
@@ -907,10 +778,12 @@ double objective_function(const Parameters& p, const Moments& m, bool display_mo
         print_mean_table("Match Quality Down", estimated_moments.match_w_down);
         print_wage_moments(estimated_moments.wage_moments, true);
         print_wage_moments(m.wage_moments, false);
-        print_emp_moments(estimated_moments.emp_moments);
-        print_emp_moments(m.emp_moments);
-        print_marr_moments(estimated_moments.marr_fer_moments);
-        print_marr_moments(m.marr_fer_moments);
+        print_emp_moments(estimated_moments.emp_moments, true);
+        print_emp_moments(m.emp_moments, false);
+        print_marr_moments(estimated_moments.marr_fer_moments, true);
+        print_marr_moments(m.marr_fer_moments, false);
+        print_gen_moments(estimated_moments.general_moments, true);
+        print_gen_moments(m.general_moments, false);
     }
 
     // objective function calculation

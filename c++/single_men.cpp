@@ -33,7 +33,7 @@ unsigned single_men(const Parameters& p, unsigned HS, unsigned t, const Emax& EM
                 // PROBABILITY OF MEETING A POTENTIAL HUSBAND
                 const auto P_WIFE = exp(p.p0_h+p.p1_h*(husband.AGE+t)+p.p2_h*pow(husband.AGE+t,2))/(1.0+exp(p.p0_h+p.p1_h*(husband.AGE+t)+p.p2_h*pow(husband.AGE+t,2))); 
                 unsigned CHOOSE_WIFE = 0;
-                if (h_draw_p() < P_WIFE) {
+                if (draw_p() < P_WIFE) {
                     CHOOSE_WIFE = 1;
                     wife = draw_wife(p, t, husband.age_index, HS);
                 }
@@ -42,7 +42,7 @@ unsigned single_men(const Parameters& p, unsigned HS, unsigned t, const Emax& EM
                 double wage_w = 0.0;
                 // JOB OFFER PROBABILITY + WAGE WIFE
                 if  (CHOOSE_WIFE == 1) {
-                    wage_w = calculate_wage_w(p, wife, w_draw_p(), epsilon());
+                    wage_w = calculate_wage_w(p, wife, draw_p(), epsilon());
                 }
 
                 // calculate husbands and wives utility from each option -inf for unavailable

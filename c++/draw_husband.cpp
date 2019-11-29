@@ -49,8 +49,8 @@ Husband draw_husband(const Parameters& p, unsigned t, unsigned age_index, unsign
 
     result.ID = ++id;
 
-    update_ability(p, h_draw_3(), result);
-    result.Q_INDEX = h_draw_3();
+    update_ability(p, draw_3(), result);
+    result.Q_INDEX = draw_3();
     result.Q = normal_arr[result.Q_INDEX]*p.sigma[4];
 
     assert(WS > 0 && WS < 5);
@@ -68,7 +68,7 @@ Husband draw_husband(const Parameters& p, unsigned t, unsigned age_index, unsign
 
     const auto& husband_arr = (*tmp_husbands)[t+age_index];
 
-    const auto prob = h_draw_p();
+    const auto prob = draw_p();
 
     // find the first index in the husband array that is not less than the probability
     // note: first column of the husband matrix is skipped since it is just an index, hence the: "+1"

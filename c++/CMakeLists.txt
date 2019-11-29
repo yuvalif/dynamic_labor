@@ -7,8 +7,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(Boost REQUIRED)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -Wno-sign-compare -O3 -ffast-math -DDRAWS=1")
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -Wno-sign-compare -O0 -DDRAWS=10")
+# TODO add proper Debug/Release targets
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -Wno-sign-compare -O3 -ffast-math")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g3 -Wall -Werror -Wno-sign-compare -O0 -DDRAWS=10")
 set(CMAKE_BUILD_TYPE Debug)
 
 add_library(dynamic_labor 
@@ -28,6 +29,7 @@ add_library(dynamic_labor
     married_couple.cpp
     load_files.cpp
     objective_function.cpp
+    print_moments.cpp
     )
 
 set_target_properties(dynamic_labor PROPERTIES CXX_STANDARD 17)
@@ -55,6 +57,8 @@ if(CXXTEST_FOUND)
     CXXTEST_ADD_TEST(unittest_marriage_decision marriage_decision_test.cpp ${CMAKE_CURRENT_SOURCE_DIR}/marriage_decision_test.h)
     CXXTEST_ADD_TEST(unittest_matrix matrix_test.cpp ${CMAKE_CURRENT_SOURCE_DIR}/matrix_test.h)
     CXXTEST_ADD_TEST(unittest_value_to_index value_to_index_test.cpp ${CMAKE_CURRENT_SOURCE_DIR}/value_to_index_test.h)
+    CXXTEST_ADD_TEST(unittest_random_pools random_pools_test.cpp ${CMAKE_CURRENT_SOURCE_DIR}/random_pools_test.h)
+    target_link_libraries (unittest_random_pools dynamic_labor)
 endif()
 
 # TODO: add dynamic_labor_estimate target for automatic model estimation

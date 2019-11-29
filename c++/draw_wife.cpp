@@ -33,15 +33,15 @@ bool update_wife_schooling(unsigned WS, unsigned t, Wife& wife) {
 
 Wife draw_wife(const Parameters& p, unsigned t, unsigned age_index, unsigned school_group) {
     Wife result;
-    result.ability_wi = h_draw_3();
-    result.Q_INDEX = h_draw_3();
+    result.ability_wi = draw_3();
+    result.Q_INDEX = draw_3();
     // TODO move wife ability function
     result.ability_w_value = normal_arr[result.ability_wi]*p.sigma[3];
     result.Q = normal_arr[result.Q_INDEX]*p.sigma[4];
 
     const auto& wives_arr = p.wives[t+age_index];
 
-    const auto prob = h_draw_p();
+    const auto prob = draw_p();
 
     // find the first index in the wife array that is not less than the probability
     // note: first column of the wife matrix is skipped since it is just an index, hence the: "+1"

@@ -44,7 +44,7 @@ unsigned single_women(const Parameters& p, unsigned WS, unsigned t, Emax& EMAX_W
                             (1.0+exp(p.p0_w+p.p1_w*(wife.AGE+t)+p.p2_w*pow(wife.AGE+t,2)));
                         Husband husband;
                         // PROBABILITY OF MEETING A POTENTIAL HUSBAND
-                        if (h_draw_p() < P_HUSBAND) {
+                        if (draw_p() < P_HUSBAND) {
                             CHOOSE_HUSBAND = 1;
                             husband = draw_husband(p, t, wife.age_index, WS, WS);
                         }
@@ -53,7 +53,7 @@ unsigned single_women(const Parameters& p, unsigned WS, unsigned t, Emax& EMAX_W
                             wage_h = calculate_wage_h(p, husband, epsilon());
                         }
                         // JOB OFFER PROBABILITY + WAGE WIFE
-                        wage_w =  calculate_wage_w(p, wife, w_draw_p(), epsilon());
+                        wage_w =  calculate_wage_w(p, wife, draw_p(), epsilon());
                         // MAXIMIZATION - MARRIAGE + WORK DESICION
 
                         // calculate husbands and wives utility from each option -inf for unavailable
