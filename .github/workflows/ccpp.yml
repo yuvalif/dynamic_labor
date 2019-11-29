@@ -1,0 +1,21 @@
+name: C/C++ CI
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v1
+    - name: install-boost
+      run: sudo apt-get install -y libboost-all-dev
+    - name: install-cxxtest
+      run: sudo apt-get install -y install -y cxxtest
+    - name: cmake
+      run: mkdir -p c++/build && cd c++/build && cmake ..
+    - name: make
+      run: make
+    - name: make check
+      run: make check
