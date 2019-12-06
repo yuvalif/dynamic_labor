@@ -12,10 +12,14 @@ jobs:
     - name: install-boost
       run: sudo apt-get install -y libboost-all-dev
     - name: install-cxxtest
-      run: sudo apt-get install -y install -y cxxtest
+      run: sudo apt-get install -y cxxtest
+    - name: install-ctags
+      run: sudo apt-get install -y ctags
+    - name: submodules
+      run: git submodule update --init
     - name: cmake
       run: mkdir -p c++/build && cd c++/build && cmake ..
     - name: make
-      run: make
-    - name: test
-      run: make test
+      run: cd c++/build && make
+    - name: make check
+      run: cd c++/build && make check
