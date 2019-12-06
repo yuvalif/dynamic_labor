@@ -7,7 +7,7 @@
 #include "draw_husband.h"
 #include "calculate_wage.h"
 #include "calculate_utility.h"
-#include "marriage_decision.h"
+#include "marriage_emp_decision.h"
 #include "nash.h"
 #include <cstdlib>
 
@@ -59,7 +59,7 @@ unsigned single_men(const Parameters& p, unsigned HS, unsigned t, const Emax& EM
 
                 if (CHOOSE_WIFE == 1 && BP != -1.0) {
                     // marriage decision - outside option value wife
-                    const auto decision = marriage_decision(utility, BP, wife, husband);
+                    const auto decision = marriage_emp_decision(utility, BP, wife, husband);
                     if (decision.M == MARRIED) {
                         ADD_EMAX += utility.U_H[decision.max_weighted_utility_index];
                     } else {

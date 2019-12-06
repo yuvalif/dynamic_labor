@@ -17,7 +17,7 @@ double calculate_wage_h(const Parameters& p, const Husband& husband, double epsi
 
 double calculate_wage_w(const Parameters& p, const Wife& wife, double w_draw, double epsilon) {
     assert(wife.SC + wife.HSD + wife.HSG + wife.CG + wife.PC == 1);
-    const double PROB_TMP = p.row0_w*wife.prev_state_w + p.row11_w*wife.HSG + p.row12_w*wife.SC + p.row13_w*wife.CG + p.row14_w*wife.PC + p.row2_w*wife.WE;
+    const double PROB_TMP = p.row0_w*wife.emp_state + p.row11_w*wife.HSG + p.row12_w*wife.SC + p.row13_w*wife.CG + p.row14_w*wife.PC + p.row2_w*wife.WE;
     const double PROB_W = exp(PROB_TMP)/(1.0+exp(PROB_TMP));
     if (PROB_W > w_draw) {
         const double tmp1 = wife.ability_w_value + p.beta11_w*wife.WE*wife.HSG + p.beta12_w*wife.WE*wife.SC + p.beta13_w*wife.WE*wife.CG + 

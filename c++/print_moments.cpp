@@ -80,7 +80,7 @@ void print_emp_moments(const EmpMoments& m, bool estimated) {
     TextTable table('-', '|', '+');
     // header
     table.add(" ");
-    table.add("Choosing");table.add(" ");table.add(" ");table.add(" ");
+    table.add("Total");table.add(" ");table.add(" ");table.add(" ");
     table.add("Married");table.add(" ");table.add(" ");table.add(" ");
     table.add("Unmarried");table.add(" ");table.add(" ");table.add(" ");
     table.endOfRow();
@@ -120,6 +120,11 @@ void print_marr_moments(const MarrMoments& m, bool estimated) {
 
     TextTable table('-', '|', '+');
     // header
+    table.add(" ");
+    table.add("Marriage");table.add(" ");table.add(" ");table.add(" ");
+    table.add("Fertility");table.add(" ");table.add(" ");table.add(" ");
+    table.add("Divorce");table.add(" ");table.add(" ");table.add(" ");
+    table.endOfRow();
     table.add("Age");
     for (auto school_group : SCHOOL_W_VALUES) {
         table.add(std::to_string(school_group+1));
@@ -129,16 +134,16 @@ void print_marr_moments(const MarrMoments& m, bool estimated) {
         table.add(std::to_string(school_group+1));
         table.setAlignment(school_group+4, TextTable::Alignment::RIGHT);
     }
+    for (auto school_group : SCHOOL_W_VALUES) {
+        table.add(std::to_string(school_group+1));
+        table.setAlignment(school_group+8, TextTable::Alignment::RIGHT);
+    }
     table.endOfRow();
 
     // rows
-    for (auto t = 0U; t < EMP_MOM_ROW; ++t) {
-        table.add(std::to_string(m[t][0]));
-        for (auto school_group : SCHOOL_W_VALUES) {
-            table.add(std::to_string(m[t][school_group]));
-        }
-        for (auto school_group : SCHOOL_W_VALUES) {
-            table.add(std::to_string(m[t][school_group+4]));
+    for (auto t = 0U; t < MARR_MOM_ROW; ++t) {
+        for (auto col_idx = 0U; col_idx < MARR_MOM_COL; ++col_idx) {
+            table.add(std::to_string(m[t][col_idx]));
         }
         table.endOfRow();
     }

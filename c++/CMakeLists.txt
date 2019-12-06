@@ -9,7 +9,7 @@ find_package(Boost REQUIRED)
 
 # TODO add proper Debug/Release targets
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -Wno-sign-compare -O3 -ffast-math")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g3 -Wall -Werror -Wno-sign-compare -O0 -DDRAWS=10")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g3 -Wall -Werror -Wno-sign-compare -O0 -DDRAWS=100")
 set(CMAKE_BUILD_TYPE Debug)
 
 add_library(dynamic_labor 
@@ -23,7 +23,7 @@ add_library(dynamic_labor
     calculate_wage.cpp 
     value_to_index.cpp 
     calculate_utility.cpp
-    marriage_decision.cpp
+    marriage_emp_decision.cpp
     single_men.cpp
     single_women.cpp
     married_couple.cpp
@@ -54,7 +54,7 @@ if(CXXTEST_FOUND)
     CXXTEST_ADD_TEST(unittest_draw draw_test.cpp ${CMAKE_CURRENT_SOURCE_DIR}/draw_test.h)
     CXXTEST_ADD_TEST(unittest_gross_to_net gross_to_net_test.cpp ${CMAKE_CURRENT_SOURCE_DIR}/gross_to_net_test.h)
     target_link_libraries (unittest_gross_to_net dynamic_labor)
-    CXXTEST_ADD_TEST(unittest_marriage_decision marriage_decision_test.cpp ${CMAKE_CURRENT_SOURCE_DIR}/marriage_decision_test.h)
+    CXXTEST_ADD_TEST(unittest_marriage_emp_decision marriage_emp_decision_test.cpp ${CMAKE_CURRENT_SOURCE_DIR}/marriage_emp_decision_test.h)
     CXXTEST_ADD_TEST(unittest_matrix matrix_test.cpp ${CMAKE_CURRENT_SOURCE_DIR}/matrix_test.h)
     CXXTEST_ADD_TEST(unittest_value_to_index value_to_index_test.cpp ${CMAKE_CURRENT_SOURCE_DIR}/value_to_index_test.h)
     CXXTEST_ADD_TEST(unittest_random_pools random_pools_test.cpp ${CMAKE_CURRENT_SOURCE_DIR}/random_pools_test.h)

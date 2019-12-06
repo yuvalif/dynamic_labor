@@ -67,7 +67,8 @@ Wife draw_wife(const Parameters& p, unsigned t, unsigned age_index, unsigned sch
     result.WE = exp_vector[index%5];
 
     // [0,4]->0, [5,9]->1, [10,14]->0, [15-19]->1, etc.
-    result.prev_state_w = (index/5)%2; 
+    result.emp_state = (index/5)%2; 
+    assert(result.emp_state == EMP || result.emp_state == UNEMP);
     
     if (result.WS == school_group) {
         result.similar_educ = p.EDUC_MATCH[school_group];

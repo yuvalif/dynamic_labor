@@ -1,5 +1,5 @@
 #include <cxxtest/TestSuite.h>
-#include "marriage_decision.h"
+#include "marriage_emp_decision.h"
 
 class marriage_decision_suite : public CxxTest::TestSuite {
 public:

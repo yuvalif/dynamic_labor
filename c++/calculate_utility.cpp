@@ -32,7 +32,7 @@ Utility::Utility() {
 }
 
 Utility calculate_utility(const Parameters& p, const Emax& EMAX_W, const Emax& EMAX_H, unsigned kids,
-        double wage_h, double wage_w, unsigned CHOOSE_PARTNER,
+        double wage_h, double wage_w, bool choose_partner,
         unsigned M, const Wife& wife, const Husband& husband, unsigned t, double BP, bool single_men) {
 
     const auto T_END = single_men ? husband.T_END : wife.T_END;
@@ -45,7 +45,7 @@ Utility calculate_utility(const Parameters& p, const Emax& EMAX_W, const Emax& E
 
     auto kids_h = NO_KIDS;
 
-    if (M != 0  || CHOOSE_PARTNER != 0) {
+    if (M == MARRIED  || choose_partner) {
         kids_h = kids;
         // decision making - choose from up to 6 options, according to CHOOSE_HUSBAND and CHOOSE_WORK_H, CHOOSE_WORK_W  values
         // utility from each option:                                 
@@ -61,7 +61,7 @@ Utility calculate_utility(const Parameters& p, const Emax& EMAX_W, const Emax& E
             const auto women_cons_m2 = CS*total_cons2;          // women private consumption when married and employed
             const auto men_cons_m1 = (1.0-CS)*total_cons1;    // men private consumption when married and women unemployed
             const auto men_cons_m2 = (1.0-CS)*total_cons2;    // men private consumption when married and women employed
-            const auto UC_W1 = pow(women_cons_m1, p.alpha)/p.alpha + p.alpha1_w_m*kids + wife.Q + wife.similar_educ + p.alpha2_w*log(1.0+kids) + p.alpha3_w;
+            const auto UC_W1 = pow(women_cons_m1, p.alpha)/p.alpha + p.alpha1_w_m*kids + wife.Q + wife.similar_educ + p.alpha2_w*log1p(kids) + p.alpha3_w;
             const auto UC_W2 = pow(women_cons_m2, p.alpha)/p.alpha + p.alpha1_w_m*kids + wife.Q + wife.similar_educ;
             const auto UC_H1 = pow(men_cons_m1, p.alpha)/p.alpha   + p.alpha1_h_m*kids + wife.Q + wife.similar_educ;
             const auto UC_H2 = pow(men_cons_m2, p.alpha)/p.alpha   + p.alpha1_h_m*kids + wife.Q + wife.similar_educ;
@@ -101,7 +101,7 @@ Utility calculate_utility(const Parameters& p, const Emax& EMAX_W, const Emax& E
     }
 
     std::array<double, 2> UC_W_S{};
-    UC_W_S[0] = p.alpha1_w_s*(kids) + p.alpha2_w*log(1.0+kids) + p.alpha3_w;
+    UC_W_S[0] = p.alpha1_w_s*(kids) + p.alpha2_w*log1p(kids) + p.alpha3_w;
     const auto women_cons_s2 = net.net_income_s_w*(1.0+kids*0.4); // women private consumption when single and employed
     UC_W_S[1] = pow(women_cons_s2,p.alpha)/p.alpha + p.alpha1_w_s*kids;
     const auto UC_H_S = pow(net.net_income_s_h,p.alpha)/p.alpha;

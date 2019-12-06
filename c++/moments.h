@@ -18,11 +18,11 @@ const size_t GEN_MOM_COL = 4;
 // column 6-10  - annual wage for men by education group - run until initial exp+t == 35
 using WageMoments = Matrix<WAGE_MOM_ROW, WAGE_MOM_COL>;
 
-// marr_fer_moments - 9 by 28 matrix
-// TODO: should be 13 columns?
+// marr_fer_moments - 13 by 28 matrix
 // first column - age
 // column 2-5   - marriage rate by education group. start at t+age index
 // column 6-9   - frtility rate by education group. start at t+age index end at 42
+// column 10-13 - divorce rate by education group. start at t+age index end at 42
 using MarrMoments = Matrix<MARR_MOM_ROW, MARR_MOM_COL>;
 
 // emp_moments - 13 by 28 matrix

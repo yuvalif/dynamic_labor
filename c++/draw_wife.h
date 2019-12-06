@@ -16,7 +16,7 @@ struct Wife {
     // wife experience
     unsigned WE = 0;
 
-    unsigned prev_state_w = 0;
+    unsigned emp_state = 0;
     double ability_w_value = 0;
     unsigned ability_wi = 0;
     double Q = 0.0;

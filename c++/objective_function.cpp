@@ -8,7 +8,7 @@
 #include "draw_wife.h"
 #include "calculate_wage.h"
 #include "calculate_utility.h"
-#include "marriage_decision.h"
+#include "marriage_emp_decision.h"
 #include "nash.h"
 #include "parameters.h"
 #include "const_parameters.h"
@@ -60,8 +60,6 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m, const 
     boost::math::normal normal_dist;
     SchoolingMatrix emp_choice_w = {{{0}}};
     SchoolingMatrix count_emp_choice_w{{{0}}};
-    SchoolingMatrix marriage_choice{{{0}}};
-    SchoolingMatrix count_marriage_choice{{{0}}};
     SchoolingMatrix emp_m{{{0}}};         // employment married
     SchoolingMatrix emp_um{{{0}}};        // employment unmarried
     SchoolingMatrix emp_m_up{{{0}}};      // employment unmarried up
@@ -73,9 +71,6 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m, const 
     SchoolingMatrix emp_m_eq_below{{{0}}};
     SchoolingMatrix emp_m_up_above{{{0}}};
     SchoolingMatrix emp_m_eq_above{{{0}}};
-    // FIXME unused?
-    //SchoolingMatrix count_emp_m{{{0}}};
-    //SchoolingMatrix count_emp_um{{{0}}};
     SchoolingMatrix count_emp_m_up{{{0}}};
     SchoolingMatrix count_emp_m_down{{{0}}};
     SchoolingMatrix count_emp_m_eq{{{0}}};
@@ -151,9 +146,7 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m, const 
             Husband husband;
             Wife wife;
             update_wife_schooling(school_group, IGNORE_T, wife);
-            wife.prev_state_w = (draw_f > DRAW_F*UNEMP_WOMEN_RATIO) ? 1 : 0;
-            unsigned prev_state_w_T_minus_1 = 0;
-            // FIXME prev_state_h and prev_state_h_T_minus_1 not used?
+            wife.emp_state = (draw_f > DRAW_F*UNEMP_WOMEN_RATIO) ? 1 : 0;
 
             unsigned count_age1 = 0; // the age of the oldest child under6
             unsigned count_age2 = 0; // the age of the 2nd oldest child under6
@@ -161,7 +154,6 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m, const 
             unsigned count_age4 = 0; // the age of the 4th oldest child under6
             unsigned count_age5 = 0; // the age of the 5th oldest child under6
             // FIXME year_married not used?
-            unsigned M_T_minus_1 = 0;
             unsigned DIVORCE = 0;
             // FIXME should we use the newborn indicator insie or outside of the loop?
             //unsigned NEW_BORN = 0;
@@ -182,17 +174,18 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m, const 
             std::array<unsigned, CS_SIZE> BP_DISTRIBUTION;
             std::array<unsigned, UTILITY_SIZE> CS_DISTRIBUTION;
 
-            MarriageDecision decision;
+            MarriageEmpDecision decision;
             // make choices for all periods
             for (auto t = 0U; t < wife.T_END; ++t) {
-                unsigned CHOOSE_HUSBAND = 0;
-                prev_state_w_T_minus_1 = wife.prev_state_w;
-                // FIXME do we use prev_state_h_T_minus_1 ?
+                const auto prev_emp_state_w = wife.emp_state;
+                const auto prev_M = decision.M;
                 // FIXME duration_minus_1 is not used?
                 unsigned NEW_BORN = 0;
+
+                bool choose_husband = false;
                 // draw husband if not already married
-                if (decision.M == 0) {
-                    BP = 0.5;
+                if (decision.M == UNMARRIED) {
+                    BP = INITIAL_BP;
                     duration = 0;
                     wife.Q = 0.0;
                     // FIXME similar_educ is not used?
@@ -200,68 +193,48 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m, const 
                     const auto choose_hudband_p = exp(p.p0_w+p.p1_w*(wife.AGE+t)+p.p2_w*pow(wife.AGE+t,2))/
                         (1.0+exp(p.p0_w+p.p1_w*(wife.AGE+t)+p.p2_w*pow(wife.AGE+t,2)));
                     if (draw_p() < choose_hudband_p) {
-                        CHOOSE_HUSBAND = 1;
+                        choose_husband = true;
                         husband = draw_husband(p, t, wife.age_index, wife.WS, wife.WS);
                         const auto dont_skip = update_husband_schooling(husband.HS, IGNORE_T, husband);
                         assert(dont_skip);
-                    } else {
-                        CHOOSE_HUSBAND = 0;
                     }
                 }
 
                 // potential or current husband wage
-                const auto wage_h = (decision.M == 1 || CHOOSE_HUSBAND == 1) ? calculate_wage_h(p, husband, epsilon()) : 0.0;
+                const auto wage_h = (decision.M == MARRIED || choose_husband) ? calculate_wage_h(p, husband, epsilon()) : 0.0;
                 const auto wage_w = calculate_wage_w(p, wife, draw_p(), epsilon());
 
-                const auto NOT_SINGLE_MEN = false;
-                const auto CHOOSE_WIFE = 1;
-
-                // not married, but has potential husband - calculate initial BP
-                if (decision.M == 0 && CHOOSE_HUSBAND == 1) {
+                if (decision.M == UNMARRIED && choose_husband) {
+                    // not married, but has potential husband - calculate initial BP
                     BP = INITIAL_BP;
                     const Utility utility = calculate_utility(p, EMAX_W, EMAX_H, N_KIDS, wage_h, wage_w,
-                            CHOOSE_WIFE, decision.M, wife, husband, t, BP, NOT_SINGLE_MEN);
+                            true /*choose partner*/, decision.M, wife, husband, t, BP, false /*not single men*/);
                     BP = nash(p, utility, BP); // Nash bargaining at first period of marriage  
                     if (BP != NO_BP) {
                         const int BP_INDEX = round(BP*10.0)+1;
                         ++BP_INITIAL_DISTRIBUTION[BP_INDEX];
                     } else {
-                        CHOOSE_HUSBAND = 0;
+                        choose_husband = false;
                     }
                 }
 
-                // make new decision
-                if (decision.M == 1 || CHOOSE_HUSBAND == 1) {
+                if (decision.M == MARRIED || choose_husband) {
                     // at this point the BP is 0.5 if there is no marriage offer
-                    // BP is calculated by nash if offer given
+                    // BP is calculated by nash above if offer given
                     // and is from previous period if already married           
+                    // utility is calculated again based on the new BP
                     const Utility utility = calculate_utility(p, EMAX_W, EMAX_H, N_KIDS, wage_h, wage_w,
-                        CHOOSE_WIFE, decision.M, wife, husband, t, BP, NOT_SINGLE_MEN);
-                    decision = marriage_decision(utility, BP, wife, husband);
-                    // decided to get married
-                    M_T_minus_1 = decision.M;
-                    // marriage decision - outside option value wife
-                    if (decision.M == 1) {
-                        ++marriage_choice[t][school_group];
-                    }
-                    if (wife.prev_state_w == 1) {
-                        // getting married and employed
-                        ++emp_choice_w[t+wife.age_index][school_group];
-                    } else {
-                        // getting married and unemployed
-                        // FIXME which moment to increment?
-                    }
-                } else if (decision.M == 0 && CHOOSE_HUSBAND == 0) {
-                    // remains unmarried
-                    if (decision.outside_option_w == 1) { 
-                        // unmarried and unemployed
-                        // FIXME which moment to increment?
-                    } else { 
-                        // unmarried and employed
-                        ++emp_choice_w[t+wife.age_index][school_group];
-                    }
+                        true /*choose partner*/, decision.M, wife, husband, t, BP, false /*not single men*/);
+                    decision = marriage_emp_decision(utility, BP, wife, husband);
+                } else {
+                    const Utility utility = calculate_utility(p, EMAX_W, EMAX_H, N_KIDS, wage_h, wage_w,
+                        false /*no partner*/, decision.M, wife, husband, t, BP, false /*not single men*/);
+                    wife.emp_state = wife_emp_decision(utility);
                 }
-                ++count_marriage_choice[t][school_group];
+
+                emp_choice_w[t+wife.age_index][school_group] += wife.emp_state;
+                emp_m[t+wife.age_index][school_group] += decision.M == MARRIED ? wife.emp_state : 0;
+                emp_um[t+wife.age_index][school_group] += decision.M == UNMARRIED ? wife.emp_state : 0;
                 ++count_emp_choice_w[t+wife.age_index][school_group];
 
                 if (BP != NO_BP) {
@@ -287,7 +260,7 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m, const 
                 // c10 number of children at household    
                 // c11 schooling - husband  
                 // c12 unmarried
-                const auto c_lamda = p.c1*wife.prev_state_w + p.c2*wife.HSG*(wife.AGE+t) + p.c3*wife.HSG*pow(wife.AGE+t,2) + 
+                const auto c_lamda = p.c1*wife.emp_state + p.c2*wife.HSG*(wife.AGE+t) + p.c3*wife.HSG*pow(wife.AGE+t,2) + 
                     p.c4*wife.SC*(wife.AGE+t) + p.c5*wife.SC*pow(wife.AGE+t,2) + p.c6*wife.CG*(wife.AGE+t) + p.c7*wife.CG*pow(wife.AGE+t,2) + 
                     p.c8*wife.PC*(wife.AGE+t) + p.c9*wife.PC*pow(wife.AGE+t,2) + p.c10*N_KIDS + p.c11*husband.HS*decision.M + p.c12*decision.M;
                 const auto child_prob = boost::math::cdf(normal_dist, c_lamda);
@@ -362,35 +335,34 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m, const 
                 if (decision.M == 1) {
                     // MARRIED WOMEN EMPLOYMENT BY KIDS INDIVIDUAL MOMENTS
                     if (N_KIDS == 0) {
-                        emp_m_no_kids[t+age_index][school_group] += wife.prev_state_w; // employment married no kids
+                        emp_m_no_kids[t+age_index][school_group] += wife.emp_state; // employment married no kids
                         ++count_emp_m_no_kids[t+age_index][school_group];
                     } else if (N_KIDS == 1) {
-                        emp_m_one_kid[t+age_index][school_group] += wife.prev_state_w; // employment married 1 kid
+                        emp_m_one_kid[t+age_index][school_group] += wife.emp_state; // employment married 1 kid
                         ++count_emp_m_one_kid[t+age_index][school_group];
                     } else if (N_KIDS == 2) {
-                        emp_m_2_kids[t+age_index][school_group] += wife.prev_state_w; //employment married 2 kid
+                        emp_m_2_kids[t+age_index][school_group] += wife.emp_state; //employment married 2 kid
                         ++count_emp_m_2_kids[t+age_index][school_group];
                     } else if (N_KIDS == 3) {
-                        emp_m_3_kids[t+age_index][school_group] += wife.prev_state_w; // employment married 3 kid
+                        emp_m_3_kids[t+age_index][school_group] += wife.emp_state; // employment married 3 kid
                         ++count_emp_m_3_kids[t+age_index][school_group];
                     } else {
-                        emp_m_4plus_kids[t+age_index][school_group] += wife.prev_state_w; // employment married 4 kids
+                        emp_m_4plus_kids[t+age_index][school_group] += wife.emp_state; // employment married 4 kids
                         ++count_emp_m_4plus_kids[t+age_index][school_group];
                     }
                 } else { 
                     // UNMARRIED WOMEN EMPLOYMENT BY KIDS INDIVIDUAL MOMENTS
-                    emp_um[t+age_index][school_group] += wife.prev_state_w; // employment unmarried
                     if (N_KIDS == 0) {
-                        emp_um_no_kids[t+age_index][school_group] += wife.prev_state_w; // employment unmarried and no children
+                        emp_um_no_kids[t+age_index][school_group] += wife.emp_state; // un/employment unmarried and no children
                         ++count_emp_um_no_kids[t+age_index][school_group];
                     } else {
-                        emp_um_kids[t+age_index][school_group] += wife.prev_state_w; // employment unmarried and children
+                        emp_um_kids[t+age_index][school_group] += wife.emp_state; // un/employment unmarried and children
                         ++count_emp_um_kids[t+age_index][school_group];
                     } 
                 }
                 // EMPLOYMENT TRANSITION MATRIX
                 // FIXME: reorder if statements to decrease lines of code
-                if (wife.prev_state_w == 1 && prev_state_w_T_minus_1 == 0) {
+                if (wife.emp_state == EMP && prev_emp_state_w == UNEMP) {
                     // for transition matrix - unemployment to employment
                     if (decision.M ==1) {
                         ++just_found_job_m[t+age_index][school_group];
@@ -403,7 +375,7 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m, const 
                         ++just_found_job_um[t+age_index][school_group];
                         ++count_just_found_job_um[t+age_index][school_group];
                     }	
-                } else if (wife.prev_state_w == 0 && prev_state_w_T_minus_1 == 1) {
+                } else if (wife.emp_state == UNEMP && prev_emp_state_w == EMP) {
                     // for transition matrix - employment to unemployment
                     if (decision.M == 1) {
                         ++just_got_fired_m[t+age_index][school_group]; 
@@ -413,7 +385,7 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m, const 
                     } else {
                         ++just_got_fired_um[t+age_index][school_group];
                     }
-                } else if (wife.prev_state_w == 0 && prev_state_w_T_minus_1 == 0) {
+                } else if (wife.emp_state == UNEMP && prev_emp_state_w == UNEMP) {
                     // no change employment
                     if (decision.M == 1) {
                         ++count_just_found_job_m[t+age_index][school_group];
@@ -423,7 +395,7 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m, const 
                     } else {
                         ++count_just_found_job_um[t+age_index][school_group];
                     }	
-                } else if (wife.prev_state_w == 1 && prev_state_w_T_minus_1 == 1) {
+                } else if (wife.emp_state == EMP && prev_emp_state_w == EMP) {
                     // no change unemployment
                     if (decision.M == 1) {
                         ++count_just_got_fired_m[t+age_index][school_group];
@@ -436,46 +408,45 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m, const 
                 }
 
                 // women wages if employed by experience
-                if (wife.prev_state_w == 1 && wage_w > 0.0) {
+                if (wife.emp_state == EMP && wage_w > 0.0) {
                     wages_w.accumulate(wife.WE, school_group, wage_w);
                 }
 
                 // FIXME: reorder if statement to make code shorter
-                if (decision.M == 1) {
+                if (decision.M == MARRIED) {
                     assert(wage_h > 0.0); // husband always works
                     wages_m_h.accumulate(husband.HE, husband.HS, wage_h); // husband always works
-                    emp_m[t+age_index][school_group] += wife.prev_state_w; // employment married women  
                     if (school_group > husband.HS) { 
                         // women married down, men married up
-                        emp_m_down[t+age_index][school_group] += wife.prev_state_w;
+                        emp_m_down[t+age_index][school_group] += wife.emp_state;
                         ++count_emp_m_down[t+age_index][school_group];
                         if (husband.HE < 37  && wage_h > m.wage_moments[husband.HE][SCHOOL_LEN+husband.HS]) {
-                            emp_m_down_above[t+age_index][school_group] += wife.prev_state_w;
+                            emp_m_down_above[t+age_index][school_group] += wife.emp_state;
                             ++count_emp_m_down_above[t+age_index][school_group];
                         } else {	
-                            emp_m_down_below[t+age_index][school_group] += wife.prev_state_w;
+                            emp_m_down_below[t+age_index][school_group] += wife.emp_state;
                             ++count_emp_m_down_below[t+age_index][school_group];
                         }
                         wages_m_h_up.accumulate(husband.HE, husband.HS, wage_h); // married up men wages 
-                        if (M_T_minus_1 == 0) {
-                            // was not married before
+                        if (prev_M == UNMARRIED) {
+                            // first period of marriage
                             estimated.ability_h_up.accumulate(t+age_index, husband.HS, ability_h);
                             estimated.match_w_down.accumulate(t+age_index, school_group, Q_minus_1);
                         }
                     } else if (school_group < husband.HS) {
                         // women married up, men married down
-                        emp_m_up[t+age_index][school_group] += wife.prev_state_w;
+                        emp_m_up[t+age_index][school_group] += wife.emp_state;
                         ++count_emp_m_up[t+age_index][school_group];
                         if (husband.HE < 37 && wage_h > m.wage_moments[husband.HE][SCHOOL_LEN+husband.HS]) {
-                            emp_m_up_above[t+age_index][school_group] += wife.prev_state_w;
+                            emp_m_up_above[t+age_index][school_group] += wife.emp_state;
                             ++count_emp_m_up_above[t+age_index][school_group];
                         } else {
-                            emp_m_up_below[t+age_index][school_group] += wife.prev_state_w;
+                            emp_m_up_below[t+age_index][school_group] += wife.emp_state;
                             ++count_emp_m_up_below[t+age_index][school_group];
                         }
                         wages_m_h_down.accumulate(husband.HE, husband.HS, wage_h); // married down men wages
-                        if (M_T_minus_1 == 0) {
-                            // was not married before
+                        if (prev_M == UNMARRIED) {
+                            // first period of marriage
                             estimated.ability_h_down.accumulate(t+age_index, husband.HS, ability_h);
                             estimated.ability_w_up.accumulate(t+age_index, school_group, ability_w);
                             estimated.match_w_up.accumulate(t+age_index, school_group, Q_minus_1);
@@ -483,18 +454,18 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m, const 
                     } else {
                         // married equal
                         wages_m_h_eq.accumulate(husband.HE, husband.HS, wage_h); // married equal men wages 
-                        emp_m_eq[t+age_index][school_group] += wife.prev_state_w; //employment married equal women
+                        emp_m_eq[t+age_index][school_group] += wife.emp_state; //employment married equal women
                         ++count_emp_m_eq[t+age_index][school_group];
 
                         if (husband.HE < 37 && wage_h > m.wage_moments[husband.HE][SCHOOL_LEN+husband.HS+husband.HS]) {
-                            emp_m_eq_above[t+age_index][school_group] += wife.prev_state_w;
+                            emp_m_eq_above[t+age_index][school_group] += wife.emp_state;
                             ++count_emp_m_eq_above[t+age_index][school_group];
                         } else {
-                            emp_m_eq_below[t+age_index][school_group] += wife.prev_state_w;
+                            emp_m_eq_below[t+age_index][school_group] += wife.emp_state;
                             ++count_emp_m_eq_below[t+age_index][school_group];
                         }
-                        if (M_T_minus_1 == 0) {
-                            // was not married before
+                        if (prev_M == UNMARRIED) {
+                            // first period of marriage
                             estimated.ability_h_eq.accumulate(t+age_index, husband.HS, ability_h);
                             estimated.ability_w_eq.accumulate(t+age_index, school_group, ability_w);
                             estimated.match_w_eq.accumulate(t+age_index, school_group, Q_minus_1);
@@ -502,8 +473,8 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m, const 
                     }
                 }
 
-                if (wife.prev_state_w == 1) {
-                    // wife employed - prev_state_w is actually current state at this point
+                if (wife.emp_state == EMP) {
+                    // wife employed - emp_state is actually current state at this point
                     if (decision.M == 1) {
                         wages_m_w.accumulate(wife.WE, school_group, wage_w);          // married women wages if employed
                         if (school_group < husband.HS) {
@@ -534,7 +505,7 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m, const 
                     kids_um[school_group] += N_KIDS_UM;
                     ++count_kids[school_group];
                 }
-                if (decision.M == 1 && M_T_minus_1 == 0) {
+                if (decision.M == MARRIED && prev_M == UNMARRIED) {
                     // for transition matrix from single to married
                     ++just_married[t+age_index][school_group];
                     ++count_just_married[t+age_index][school_group];
@@ -544,7 +515,7 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m, const 
                         ++assortative_mating_count[school_group];
                         ++assortative_mating_hist[school_group][husband.HS];
                     } 
-                } else if (decision.M == 0 && M_T_minus_1 == 1) {
+                } else if (decision.M == MARRIED && prev_M == MARRIED) {
                     // for transition matrix from married to divorce
                     DIVORCE = 1;
                     ++just_divorced[t+age_index][school_group];
@@ -553,10 +524,10 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m, const 
                         duration_of_first_marriage[school_group] += (duration - 1); // duration of marriage if divorce 
                         ++count_dur_of_first_marriage[school_group];
                     }
-                } else if (decision.M == 0 && M_T_minus_1 == 0) {
+                } else if (decision.M == MARRIED && prev_M == UNMARRIED) {
                     // still single
                     ++count_just_married[t+age_index][school_group];
-                } else if (decision.M == 1 && M_T_minus_1 == 1) {
+                } else if (decision.M == MARRIED && prev_M == MARRIED) {
                     // still married
                     ++count_just_divorced[t+age_index][school_group];
                 }
@@ -590,18 +561,18 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m, const 
 
     // calculate marriage/fertility moments
     for (auto t = 0; t < T_MAX; ++t) {
-        estimated.marr_fer_moments[t][0] = t;
+        estimated.marr_fer_moments[t][0] = t+18;
         auto offset = 1;
-        for (auto school_group = 0; school_group < SCHOOL_LEN; ++school_group) {
-            estimated.marr_fer_moments[t][school_group+offset] = married[t][school_group]/(double)DRAW_F;
+        for (auto school_group : SCHOOL_W_VALUES) {
+            estimated.marr_fer_moments[t][offset] = married[t][school_group]/(double)DRAW_F;
             ++offset;
         }
-        for (auto school_group = 0; school_group < SCHOOL_LEN; ++school_group) {
-            estimated.marr_fer_moments[t][school_group+offset] = mean(newborn_m, count_newborn_m, t, school_group);
+        for (auto school_group : SCHOOL_W_VALUES) {
+            estimated.marr_fer_moments[t][offset] = mean(newborn_m, count_newborn_m, t, school_group);
             ++offset;
         }
-        for (auto school_group = 0; school_group < SCHOOL_LEN; ++school_group) {
-            estimated.marr_fer_moments[t][school_group+offset] = divorce[t][school_group]/(double)DRAW_F;
+        for (auto school_group : SCHOOL_W_VALUES) {
+            estimated.marr_fer_moments[t][offset] = divorce[t][school_group]/(double)DRAW_F;
             ++offset;
         }
     }

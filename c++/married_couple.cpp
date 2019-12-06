@@ -7,7 +7,7 @@
 #include "calculate_wage.h"
 #include "calculate_utility.h"
 #include "nash.h"
-#include "marriage_decision.h"
+#include "marriage_emp_decision.h"
 
 unsigned married_couple(const Parameters& p, int WS, unsigned t, Emax& EMAX_W, Emax& EMAX_H) { 
     unsigned iter_count = 0;
@@ -32,7 +32,7 @@ unsigned married_couple(const Parameters& p, int WS, unsigned t, Emax& EMAX_W, E
                     for (auto ability_hi : ABILITY_VALUES) {   
                         update_ability(p, ability_hi, husband);
                         for (auto prev : PREV_WORK_VALUES) { 
-                            wife.prev_state_w = prev;
+                            wife.emp_state = prev;
                             for (auto HS : SCHOOL_H_VALUES) {
                                 update_husband_schooling(HS, t, husband);
                                 if (HS == WS) {
@@ -60,7 +60,7 @@ unsigned married_couple(const Parameters& p, int WS, unsigned t, Emax& EMAX_W, E
                                             const auto tmp2 = epsilon()*p.sigma[0];
                                             const auto wage_h = exp(tmp1 + tmp2);
                                             // JOB OFFER PROBABILITY + WAGE WIFE
-                                            const auto PROB_TMP = p.row0_w*wife.prev_state_w + p.row11_w*wife.HSG + p.row12_w*wife.SC + 
+                                            const auto PROB_TMP = p.row0_w*wife.emp_state + p.row11_w*wife.HSG + p.row12_w*wife.SC + 
                                                 p.row13_w*wife.CG + p.row14_w*wife.PC + p.row2_w*wife.WE;
                                             const auto PROB_W = exp(PROB_TMP)/(1.0+exp(PROB_TMP));
                                             auto wage_w = 0.0;
@@ -80,7 +80,7 @@ unsigned married_couple(const Parameters& p, int WS, unsigned t, Emax& EMAX_W, E
                                                     CHOOSE_WIFE, MARRIED, wife, husband, t, BP, single_men);
 
                                             // marriage decision - outside option value wife
-                                            const MarriageDecision decision = marriage_decision(utility, BP, wife, husband);
+                                            const auto decision = marriage_emp_decision(utility, BP, wife, husband);
 
                                             if (decision.M == MARRIED) {
                                                 ADD_EMAX_H += utility.U_H[decision.max_weighted_utility_index];

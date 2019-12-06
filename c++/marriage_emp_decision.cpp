@@ -1,17 +1,21 @@
 #include "calculate_utility.h"
-#include "marriage_decision.h"
+#include "marriage_emp_decision.h"
 #include "draw_wife.h"
 #include "draw_husband.h"
 #include <stdexcept>
 #include <string>
 #include <cassert>
 
-MarriageDecision marriage_decision(const Utility& utility, double BP, Wife& wife, Husband& husband) {
+unsigned wife_emp_decision(const Utility& utility) {
+    return (utility.U_W_S[0] > utility.U_W_S[1]) ? UNEMP : EMP;
+}
 
-    MarriageDecision result;
+MarriageEmpDecision marriage_emp_decision(const Utility& utility, double BP, Wife& wife, Husband& husband) {
+
+    MarriageEmpDecision result;
     result.outside_option_w_v = std::max(utility.U_W_S[0], utility.U_W_S[1]);
     result.outside_option_h_v = utility.U_H_S;
-    result.outside_option_w = (utility.U_W_S[0] > utility.U_W_S[1]) ? UNEMP : EMP;
+    result.outside_option_w = wife_emp_decision(utility);
     
     if (BP < 0) {
         // no marriage is possible to begin with
@@ -44,12 +48,12 @@ MarriageDecision marriage_decision(const Utility& utility, double BP, Wife& wife
             result.M = MARRIED;
             if (max_weighted_utility_index < 11) {  
                 // 0-10 WOMEN UNEMPLOYED
-                wife.prev_state_w = 0;
+                wife.emp_state = UNEMP;
                 ++husband.HE;
                 return result;
             }
             // 11-21: wife employed  + husband employed
-            wife.prev_state_w = 1;
+            wife.emp_state = EMP;
             ++wife.WE;
             ++husband.HE;
             return result;
@@ -79,13 +83,13 @@ MarriageDecision marriage_decision(const Utility& utility, double BP, Wife& wife
 
     // no marriage
     result.M = UNMARRIED;
-    if (result.outside_option_w_v == 1) {  
-        // 3-unmarried+wife unemployed
-        wife.prev_state_w = 0;
+    if (result.outside_option_w == UNEMP) {  
+        // unmarried+wife unemployed
+        wife.emp_state = UNEMP;
         return result;
     } else {
-        // 3-unmarried+wife employed
-        wife.prev_state_w = 1;
+        // unmarried+wife employed
+        wife.emp_state = EMP;
         ++wife.WE;
     }
     return result;

@@ -7,7 +7,7 @@ struct NetIncome {
     double net_income_m_unemp{};
 };
 
-class Parameters;
+struct Parameters;
 
 NetIncome gross_to_net(const Parameters &p, unsigned kids, double wage_w, double wage_h, unsigned t, unsigned age_index);
 

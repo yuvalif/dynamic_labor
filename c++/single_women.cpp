@@ -7,7 +7,7 @@
 #include "calculate_wage.h"
 #include "calculate_utility.h"
 #include "nash.h"
-#include "marriage_decision.h"
+#include "marriage_emp_decision.h"
 
 unsigned single_women(const Parameters& p, unsigned WS, unsigned t, Emax& EMAX_W, const Emax& EMAX_H) { 
     unsigned iter_count = 0;
@@ -26,7 +26,7 @@ unsigned single_women(const Parameters& p, unsigned WS, unsigned t, Emax& EMAX_W
             double ADD_EMAX = 0;
             for (auto kids : KIDS_VALUES) {
                 for (auto prev : PREV_WORK_VALUES) { 
-                    wife.prev_state_w = prev - 1;
+                    wife.emp_state = prev - 1;
                     for (auto draw_b = 0U; draw_b <  DRAW_B; ++draw_b) {
                         // DRAW A HUSBAND 
                         const auto HS = 1; 
@@ -72,7 +72,7 @@ unsigned single_women(const Parameters& p, unsigned WS, unsigned t, Emax& EMAX_W
 
                         if (CHOOSE_HUSBAND == 1 && BP > -1) {
                             // marriage decision - outside option value wife
-                            const MarriageDecision decision = marriage_decision(utility, BP, wife, husband);
+                            const auto decision = marriage_emp_decision(utility, BP, wife, husband);
 
                             if (decision.M == MARRIED) {
                                 ADD_EMAX = ADD_EMAX + utility.U_W[decision.max_weighted_utility_index];
@@ -85,7 +85,7 @@ unsigned single_women(const Parameters& p, unsigned WS, unsigned t, Emax& EMAX_W
                         ++iter_count;
                     }   // end draw backward loop
                     EMAX_W[t][w_exp_i][1][kids][prev][ability_wi][1][UNMARRIED][1][WS][1][1] = ADD_EMAX/(double)DRAW_B;
-                } // end prev_state_w        
+                } // end emp_state        
             } // end of kids loop
         } // end single wemen ability loop
     } // end single women experience loop

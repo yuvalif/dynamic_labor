@@ -16,12 +16,12 @@ struct Utility {
     double U_H_S{};
 };
 
-class Parameters;
-class Wife;
-class Husband;
+struct Parameters;
+struct Wife;
+struct Husband;
 
 Utility calculate_utility(const Parameters& p, const Emax& EMAX_W, const Emax& EMAX_H, unsigned kids,
-        double wage_h, double wage_w, unsigned CHOOSE_PARTNER,
+        double wage_h, double wage_w, bool choose_partner,
         unsigned M, const Wife& wife, const Husband& husband, unsigned t, double BP, bool single_men);
 
 void print_utility(const Utility& u);

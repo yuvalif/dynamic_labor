@@ -2,7 +2,7 @@
 
 #include "calculate_utility.h"
 
-struct MarriageDecision {
+struct MarriageEmpDecision {
     unsigned M = 0;
     unsigned max_weighted_utility_index = 0;
     double outside_option_w_v = MINIMUM_UTILITY;
@@ -13,5 +13,7 @@ struct MarriageDecision {
 class Wife;
 class Husband;
 
-MarriageDecision marriage_decision(const Utility& utility, double BP, Wife& wife, Husband& husband);
+MarriageEmpDecision marriage_emp_decision(const Utility& utility, double BP, Wife& wife, Husband& husband);
+
+unsigned wife_emp_decision(const Utility& utility);
 
