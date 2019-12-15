@@ -162,10 +162,16 @@ void print_gen_moments(const GenMoments& m, bool estimated) {
 
     TextTable table('-', '|', '+');
     // header
-    // TODO: what is the header for this table?
+    table.add("Moment");
+    for (auto school_group : SCHOOL_W_VALUES) {
+        table.add(std::to_string(school_group));
+        table.setAlignment(school_group, TextTable::Alignment::RIGHT);
+    }
+    table.endOfRow();
 
     // rows
     for (auto i = 0U; i < GEN_MOM_ROW; ++i) {
+        table.add(std::to_string(i+1));
         for (auto j = 0U; j < GEN_MOM_COL; ++j) {
             table.add(std::to_string(m[i][j]));
         }

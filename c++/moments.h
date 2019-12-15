@@ -9,8 +9,8 @@ const size_t MARR_MOM_ROW = 28;
 const size_t MARR_MOM_COL = 13; // should be 9
 const size_t EMP_MOM_ROW = 28;
 const size_t EMP_MOM_COL = 13;
-const size_t GEN_MOM_ROW = 62;
-const size_t GEN_MOM_COL = 4;
+const size_t GEN_MOM_ROW = 31; // FIXME: was 62
+const size_t GEN_MOM_COL = SCHOOL_LEN-1;
 
 // wage_moments - 10 by 36 matrix
 // first column - potential or real experience
@@ -32,8 +32,22 @@ using MarrMoments = Matrix<MARR_MOM_ROW, MARR_MOM_COL>;
 // column 10-13 - unmarried women employment rate by education group. start at t+age index
 using EmpMoments = Matrix<EMP_MOM_ROW, EMP_MOM_COL>;
 
-// general_moments - 4 by 62 matrix (31 moments by education group)
-// 5 moments - assortative mating (H_HSD, H_HSG, H_SC, H_CG, H_PC)
+// general_moments - 4 by 62 matrix
+// 1-5 moments - assortative mating (H_HSD, H_HSG, H_SC, H_CG, H_PC)
+// 6 marriage duration
+// 7 age of first marriage
+// 8 total kids
+// 9-11 wage married up/equal/down
+// 12-14 emp married up/equal/down
+// 15-18 employment by number of children (married)
+// 19-20 employment with/without children (unmarried)
+// 21-26 transition matrix emp-unemp (m), unemp-emp(m), emp-unemp (um), unemp-emp(um), emp-unemp (m+), unemp-emp(m+)
+// 27-28 transition matrix marr-divorce, single-married
+// 29-30 birth rate m/um
+// 31-32 emp married up with husband wage above/below avg (no estimated moments)
+// 33-34 emp married eq with husband wage above/below avg (no estimated moments)
+// 35-36 emp married down with husband wage above/below avg (no estimated moments)
+// 38-39 standard variage of wage wife/husband (no estimated moments) 
 using GenMoments = Matrix<GEN_MOM_ROW, GEN_MOM_COL>;
 
 struct Moments {
