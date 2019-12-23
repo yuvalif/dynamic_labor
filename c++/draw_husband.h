@@ -1,6 +1,6 @@
 #pragma once
 
-class Parameters;
+struct Parameters;
 
 struct Husband {
     unsigned ID = 0;
@@ -17,7 +17,6 @@ struct Husband {
     unsigned ability_hi = 0;
     double Q = 0.0;
     unsigned Q_INDEX = 0;
-    unsigned similar_educ = 0.0;
     unsigned AGE = 0;
     unsigned age_index = 0;
     unsigned T_END = 0;

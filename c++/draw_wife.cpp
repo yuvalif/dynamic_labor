@@ -31,7 +31,7 @@ bool update_wife_schooling(unsigned WS, unsigned t, Wife& wife) {
     return true;
 }
 
-Wife draw_wife(const Parameters& p, unsigned t, unsigned age_index, unsigned school_group) {
+Wife draw_wife(const Parameters& p, unsigned t, unsigned age_index, unsigned HS) {
     Wife result;
     result.ability_wi = draw_3();
     result.Q_INDEX = draw_3();
@@ -70,8 +70,8 @@ Wife draw_wife(const Parameters& p, unsigned t, unsigned age_index, unsigned sch
     result.emp_state = (index/5)%2; 
     assert(result.emp_state == EMP || result.emp_state == UNEMP);
     
-    if (result.WS == school_group) {
-        result.similar_educ = p.EDUC_MATCH[school_group];
+    if (result.WS == HS) {
+        result.similar_educ = p.EDUC_MATCH[HS];
     }
 
     return result;

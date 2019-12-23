@@ -165,8 +165,6 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m, const 
             // unsigned duration_minus_1 = 0;
             double Q_minus_1 = 0.0;
             double BP = INITIAL_BP;
-            // FIXME similar_educ is not used?
-            // unsigned similar_educ = 0;
             auto ability_wi = draw_3();
             auto ability_w = normal_arr[ability_wi]*p.sigma[3];
             unsigned ability_h = 0;
@@ -194,7 +192,6 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m, const 
                     BP = INITIAL_BP;
                     duration = 0;
                     wife.Q = 0.0;
-                    // FIXME similar_educ is not used?
                     // probability of meeting a potential husband
                     const auto choose_hudband_p = exp(p.p0_w+p.p1_w*(wife.AGE+t)+p.p2_w*pow(wife.AGE+t,2))/
                         (1.0+exp(p.p0_w+p.p1_w*(wife.AGE+t)+p.p2_w*pow(wife.AGE+t,2)));
@@ -248,7 +245,7 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m, const 
                     const auto BP_INDEX = round(BP*10)+1;
                     ++BP_DISTRIBUTION[BP_INDEX];
                 }
-                if (decision.M == 1) {
+                if (decision.M == MARRIED) {
                     ++CS_DISTRIBUTION[decision.max_weighted_utility_index];
                 }
 
@@ -276,7 +273,7 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m, const 
                     if (N_KIDS < 3) {
                         ++N_KIDS;
                     }
-                    if (decision.M == 1) {
+                    if (decision.M == MARRIED) {
                         ++N_KIDS_M;
                     } else {
                         ++N_KIDS_UM;
@@ -320,7 +317,7 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m, const 
                 }
 
                 //  UPDARE T+1 STATE SPACE - match quality 
-                if (decision.M == 1) {
+                if (decision.M == MARRIED) {
                     // update the match quality
                     DIVORCE = 0;
                     ++duration;
@@ -338,7 +335,7 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m, const 
 
                 // FIXME: create an array by number of kids
                 const auto age_index = wife.age_index;
-                if (decision.M == 1) {
+                if (decision.M == MARRIED) {
                     // MARRIED WOMEN EMPLOYMENT BY KIDS INDIVIDUAL MOMENTS
                     if (N_KIDS == 0) {
                         emp_m_no_kids[t+age_index][school_group] += wife.emp_state; // employment married no kids
@@ -370,7 +367,7 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m, const 
                 // FIXME: reorder if statements to decrease lines of code
                 if (wife.emp_state == EMP && prev_emp_state_w == UNEMP) {
                     // for transition matrix - unemployment to employment
-                    if (decision.M ==1) {
+                    if (decision.M == MARRIED) {
                         ++just_found_job_m[t+age_index][school_group];
                         ++count_just_found_job_m[t+age_index][school_group];
                         if (N_KIDS >0) {
@@ -383,7 +380,7 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m, const 
                     }	
                 } else if (wife.emp_state == UNEMP && prev_emp_state_w == EMP) {
                     // for transition matrix - employment to unemployment
-                    if (decision.M == 1) {
+                    if (decision.M == MARRIED) {
                         ++just_got_fired_m[t+age_index][school_group]; 
                         if (N_KIDS > 0) {
                             ++just_got_fired_mc[t+age_index][school_group];
@@ -393,7 +390,7 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m, const 
                     }
                 } else if (wife.emp_state == UNEMP && prev_emp_state_w == UNEMP) {
                     // no change employment
-                    if (decision.M == 1) {
+                    if (decision.M == MARRIED) {
                         ++count_just_found_job_m[t+age_index][school_group];
                         if (N_KIDS > 0) {
                             ++count_just_found_job_mc[t+age_index][school_group];
@@ -403,7 +400,7 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m, const 
                     }	
                 } else if (wife.emp_state == EMP && prev_emp_state_w == EMP) {
                     // no change unemployment
-                    if (decision.M == 1) {
+                    if (decision.M == MARRIED) {
                         ++count_just_got_fired_m[t+age_index][school_group];
                         if (N_KIDS > 0) {
                             ++count_just_got_fired_mc[t+age_index][school_group];
@@ -481,7 +478,7 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m, const 
 
                 if (wife.emp_state == EMP) {
                     // wife employed - emp_state is actually current state at this point
-                    if (decision.M == 1) {
+                    if (decision.M == MARRIED) {
                         wages_m_w.accumulate(wife.WE, school_group, wage_w);          // married women wages if employed
                         if (school_group < husband.HS) {
                             wages_m_w_up.accumulate(wife.WE, school_group, wage_w);   // married up women wages if employed
@@ -498,7 +495,7 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m, const 
                 married[t+age_index][school_group] += decision.M;
 
                 // FERTILITY AND MARRIED RATE MOMENTS
-                if (decision.M ==1) {
+                if (decision.M == MARRIED) {
                     newborn_m[t+age_index][school_group] += NEW_BORN;
                     ++count_newborn_m[t+age_index][school_group];
                 } else {
@@ -589,12 +586,12 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m, const 
     // calculate wage moments
     for (auto t = 0; t < T_MAX; ++t) {
         estimated.wage_moments[t][0] = t; // FIXME experience?
-        auto offset = 0;
+        auto offset = 1;
         for (auto WS : SCHOOL_W_VALUES) {
             estimated.wage_moments[t][offset] = wages_w.mean(t, WS); 
             ++offset;
         }
-        for (auto HS : SCHOOL_W_VALUES) {
+        for (auto HS : SCHOOL_H_VALUES) {
             estimated.wage_moments[t][offset] = wages_m_h.mean(t, HS);
             ++offset;
         }

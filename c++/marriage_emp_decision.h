@@ -10,8 +10,8 @@ struct MarriageEmpDecision {
     unsigned outside_option_w = 0;
 };
 
-class Wife;
-class Husband;
+struct Wife;
+struct Husband;
 
 MarriageEmpDecision marriage_emp_decision(const Utility& utility, double BP, Wife& wife, Husband& husband);
 

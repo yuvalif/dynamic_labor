@@ -79,16 +79,11 @@ Husband draw_husband(const Parameters& p, unsigned t, unsigned age_index, unsign
         index = index_iter - husband_arr_begin;
     }
  
-
     // index will be in the range: 0-24 
     assert(index <= HUSBANDS_COL-2);
 
     // husband schooling is in the range: 0-4
     result.HS = index/5;
-
-    if (result.HS == school_group) {
-        result.similar_educ = p.EDUC_MATCH[school_group];
-    }
 
     return result;
 }
@@ -102,7 +97,6 @@ void print_husband(const Husband& husband) {
     std::cout << "\tExperience: " << husband.HE << std::endl;
     std::cout << "\tAbility: (" << husband.ability_hi << ", " << husband.ability_h_value << ")" << std::endl;
     std::cout << "\tMatch Quality: (" << husband.Q_INDEX << ", " << husband.Q << ")" << std::endl;
-    std::cout << "\tSimilar Education: " << husband.similar_educ << std::endl;
     std::cout << "\tAge: (" << husband.age_index << ", " << husband.AGE << ")" << std::endl;
     std::cout << "\tLast Period: " << husband.T_END << std::endl;
 }

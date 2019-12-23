@@ -1,8 +1,8 @@
 #pragma once
 
-class Parameters;
-class Wife;
-class Husband;
+struct Parameters;
+struct Wife;
+struct Husband;
 
 double calculate_wage_h(const Parameters& p, const Husband& husband, double epsilon);
 

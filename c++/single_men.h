@@ -2,7 +2,7 @@
 
 #include "emax.h"
 
-class Parameters;
+struct Parameters;
 
 // update husband emax for single men case
 // return number of internal iterations

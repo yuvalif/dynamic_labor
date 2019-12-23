@@ -2,7 +2,7 @@
 
 #include "emax.h"
 
-class Parameters;
+struct Parameters;
 
 // update wife and husband emax for married couple case
 // return number of internal iterations

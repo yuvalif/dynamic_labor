@@ -1,6 +1,6 @@
 #pragma once
 
-class Parameters;
+struct Parameters;
 
 struct Wife {
     // following are indicators for the wife's schooling
@@ -21,7 +21,7 @@ struct Wife {
     unsigned ability_wi = 0;
     double Q = 0.0;
     unsigned Q_INDEX = 0;
-    double similar_educ = 0;
+    double similar_educ = 0.0;
     unsigned AGE = 0;
     unsigned age_index = 0;
     unsigned T_END = 0;

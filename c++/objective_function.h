@@ -1,7 +1,7 @@
 #pragma once
 
-class Parameters;
-class Moments;
+struct Parameters;
+struct Moments;
 
 // the objective function is estimating the moments based on the input parameters and compare them to the actual moments
 // it return a single value that represent the difference between the estimated and actual moments
