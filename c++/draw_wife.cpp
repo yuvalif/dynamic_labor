@@ -31,13 +31,16 @@ bool update_wife_schooling(unsigned WS, unsigned t, Wife& wife) {
     return true;
 }
 
+void update_ability(const Parameters& p, unsigned ability, Wife& wife) {
+    wife.ability_wi = ability;
+    wife.ability_w_value = normal_arr[ability]*p.sigma[3];
+}
+
 Wife draw_wife(const Parameters& p, unsigned t, unsigned age_index, unsigned HS) {
     Wife result;
-    result.ability_wi = draw_3();
     result.Q_INDEX = draw_3();
-    // TODO move wife ability function
-    result.ability_w_value = normal_arr[result.ability_wi]*p.sigma[3];
     result.Q = normal_arr[result.Q_INDEX]*p.sigma[4];
+    update_ability(p, draw_3(), result);
 
     const auto& wives_arr = p.wives[t+age_index];
 

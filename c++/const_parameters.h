@@ -8,7 +8,7 @@
 #define DRAWS 100
 #endif
 
-const unsigned DRAW_B = DRAWS;
+const unsigned DRAW_B = DRAWS/3;
 const unsigned DRAW_F = DRAWS;
 
 const unsigned UNEMP = 0;
@@ -22,10 +22,11 @@ const double UNEMP_WOMEN_RATIO = 0.45;
 const double beta0 = 0.983;  // discount rate
 
 // use this instead of: std::numeric_limits<double>::lowest()
-// so it is more clear when the number is prited
+// so it is more clear when the number is printed
 const double MINIMUM_UTILITY = -99999.0;
 
 const auto CS_SIZE = 11;
+const unsigned UTILITY_SIZE = CS_SIZE*2;
 const std::array<double, CS_SIZE> cs_vector = {0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0};
 const std::array<double, CS_SIZE> bp_vector = cs_vector;
 
@@ -39,7 +40,6 @@ const int TERMINAL = 45;
 const int T_MAX = 28; // 28 periods, 45years - 18years
 const int EXP_W_LEN = 5; const auto EXP_W_VALUES = boost::irange(0, EXP_W_LEN);
 const int EXP_H_LEN = 5; const auto EXP_H_VALUES = boost::irange(0, EXP_H_LEN);
-// FIXME: kids should be upto 3+ or 4+ ?
 // number of children: (0, 1, 2, 3, 4+)
 const int KIDS_LEN = 5; const auto KIDS_VALUES = boost::irange(0, KIDS_LEN);
 // previous work status: (employed, unemployed)
@@ -55,12 +55,10 @@ const auto SCHOOL_W_VALUES = boost::irange(1, SCHOOL_LEN);
 // match quality: (high, medium, low)
 const int MATCH_Q_LEN = 3; const auto MATCH_Q_VALUES = boost::irange(0, MATCH_Q_LEN);
 // wife bargening power: (0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8)
-// FIXME 7 or 11?
 const int BP_W_LEN = 7; const auto BP_W_VALUES = boost::irange(0, BP_W_LEN);
 
 // 5 points grid for experience, use interpulations for the values between
 const std::array<unsigned, EXP_W_LEN> exp_vector = {0, 2, 4, 8, 16};
-// TODO: should we use: {0.0, 1.5, 3.5, 7.5, 15.0} ?
 
 const std::array<double, ABILITY_LEN> normal_arr = {-1.150, 0.0, 1.150};     // low, medium, high
 

@@ -9,7 +9,7 @@ const size_t MARR_MOM_ROW = 28;
 const size_t MARR_MOM_COL = 13; // should be 9
 const size_t EMP_MOM_ROW = 28;
 const size_t EMP_MOM_COL = 13;
-const size_t GEN_MOM_ROW = 31; // FIXME: in the actual general moments file there are 62
+const size_t GEN_MOM_ROW = 31;
 const size_t GEN_MOM_COL = SCHOOL_LEN-1;
 
 // wage_moments - 10 by 36 matrix
@@ -17,6 +17,8 @@ const size_t GEN_MOM_COL = SCHOOL_LEN-1;
 // column 2-5   - annual wage for women by education group - run until 27 for HSG, 25 for SC, 23 for CG and 20 for PC
 // column 6-10  - annual wage for men by education group - run until initial exp+t == 35
 using WageMoments = Matrix<WAGE_MOM_ROW, WAGE_MOM_COL>;
+// standard deviation of wage moments over T, one row matrix (no index column)
+using WageMomentsStdev = std::array<double, WAGE_MOM_COL-1>;
 
 // marr_fer_moments - 13 by 28 matrix
 // first column - age
@@ -24,6 +26,8 @@ using WageMoments = Matrix<WAGE_MOM_ROW, WAGE_MOM_COL>;
 // column 6-9   - frtility rate by education group. start at t+age index end at 42
 // column 10-13 - divorce rate by education group. start at t+age index end at 42
 using MarrMoments = Matrix<MARR_MOM_ROW, MARR_MOM_COL>;
+// standard deviation of marriage moments over T, one row matrix (no index column)
+using MarrMomentsStdev = std::array<double, MARR_MOM_COL-1>;
 
 // emp_moments - 13 by 28 matrix
 // first column - age
@@ -31,6 +35,8 @@ using MarrMoments = Matrix<MARR_MOM_ROW, MARR_MOM_COL>;
 // column 6-9   - married women employment rate by education group. start at t+age index
 // column 10-13 - unmarried women employment rate by education group. start at t+age index
 using EmpMoments = Matrix<EMP_MOM_ROW, EMP_MOM_COL>;
+// standard deviation of employment moments over T, one row matrix (no index column)
+using EmpMomentsStdev = std::array<double, EMP_MOM_COL-1>;
 
 // general_moments - 4 by 62 matrix
 // 1-5 moments - assortative mating (H_HSD, H_HSG, H_SC, H_CG, H_PC)
@@ -44,11 +50,9 @@ using EmpMoments = Matrix<EMP_MOM_ROW, EMP_MOM_COL>;
 // 22-27 transition matrix emp-unemp (m), unemp-emp(m), emp-unemp (um), unemp-emp(um), emp-unemp (m+), unemp-emp(m+)
 // 28-39 transition matrix marr-divorce, single-married
 // 30-31 birth rate m/um
-// 32-33 emp married up with husband wage above/below avg (no estimated moments)
-// 34-35 emp married eq with husband wage above/below avg (no estimated moments)
-// 36-37 emp married down with husband wage above/below avg (no estimated moments)
-// 38-39 standard variage of wage wife/husband (no estimated moments) 
 using GenMoments = Matrix<GEN_MOM_ROW, GEN_MOM_COL>;
+// standard deviation of general moments, each moments has its stdev
+using GenMomentsStdev = Matrix<GEN_MOM_ROW, GEN_MOM_COL>;
 
 const std::array<std::string, GEN_MOM_ROW> GenMomentsDescription = {
     "Assortative Mating - HSD",
@@ -100,6 +104,22 @@ struct Moments {
     const GenMoments general_moments;
 };
 
+struct MomentsStdev {
+    MomentsStdev(const WageMomentsStdev& _wage_moments_stdev,
+            const MarrMomentsStdev& _marr_fer_moments_stdev,
+            const EmpMomentsStdev& _emp_moments_stdev,
+            const GenMomentsStdev& _general_moments_stdev): 
+        wage_moments_stdev(_wage_moments_stdev),
+        marr_fer_moments_stdev(_marr_fer_moments_stdev),
+        emp_moments_stdev(_emp_moments_stdev),
+        general_moments_stdev(_general_moments_stdev) {}
+
+    const WageMomentsStdev wage_moments_stdev;
+    const MarrMomentsStdev marr_fer_moments_stdev;
+    const EmpMomentsStdev emp_moments_stdev;
+    const GenMomentsStdev general_moments_stdev;
+};
+
 using SchoolingMeanMatrix = MeanMatrix<T_MAX, SCHOOL_LEN>;
 using SchoolingMeanArray = MeanArray<SCHOOL_LEN>;
 
@@ -107,11 +127,12 @@ using SchoolingMatrix = UMatrix<T_MAX, SCHOOL_LEN>;
 using SchoolingArray = std::array<unsigned, SCHOOL_LEN>;
 
 struct EstimatedMoments {
+    // estimated moments
     WageMoments wage_moments;
     MarrMoments marr_fer_moments;
     EmpMoments emp_moments;
     GenMoments general_moments;
-    
+    // counter factuals
     SchoolingMeanMatrix ability_h_up;
     SchoolingMeanMatrix ability_h_down;
     SchoolingMeanMatrix ability_h_eq;
@@ -121,5 +142,20 @@ struct EstimatedMoments {
     SchoolingMeanMatrix match_w_up;
     SchoolingMeanMatrix match_w_down;
     SchoolingMeanMatrix match_w_eq;
+    std::array<unsigned, CS_SIZE> bp_initial_dist;
+    std::array<unsigned, CS_SIZE> bp_dist;
+    std::array<unsigned, UTILITY_SIZE> cs_dist;
+    SchoolingMeanMatrix wages_m_w;      // married women wages if employed
+    SchoolingMeanMatrix wages_m_h_up;   // married up men wages 
+    SchoolingMeanMatrix wages_m_h_down; // married down men wages 
+    SchoolingMeanMatrix wages_m_h_eq;   // married equal men wages 
+    SchoolingMeanArray n_kids_m_arr;    // # of children by school group for married women
+    SchoolingMeanArray n_kids_um_arr;   // # of children by school group for unmarried women
+    SchoolingMeanMatrix emp_m_up_below;
+    SchoolingMeanMatrix emp_m_down_below;
+    SchoolingMeanMatrix emp_m_down_above;
+    SchoolingMeanMatrix emp_m_eq_below;
+    SchoolingMeanMatrix emp_m_up_above;
+    SchoolingMeanMatrix emp_m_eq_above;
 };
 

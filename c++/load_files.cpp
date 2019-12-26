@@ -27,14 +27,14 @@ Matrix<ROW, COL> load_matrix(const std::string& file_name) {
     return m;
 }
 
-template <size_t ROW>
-std::array<double, ROW> load_array(const std::string& file_name) {
+template <size_t SIZE>
+std::array<double,SIZE> load_array(const std::string& file_name) {
     std::ifstream file(file_name);
     if (!file.is_open()) {
         throw std::runtime_error("failed to open: " + file_name);
     }
-    std::array<double, ROW> arr;
-    for (size_t i = 0; i < ROW; ++i) {
+    std::array<double, SIZE> arr;
+    for (size_t i = 0; i < SIZE; ++i) {
         file >> arr[i];
         if (!file.good()) {
             throw std::runtime_error("parse error in: '" + file_name + 
@@ -69,5 +69,15 @@ Moments load_moments(const std::string& wage_moments_file_name,
             load_matrix<MARR_MOM_ROW, MARR_MOM_COL>(marr_fer_moments_file_name),
             load_matrix<EMP_MOM_ROW, EMP_MOM_COL>(emp_moments_file_name),
             load_matrix<GEN_MOM_ROW, GEN_MOM_COL>(general_moments_file_name));
+}
+
+MomentsStdev load_moments_stdev(const std::string& wage_moments_stdev_file_name,
+        const std::string& marr_fer_moments_stdev_file_name,
+        const std::string& emp_moments_stdev_file_name,
+        const std::string& general_moments_stdev_file_name) {
+    return MomentsStdev(load_array<WAGE_MOM_COL-1>(wage_moments_stdev_file_name),
+            load_array<MARR_MOM_COL-1>(marr_fer_moments_stdev_file_name),
+            load_array<EMP_MOM_COL-1>(emp_moments_stdev_file_name),
+            load_matrix<GEN_MOM_ROW, GEN_MOM_COL>(general_moments_stdev_file_name));
 }
 

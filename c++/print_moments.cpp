@@ -1,6 +1,28 @@
 #include "print_moments.h"
 #include <iostream>
+#include <numeric>
 #include "cpp-text-table/TextTable.h"
+
+void print_mean_array(const std::string& table_name, const SchoolingMeanArray& m) {
+    TextTable table_headline('-', '|', '+' );
+    table_headline.add(table_name);
+    table_headline.endOfRow();
+
+    TextTable table('-', '|', '+');
+    // header
+    for (auto school_group : SCHOOL_W_VALUES) {
+        table.add(std::to_string(school_group+1));
+        table.setAlignment(school_group+1, TextTable::Alignment::RIGHT);
+    }
+    table.endOfRow();
+    for (auto school_group : SCHOOL_W_VALUES) {
+        table.add(std::to_string(m.mean(school_group)));
+    }
+    table.endOfRow();
+
+    std::cout << std::endl << table_headline;
+    std::cout << table;
+}
 
 void print_mean_table(const std::string& table_name, const SchoolingMeanMatrix& m) {
     TextTable table_headline('-', '|', '+' );
@@ -17,13 +39,13 @@ void print_mean_table(const std::string& table_name, const SchoolingMeanMatrix& 
     table.endOfRow();
     // rows
     for (auto t = 0U; t < T_MAX; ++t) {
-        table.add(std::to_string(t));
+        table.add(std::to_string(t+1));
         for (auto school_group : SCHOOL_H_VALUES) {
             table.add(std::to_string(m.mean(t, school_group)));
         }
         table.endOfRow();
     }
-    std::cout << table_headline;
+    std::cout << std::endl << table_headline;
     std::cout << table;
 }
 
@@ -55,7 +77,7 @@ void print_wage_moments(const WageMoments& m, bool estimated) {
     // rows
     const auto max_t = estimated ? T_MAX : WAGE_MOM_ROW;
     for (auto t = 0U; t < max_t; ++t) {
-        table.add(std::to_string(m[t][0]));
+        table.add(std::to_string(m[t][0]+1));
         for (auto school_group : SCHOOL_W_VALUES) {
             table.add(std::to_string(m[t][school_group]));
         }
@@ -64,7 +86,7 @@ void print_wage_moments(const WageMoments& m, bool estimated) {
         }
         table.endOfRow();
     }
-    std::cout << table_headline;
+    std::cout << std::endl << table_headline;
     std::cout << table;
 }
 
@@ -105,7 +127,7 @@ void print_emp_moments(const EmpMoments& m, bool estimated) {
         }
         table.endOfRow();
     }
-    std::cout << table_headline;
+    std::cout << std::endl << table_headline;
     std::cout << table;
 }
 
@@ -147,7 +169,7 @@ void print_marr_moments(const MarrMoments& m, bool estimated) {
         }
         table.endOfRow();
     }
-    std::cout << table_headline;
+    std::cout << std::endl <<  table_headline;
     std::cout << table;
 }
 
@@ -181,6 +203,7 @@ void print_gen_moments(const GenMoments& m, bool estimated) {
         }
         table.endOfRow();
     }
-    std::cout << table_headline;
+    std::cout << std::endl <<  table_headline;
     std::cout << table;
 }
+

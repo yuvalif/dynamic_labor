@@ -23,9 +23,19 @@ int main(int argc, char* argv[]) {
     if (cmdl[{"-d", "--data-dir"}]) {
         cmdl({"-d", "--data-dir"}) >> data_dir;
     }
-    const auto p = load_parameters(data_dir+"init_parameters.txt", data_dir+"tax_brackets.out", data_dir+"deductions_exemptions.out", data_dir+"wives.out", data_dir+"husbands");
-    const auto m = load_moments(data_dir+"wage_moments.txt", data_dir+"marr_fer_moments.txt", data_dir+"emp_moments.txt", data_dir+"general_moments.txt");
-    const double f = objective_function(p, m, verbose, no_emax);
+    const auto p = load_parameters(data_dir+"init_parameters.txt", 
+            data_dir+"tax_brackets.out", 
+            data_dir+"deductions_exemptions.out", 
+            data_dir+"wives.out", data_dir+"husbands");
+    const auto m = load_moments(data_dir+"wage_moments.txt", 
+            data_dir+"marr_fer_moments.txt", 
+            data_dir+"emp_moments.txt", 
+            data_dir+"general_moments.txt");
+    const auto m_stdev = load_moments_stdev(data_dir+"wage_moments_stdev.txt", 
+            data_dir+"marr_fer_moments_stdev.txt", 
+            data_dir+"emp_moments_stdev.txt", 
+            data_dir+"general_moments_stdev.txt");
+    const double f = objective_function(p, m, m_stdev, verbose, no_emax);
     // 2 emax matrixes: men and women
     std::cout << "state space = " << T_MAX*EXP_W_LEN*EXP_H_LEN*KIDS_LEN*PREV_WORK_LEN*ABILITY_LEN*ABILITY_LEN*MARITAL_LEN*(SCHOOL_LEN-1)*SCHOOL_LEN*MATCH_Q_LEN*BP_W_LEN*2 << std::endl;
     std::cout << "objective function = " << f << std::endl;

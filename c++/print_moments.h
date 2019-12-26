@@ -4,6 +4,8 @@
 
 void print_mean_table(const std::string& table_name, const SchoolingMeanMatrix& m);
 
+void print_mean_array(const std::string& table_name, const SchoolingMeanArray& m);
+
 void print_wage_moments(const WageMoments& m, bool estimated);
 
 void print_emp_moments(const EmpMoments& m, bool estimated);

@@ -28,7 +28,7 @@ unsigned married_couple(const Parameters& p, int WS, unsigned t, Emax& EMAX_W, E
             for (auto kids : KIDS_VALUES) {
                 for (auto ability_wi : ABILITY_VALUES) {
                     // wife ability - high, medium, low
-                    wife.ability_w_value = normal_arr[ability_wi]*p.sigma[3];
+                    update_ability(p, ability_wi, wife);
                     for (auto ability_hi : ABILITY_VALUES) {   
                         update_ability(p, ability_hi, husband);
                         for (auto prev : PREV_WORK_VALUES) { 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <array>
+#include <algorithm>
 
 // a Matrix is a 2D array of doubles (with static size)
 template <size_t ROW, size_t COL> using Matrix = std::array<std::array<double, COL>, ROW>;
@@ -9,10 +10,10 @@ template <size_t ROW, size_t COL> using Matrix = std::array<std::array<double, C
 // Matrix<3, 4> m;
 // m[1][2] = 42.0;
 
-// a Matrix is a 2D array of unsigned integers (with static size)
+// a UMatrix is a 2D array of unsigned integers (with static size)
 template <size_t ROW, size_t COL> using UMatrix = std::array<std::array<unsigned, COL>, ROW>;
 
-// return: lhs - rhs
+// return: lhs - rhs (element by element)
 template<size_t ROW, size_t COL> 
 Matrix<ROW, COL> diff(const Matrix<ROW, COL>& lhs, const Matrix<ROW, COL>& rhs) {
     Matrix<ROW, COL> result;
@@ -39,40 +40,49 @@ Matrix<ROW, COL> square_diff(const Matrix<ROW, COL>& lhs, const Matrix<ROW, COL>
 
 // return lhs/rhs (element by element)
 template<size_t ROW, size_t COL> 
-Matrix<ROW, COL> divide(const Matrix<ROW, COL>& lhs, const std::array<double, COL>& rhs) {
+Matrix<ROW, COL> divide(const Matrix<ROW, COL>& lhs, const Matrix<ROW, COL>& rhs) {
     Matrix<ROW, COL> result;
     for (auto i = 0; i < ROW; ++i) {
         for (auto j = 0; j < COL; ++j) {
-            result[i][j] = rhs[j] > 0 ? lhs[i][j]/rhs[j] : 0.0;
+            result[i][j] = lhs[i][j]/rhs[i][j];
         }
     }
     return result;
 }
 
-// return lhs/rhs^2 (element by element)
+// return sum of all elements of a matrix (skipping nan/inf etc.)
 template<size_t ROW, size_t COL> 
-Matrix<ROW, COL> divide_by_square(const Matrix<ROW, COL>& lhs, const std::array<double, COL>& rhs) {
-    Matrix<ROW, COL> result;
-    for (auto i = 0; i < ROW; ++i) {
-        for (auto j = 0; j < COL; ++j) {
-            result[i][j] = rhs[j] > 0 ? lhs[i][j]/(rhs[j]*rhs[j]) : 0.0;
-        }
-    }
-    return result;
-}
-
-// return sum of all elements of a matrix
-template<size_t ROW, size_t COL> 
-double total_sum(const Matrix<ROW, COL>& m) {
+double total_nansum(const Matrix<ROW, COL>& m) {
     double result = 0.0;
     for (auto i = 0; i < ROW; ++i) {
         for (auto j = 0; j < COL; ++j) {
-            result += m[i][j];
+            result += isfinite(m[i][j]) ? m[i][j] : 0.0;
         }
     }
     return result;
 }
 
+// return sum of all columns of a matrix (skipping nan/inf etc.)
+template<size_t ROW, size_t COL> 
+std::array<double, COL> column_nansum(const Matrix<ROW, COL>& m) {
+    std::array<double, COL> result{0.0};
+    for (auto i = 0; i < ROW; ++i) {
+        for (auto j = 0; j < COL; ++j) {
+            result[j] += isfinite(m[i][j]) ? m[i][j] : 0.0;
+        }
+    }
+    return result;
+}
+
+// column-wise mean square error of two matrices (skipping nan/inf etc.)
+template<size_t ROW, size_t COL> 
+std::array<double, COL> MSE(const Matrix<ROW, COL>& lhs, const Matrix<ROW, COL>& rhs) {
+    auto result = column_nansum(square_diff(lhs, rhs));
+    std::transform(result.begin(), result.end(), result.begin(), [](double d){return d/ROW;});
+    return result;
+}
+
+// serialize a mtrix to a string
 template<size_t ROW, size_t COL> 
 std::string to_string(const Matrix<ROW, COL>& m) {
     std::string result;

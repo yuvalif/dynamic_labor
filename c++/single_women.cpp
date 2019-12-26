@@ -21,8 +21,7 @@ unsigned single_women(const Parameters& p, unsigned WS, unsigned t, Emax& EMAX_W
     for (auto w_exp_i : EXP_W_VALUES) { 
         wife.WE = exp_vector[w_exp_i];
         for (auto ability_wi : ABILITY_VALUES) {
-            // wife ability - high, medium, low
-            wife.ability_w_value = normal_arr[ability_wi]*p.sigma[3];
+            update_ability(p, ability_wi, wife);
             double ADD_EMAX = 0;
             for (auto kids : KIDS_VALUES) {
                 for (auto prev : PREV_WORK_VALUES) { 

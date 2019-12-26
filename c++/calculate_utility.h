@@ -2,8 +2,7 @@
 
 #include <array>
 #include "emax.h"
-
-const unsigned UTILITY_SIZE = CS_SIZE*2;
+#include "const_parameters.h"
 
 using UtilityArray = std::array<double, UTILITY_SIZE>;
 
@@ -11,7 +10,6 @@ struct Utility {
     Utility(); // ctor
     UtilityArray U_W{};
     UtilityArray U_H{};
-    // FIXME: is it 22 or 2 items array?
     std::array<double, 2> U_W_S{};
     double U_H_S{};
 };
