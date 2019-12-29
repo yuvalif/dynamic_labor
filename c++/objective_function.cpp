@@ -152,7 +152,7 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m, const 
                     if (draw_p() < choose_hudband_p) {
                         choose_husband = true;
                         husband = draw_husband(p, t, wife.age_index, wife.WS, wife.WS);
-                        const auto dont_skip = update_husband_schooling(husband.HS, IGNORE_T, husband);
+                        [[maybe_unused]] const auto dont_skip = update_husband_schooling(husband.HS, IGNORE_T, husband);
                         assert(dont_skip);
                     }
                 }

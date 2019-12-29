@@ -17,7 +17,7 @@ template <size_t ROW, size_t COL> using UMatrix = std::array<std::array<unsigned
 template<size_t ROW, size_t COL> 
 Matrix<ROW, COL> diff(const Matrix<ROW, COL>& lhs, const Matrix<ROW, COL>& rhs) {
     Matrix<ROW, COL> result;
-    for (auto i = 0; i < ROW; ++i) {
+    for (auto i = 0U; i < ROW; ++i) {
         for (auto j = 0; j < COL; ++j) {
             result[i][j] = lhs[i][j] - rhs[i][j];
         }
@@ -29,8 +29,8 @@ Matrix<ROW, COL> diff(const Matrix<ROW, COL>& lhs, const Matrix<ROW, COL>& rhs) 
 template<size_t ROW, size_t COL> 
 Matrix<ROW, COL> square_diff(const Matrix<ROW, COL>& lhs, const Matrix<ROW, COL>& rhs) {
     Matrix<ROW, COL> result;
-    for (auto i = 0; i < ROW; ++i) {
-        for (auto j = 0; j < COL; ++j) {
+    for (auto i = 0U; i < ROW; ++i) {
+        for (auto j = 0U; j < COL; ++j) {
             auto const d = lhs[i][j] - rhs[i][j];
             result[i][j] = d*d;
         }
@@ -42,8 +42,8 @@ Matrix<ROW, COL> square_diff(const Matrix<ROW, COL>& lhs, const Matrix<ROW, COL>
 template<size_t ROW, size_t COL> 
 Matrix<ROW, COL> divide(const Matrix<ROW, COL>& lhs, const Matrix<ROW, COL>& rhs) {
     Matrix<ROW, COL> result;
-    for (auto i = 0; i < ROW; ++i) {
-        for (auto j = 0; j < COL; ++j) {
+    for (auto i = 0U; i < ROW; ++i) {
+        for (auto j = 0U; j < COL; ++j) {
             result[i][j] = lhs[i][j]/rhs[i][j];
         }
     }
@@ -54,8 +54,8 @@ Matrix<ROW, COL> divide(const Matrix<ROW, COL>& lhs, const Matrix<ROW, COL>& rhs
 template<size_t ROW, size_t COL> 
 double total_nansum(const Matrix<ROW, COL>& m) {
     double result = 0.0;
-    for (auto i = 0; i < ROW; ++i) {
-        for (auto j = 0; j < COL; ++j) {
+    for (auto i = 0U; i < ROW; ++i) {
+        for (auto j = 0U; j < COL; ++j) {
             result += isfinite(m[i][j]) ? m[i][j] : 0.0;
         }
     }
@@ -66,8 +66,8 @@ double total_nansum(const Matrix<ROW, COL>& m) {
 template<size_t ROW, size_t COL> 
 std::array<double, COL> column_nansum(const Matrix<ROW, COL>& m) {
     std::array<double, COL> result{0.0};
-    for (auto i = 0; i < ROW; ++i) {
-        for (auto j = 0; j < COL; ++j) {
+    for (auto i = 0U; i < ROW; ++i) {
+        for (auto j = 0U; j < COL; ++j) {
             result[j] += isfinite(m[i][j]) ? m[i][j] : 0.0;
         }
     }
@@ -86,8 +86,8 @@ std::array<double, COL> MSE(const Matrix<ROW, COL>& lhs, const Matrix<ROW, COL>&
 template<size_t ROW, size_t COL> 
 std::string to_string(const Matrix<ROW, COL>& m) {
     std::string result;
-    for (auto i = 0; i < ROW; ++i) {
-        for (auto j = 0; j < COL; ++j) {
+    for (auto i = 0U; i < ROW; ++i) {
+        for (auto j = 0U; j < COL; ++j) {
             result += std::to_string(m[i][j]);
             result += "\t";
         }
@@ -99,8 +99,8 @@ std::string to_string(const Matrix<ROW, COL>& m) {
 template<size_t ROW, size_t COL>
 class MeanMatrix {
     private:
-        std::array<std::array<double, COL>, ROW> sum{{{{0}}}};
-        UMatrix<ROW, COL> count{{{{0}}}};
+        std::array<std::array<double, COL>, ROW> sum{{{{0.0}}}};
+        UMatrix<ROW, COL> count{{{{0U}}}};
     public:
         void accumulate(size_t row, size_t col, double value) {
             sum[row][col] += value;
@@ -116,7 +116,7 @@ class MeanMatrix {
         double column_mean(size_t col) const {
             unsigned _count = 0;
             double _sum = 0;
-            for (auto i = 0; i < ROW; ++i) {
+            for (auto i = 0U; i < ROW; ++i) {
                 _count += count[i][col];
                 _sum += sum[i][col];
             }
@@ -128,8 +128,8 @@ class MeanMatrix {
 template<size_t SIZE>
 class MeanArray {
     private:
-        std::array<double, SIZE> sum{0};
-        std::array<unsigned, SIZE> count{0};
+        std::array<double, SIZE> sum{0.0};
+        std::array<unsigned, SIZE> count{0U};
     public:
         void accumulate(size_t idx, double value) {
             sum[idx] += value;
