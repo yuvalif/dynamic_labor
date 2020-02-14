@@ -674,14 +674,10 @@ double objective_function(const Parameters& p, const Moments& m, const MomentsSt
         print_mean_array("# Kids for Married Women", estimated_moments.n_kids_m_arr);
         print_mean_array("# Kids for Unmarried Women", estimated_moments.n_kids_um_arr);
 
-        print_wage_moments(estimated_moments.wage_moments, true);
-        print_wage_moments(m.wage_moments, false);
-        print_emp_moments(estimated_moments.emp_moments, true);
-        print_emp_moments(m.emp_moments, false);
-        print_marr_moments(estimated_moments.marr_fer_moments, true);
-        print_marr_moments(m.marr_fer_moments, false);
-        print_gen_moments(estimated_moments.general_moments, true);
-        print_gen_moments(m.general_moments, false);
+        print_wage_moments(estimated_moments.wage_moments, m.wage_moments);
+        print_emp_moments(estimated_moments.emp_moments, m.emp_moments);
+        print_marr_moments(estimated_moments.marr_fer_moments, m.marr_fer_moments);
+        print_gen_moments(estimated_moments.general_moments, m.general_moments);
     }
 
     // objective function calculation:
