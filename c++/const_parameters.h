@@ -2,14 +2,14 @@
 #include <array>
 #include <boost/range/irange.hpp>
 
-// number of draws backward/forward
-// allow to be set as a compilation flag, defaults to 100
+// number of draws backward
+// allow to be set as a compilation flag, defaults to 10
 #ifndef DRAWS
-#define DRAWS 100
+#define DRAWS 10
 #endif
 
-const unsigned DRAW_B = DRAWS/3;
-const unsigned DRAW_F = DRAWS;
+const unsigned DRAW_B = DRAWS;
+const unsigned DRAW_F = 1000;
 
 const unsigned UNEMP = 0;
 const unsigned EMP = 1;
