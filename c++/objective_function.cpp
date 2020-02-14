@@ -84,6 +84,7 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m, const 
     SchoolingArray count_just_found_job_um{0};
     SchoolingArray count_just_got_fired_mc{0};
     SchoolingArray count_just_found_job_mc{0};
+    // TODO: wages_m_h not used
     MeanMatrix<T_MAX, SCHOOL_LEN> wages_m_h;
     // married men wages - 0 until 20+27 years of exp - 36-47 will be ignore in moments  
     SchoolingMeanMatrix wages_w;        // women wages if employed
@@ -332,52 +333,53 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m, const 
                         // women married down, men married up
                         emp_m_down.accumulate(wife.WS, wife.emp_state);
                         if (husband.HE < 37  && wage_h > m.wage_moments[husband.HE][SCHOOL_LEN+husband.HS]) {
-                            estimated.emp_m_down_above.accumulate(t+age_index, wife.WS, wife.emp_state);
+                            estimated.up_down_moments.accumulate(emp_m_down_above, wife.WS, wife.emp_state);
                         } else {	
-                            estimated.emp_m_down_below.accumulate(t+age_index, wife.WS, wife.emp_state);
+                            estimated.up_down_moments.accumulate(emp_m_down_below, wife.WS, wife.emp_state);
                         }
-                        estimated.wages_m_h_up.accumulate(husband.HE, husband.HS, wage_h); // married up men wages 
+                        estimated.up_down_moments.accumulate(wages_m_h_up, husband.HS, wage_h); // married up men wages 
                         if (prev_M == UNMARRIED) {
                             // first period of marriage
                             // FIXME: ability is just drawn, not calculated
-                            estimated.ability_h_up.accumulate(t+age_index, husband.HS, husband.ability_h_value);
+                            estimated.up_down_moments.accumulate(ability_h_up, husband.HS, husband.ability_h_value);
+                            estimated.up_down_moments.accumulate(ability_w_down, wife.WS, wife.ability_w_value);
                             // FIXME: can Q_minus_1 be different than zero on first marriage period?
-                            estimated.match_w_down.accumulate(t+age_index, wife.WS, Q_minus_1);
+                            estimated.up_down_moments.accumulate(match_w_down, wife.WS, Q_minus_1);
                         }
                     } else if (wife.WS < husband.HS) {
                         // women married up, men married down
                         emp_m_up.accumulate(wife.WS, wife.emp_state);
                         if (husband.HE < 37 && wage_h > m.wage_moments[husband.HE][SCHOOL_LEN+husband.HS]) {
-                            estimated.emp_m_up_above.accumulate(t+age_index, wife.WS, wife.emp_state);
+                            estimated.up_down_moments.accumulate(emp_m_up_above, wife.WS, wife.emp_state);
                         } else {
-                            estimated.emp_m_up_below.accumulate(t+age_index, wife.WS, wife.emp_state);
+                            estimated.up_down_moments.accumulate(emp_m_up_below, wife.WS, wife.emp_state);
                         }
-                        estimated.wages_m_h_down.accumulate(husband.HE, husband.HS, wage_h); // married down men wages
+                        estimated.up_down_moments.accumulate(wages_m_h_down, husband.HS, wage_h); // married down men wages
                         if (prev_M == UNMARRIED) {
                             // first period of marriage
                             // FIXME: ability is just drawn, not calculated
-                            estimated.ability_h_down.accumulate(t+age_index, husband.HS, husband.ability_h_value);
-                            estimated.ability_w_up.accumulate(t+age_index, wife.WS, wife.ability_w_value);
+                            estimated.up_down_moments.accumulate(ability_h_down, husband.HS, husband.ability_h_value);
+                            estimated.up_down_moments.accumulate(ability_w_up, wife.WS, wife.ability_w_value);
                             // FIXME: can Q_minus_1 be different than zero on first marriage period?
-                            estimated.match_w_up.accumulate(t+age_index, wife.WS, Q_minus_1);
+                            estimated.up_down_moments.accumulate(match_w_up, wife.WS, Q_minus_1);
                         }
                     } else {
                         // married equal
-                        estimated.wages_m_h_eq.accumulate(husband.HE, husband.HS, wage_h); // married equal men wages 
+                        estimated.up_down_moments.accumulate(wages_m_h_eq, husband.HS, wage_h); // married equal men wages 
                         emp_m_eq.accumulate(wife.WS, wife.emp_state); //employment married equal women
 
                         if (husband.HE < 37 && wage_h > m.wage_moments[husband.HE][SCHOOL_LEN+husband.HS+husband.HS]) {
-                            estimated.emp_m_eq_above.accumulate(t+age_index, wife.WS,wife.emp_state);
+                            estimated.up_down_moments.accumulate(emp_m_eq_above, wife.WS,wife.emp_state);
                         } else {
-                            estimated.emp_m_eq_below.accumulate(t+age_index, wife.WS, wife.emp_state);
+                            estimated.up_down_moments.accumulate(emp_m_eq_below, wife.WS, wife.emp_state);
                         }
                         if (prev_M == UNMARRIED) {
                             // first period of marriage
                             // FIXME: ability is just drawn, not calculated
-                            estimated.ability_h_eq.accumulate(t+age_index, husband.HS, husband.ability_h_value);
-                            estimated.ability_w_eq.accumulate(t+age_index, wife.WS, wife.ability_w_value);
+                            estimated.up_down_moments.accumulate(ability_h_eq, husband.HS, husband.ability_h_value);
+                            estimated.up_down_moments.accumulate(ability_w_eq, wife.WS, wife.ability_w_value);
                             // FIXME: can Q_minus_1 be different than zero on first marriage period?
-                            estimated.match_w_eq.accumulate(t+age_index, wife.WS, Q_minus_1);
+                            estimated.up_down_moments.accumulate(match_w_eq, wife.WS, Q_minus_1);
                         }
                     }
                 }
@@ -665,30 +667,12 @@ double objective_function(const Parameters& p, const Moments& m, const MomentsSt
     const auto estimated_moments = calculate_moments(p, m, EMAX_W, EMAX_H);    
 
     if (display_moments) {
-        print_mean_table("Married Up - Men's Ability", estimated_moments.ability_h_up);
-        print_mean_table("Married Equal - Men's Ability", estimated_moments.ability_h_eq);
-        print_mean_table("Married Down - Men's Ability", estimated_moments.ability_h_down);
-        print_mean_table("Married Up - Women's Ability", estimated_moments.ability_w_up);
-        print_mean_table("Married Equal - Women's Ability", estimated_moments.ability_w_eq);
-        print_mean_table("Married Down - Women's Ability", estimated_moments.ability_w_down);
-        print_mean_table("Married Up - Match Quality", estimated_moments.match_w_up);
-        print_mean_table("Married Equal - Match Quality", estimated_moments.match_w_eq);
-        print_mean_table("Married Equal - Match Quality", estimated_moments.match_w_down);
-        print_mean_table("Married Women Wage", estimated_moments.wages_m_w);
-        print_mean_table("Married Up - Men's Wage", estimated_moments.wages_m_h_up);
-        print_mean_table("Married Down - Men's Wage", estimated_moments.wages_m_h_down);
-        print_mean_table("Married Equal - Men's Wage", estimated_moments.wages_m_h_eq);
+        print_up_down_moments(estimated_moments.up_down_moments);
         print_dist("BP Distribution", estimated_moments.bp_dist);
         print_dist("Initial BP Distribution", estimated_moments.bp_initial_dist);
         print_dist("Consumption Share Distribution", estimated_moments.cs_dist);
         print_mean_array("# Kids for Married Women", estimated_moments.n_kids_m_arr);
         print_mean_array("# Kids for Unmarried Women", estimated_moments.n_kids_um_arr);
-        print_mean_table("Emp of Married Up - Men's Wage Above", estimated_moments.emp_m_up_above);
-        print_mean_table("Emp of Married Up - Men's Wage Below", estimated_moments.emp_m_up_below);
-        print_mean_table("Emp of Married Equal - Men's Wage Above", estimated_moments.emp_m_eq_above);
-        print_mean_table("Emp of Married Equal - Men's Wage Below", estimated_moments.emp_m_eq_below);
-        print_mean_table("Emp of Married Down - Men's Wage Above", estimated_moments.emp_m_down_above);
-        print_mean_table("Emp of Married Down - Men's Wage Below", estimated_moments.emp_m_down_below);
 
         print_wage_moments(estimated_moments.wage_moments, true);
         print_wage_moments(m.wage_moments, false);

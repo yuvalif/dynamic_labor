@@ -207,3 +207,31 @@ void print_gen_moments(const GenMoments& m, bool estimated) {
     std::cout << table;
 }
 
+void print_up_down_moments(const UpDownMoments& m) {
+    TextTable table_headline('-', '|', '+' );
+    table_headline.add("Married Up/Down/Equal Moments");
+    table_headline.endOfRow();
+
+    TextTable table('-', '|', '+');
+    // header
+    table.add("Moment");
+    for (auto school_group : SCHOOL_W_VALUES) {
+        table.add(std::to_string(school_group));
+        table.setAlignment(school_group, TextTable::Alignment::RIGHT);
+    }
+    table.endOfRow();
+
+    // rows
+    for (auto row = 0U; row < UP_DOWN_MOM_ROW; ++row) {
+        table.setAlignment(0, TextTable::Alignment::LEFT);
+        table.add(UpDownMomentsDescription[row]);
+        table.setAlignment(1, TextTable::Alignment::LEFT);
+        for (auto school_group : SCHOOL_W_VALUES) {
+            table.add(std::to_string(m.mean(row, school_group)));
+        }
+        table.endOfRow();
+    }
+    std::cout << std::endl <<  table_headline;
+    std::cout << table;
+}
+

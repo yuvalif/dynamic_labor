@@ -13,3 +13,5 @@ void print_emp_moments(const EmpMoments& m, bool estimated);
 void print_marr_moments(const MarrMoments& m, bool estimated);
 
 void print_gen_moments(const GenMoments& m, bool estimated);
+
+void print_up_down_moments(const UpDownMoments& m);

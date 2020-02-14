@@ -126,36 +126,64 @@ using SchoolingMeanArray = MeanArray<SCHOOL_LEN>;
 using SchoolingMatrix = UMatrix<T_MAX, SCHOOL_LEN>;
 using SchoolingArray = std::array<unsigned, SCHOOL_LEN>;
 
+enum UpDownMomentsType {
+    ability_h_up = 0,
+    ability_h_eq,
+    ability_h_down,
+    ability_w_up,
+    ability_w_eq,
+    ability_w_down,
+    match_w_up,
+    match_w_eq,
+    match_w_down,
+    wages_m_h_up,
+    wages_m_h_eq,
+    wages_m_h_down,
+    emp_m_up_above,
+    emp_m_up_below,
+    emp_m_eq_above,
+    emp_m_eq_below,
+    emp_m_down_above,
+    emp_m_down_below,
+    UP_DOWN_MOM_ROW
+};
+
+using UpDownMoments = MeanMatrix<UP_DOWN_MOM_ROW, SCHOOL_LEN>;
+
+const std::array<std::string, UP_DOWN_MOM_ROW> UpDownMomentsDescription = {
+    "Married Up - Men's Ability", 
+    "Married Equal - Men's Ability",
+    "Married Down - Men's Ability",
+    "Married Up - Women's Ability",
+    "Married Equal - Women's Ability",
+    "Married Down - Women's Ability",
+    "Married Up - Match Quality",
+    "Married Equal - Match Quality",
+    "Married Down - Match Quality",
+    "Married Up - Men's Wage",
+    "Married Down - Men's Wage",
+    "Married Equal - Men's Wage",
+    "Emp of Married Up - Men's Wage Above",
+    "Emp of Married Up - Men's Wage Below",
+    "Emp of Married Equal - Men's Wage Above",
+    "Emp of Married Equal - Men's Wage Below",
+    "Emp of Married Down - Men's Wage Above",
+    "Emp of Married Down - Men's Wage Below"
+};
+
 struct EstimatedMoments {
     // estimated moments
     WageMoments wage_moments;
     MarrMoments marr_fer_moments;
     EmpMoments emp_moments;
     GenMoments general_moments;
-    // counter factuals
-    SchoolingMeanMatrix ability_h_up;
-    SchoolingMeanMatrix ability_h_down;
-    SchoolingMeanMatrix ability_h_eq;
-    SchoolingMeanMatrix ability_w_up;
-    SchoolingMeanMatrix ability_w_down;
-    SchoolingMeanMatrix ability_w_eq;
-    SchoolingMeanMatrix match_w_up;
-    SchoolingMeanMatrix match_w_down;
-    SchoolingMeanMatrix match_w_eq;
+    // non estimated moments
+    UpDownMoments up_down_moments;
     std::array<unsigned, CS_SIZE> bp_initial_dist;
     std::array<unsigned, CS_SIZE> bp_dist;
     std::array<unsigned, UTILITY_SIZE> cs_dist;
     SchoolingMeanMatrix wages_m_w;      // married women wages if employed
-    SchoolingMeanMatrix wages_m_h_up;   // married up men wages 
-    SchoolingMeanMatrix wages_m_h_down; // married down men wages 
-    SchoolingMeanMatrix wages_m_h_eq;   // married equal men wages 
     SchoolingMeanArray n_kids_m_arr;    // # of children by school group for married women
     SchoolingMeanArray n_kids_um_arr;   // # of children by school group for unmarried women
-    SchoolingMeanMatrix emp_m_up_below;
-    SchoolingMeanMatrix emp_m_down_below;
-    SchoolingMeanMatrix emp_m_down_above;
-    SchoolingMeanMatrix emp_m_eq_below;
-    SchoolingMeanMatrix emp_m_up_above;
-    SchoolingMeanMatrix emp_m_eq_above;
 };
 
