@@ -18,8 +18,8 @@ jobs:
     - name: submodules
       run: git submodule update --init
     - name: cmake
-      run: mkdir -p c++/build && cd c++/build && cmake ..
+      run: mkdir -p c++/Release && cd c++/Release && cmake -DCMAKE_BUILD_TYPE=Release ..
     - name: make
-      run: cd c++/build && make
-    - name: make check
-      run: cd c++/build && make check
+      run: cd c++/Release && make
+    - name: test
+      run: cd c++/Release && make test
