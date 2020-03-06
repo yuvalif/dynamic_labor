@@ -3,6 +3,10 @@
 #include <numeric>
 #include "cpp-text-table/TextTable.h"
 
+const std::string& school_to_string(int school_group) {
+    return SCHOOL_NAMES[school_group];
+}
+
 void print_mean_array(const std::string& table_name, const SchoolingMeanArray& m) {
     TextTable table_headline('-', '|', '+' );
     table_headline.add(table_name);
@@ -11,8 +15,7 @@ void print_mean_array(const std::string& table_name, const SchoolingMeanArray& m
     TextTable table('-', '|', '+');
     // header
     for (auto school_group : SCHOOL_W_VALUES) {
-        table.add(std::to_string(school_group+1));
-        table.setAlignment(school_group+1, TextTable::Alignment::RIGHT);
+        table.add(school_to_string(school_group));
     }
     table.endOfRow();
     for (auto school_group : SCHOOL_W_VALUES) {
@@ -33,8 +36,7 @@ void print_mean_table(const std::string& table_name, const SchoolingMeanMatrix& 
     // header
     table.add("Time");
     for (auto school_group : SCHOOL_H_VALUES) {
-        table.add(std::to_string(school_group));
-        table.setAlignment(school_group+1, TextTable::Alignment::RIGHT);
+        table.add(school_to_string(school_group));
     }
     table.endOfRow();
     // rows
@@ -65,10 +67,10 @@ void print_wage_moments(const WageMoments& estimated, const WageMoments& actual)
         table.endOfRow();
         table.add("Experience");
         for (auto school_group : SCHOOL_W_VALUES) {
-            table.add(std::to_string(school_group));
+            table.add(school_to_string(school_group));
         }
         for (auto school_group : SCHOOL_W_VALUES) {
-            table.add(std::to_string(school_group));
+            table.add(school_to_string(school_group));
         }
         table.endOfRow();
 
@@ -100,10 +102,10 @@ void print_wage_moments(const WageMoments& estimated, const WageMoments& actual)
         table.endOfRow();
         table.add("Experience");
         for (auto school_group : SCHOOL_H_VALUES) {
-            table.add(std::to_string(school_group));
+            table.add(school_to_string(school_group));
         }
         for (auto school_group : SCHOOL_H_VALUES) {
-            table.add(std::to_string(school_group));
+            table.add(school_to_string(school_group));
         }
         table.endOfRow();
 
@@ -139,10 +141,10 @@ void print_emp_moments(const EmpMoments& estimated, const EmpMoments& actual) {
         table.endOfRow();
         table.add("Age");
         for (auto school_group : SCHOOL_W_VALUES) {
-            table.add(std::to_string(school_group));
+            table.add(school_to_string(school_group));
         }
         for (auto school_group : SCHOOL_W_VALUES) {
-            table.add(std::to_string(school_group));
+            table.add(school_to_string(school_group));
         }
         table.endOfRow();
 
@@ -179,10 +181,10 @@ void print_marr_moments(const MarrMoments& estimated, const MarrMoments& actual)
         table.endOfRow();
         table.add("Age");
         for (auto school_group : SCHOOL_W_VALUES) {
-            table.add(std::to_string(school_group));
+            table.add(school_to_string(school_group));
         }
         for (auto school_group : SCHOOL_W_VALUES) {
-            table.add(std::to_string(school_group));
+            table.add(school_to_string(school_group));
         }
         table.endOfRow();
 
@@ -218,11 +220,10 @@ void print_gen_moments(const GenMoments& estimated, const GenMoments& actual) {
     table.add("Moment");
     // estimated and actual columns
     for (auto school_group : SCHOOL_W_VALUES) {
-        table.add(std::to_string(school_group));
+        table.add(school_to_string(school_group));
     }
-    table.add("");
     for (auto school_group : SCHOOL_W_VALUES) {
-        table.add(std::to_string(school_group));
+        table.add(school_to_string(school_group));
     }
     table.endOfRow();
 
@@ -238,13 +239,6 @@ void print_gen_moments(const GenMoments& estimated, const GenMoments& actual) {
         }
         table.endOfRow();
     }
-    // table alignment
-    table.setAlignment(0, TextTable::Alignment::LEFT);
-    table.setAlignment(1, TextTable::Alignment::LEFT);
-    for (auto school_group : SCHOOL_W_VALUES) {
-        table.setAlignment(school_group + 1, TextTable::Alignment::RIGHT);
-        table.setAlignment(school_group + 6, TextTable::Alignment::RIGHT);
-    }
 
     std::cout << std::endl <<  table_headline;
     std::cout << table;
@@ -259,16 +253,13 @@ void print_up_down_moments(const UpDownMoments& m) {
     // header
     table.add("Moment");
     for (auto school_group : SCHOOL_W_VALUES) {
-        table.add(std::to_string(school_group));
-        table.setAlignment(school_group, TextTable::Alignment::RIGHT);
+        table.add(school_to_string(school_group));
     }
     table.endOfRow();
 
     // rows
     for (auto row = 0U; row < UP_DOWN_MOM_ROW; ++row) {
-        table.setAlignment(0, TextTable::Alignment::LEFT);
         table.add(UpDownMomentsDescription[row]);
-        table.setAlignment(1, TextTable::Alignment::LEFT);
         for (auto school_group : SCHOOL_W_VALUES) {
             table.add(std::to_string(m.mean(row, school_group)));
         }

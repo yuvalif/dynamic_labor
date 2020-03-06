@@ -52,6 +52,7 @@ const int MARITAL_LEN = 2; const auto MARITAL_VALUES = boost::irange(0, MARITAL_
 const int SCHOOL_LEN = 5; 
 const auto SCHOOL_H_VALUES = boost::irange(0, SCHOOL_LEN);
 const auto SCHOOL_W_VALUES = boost::irange(1, SCHOOL_LEN);
+const std::array<std::string, SCHOOL_LEN> SCHOOL_NAMES = {"HSD", "HSG", "SC", "CG", "PC"};
 // match quality: (high, medium, low)
 const int MATCH_Q_LEN = 3; const auto MATCH_Q_VALUES = boost::irange(0, MATCH_Q_LEN);
 // wife bargening power: (0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8)
