@@ -72,7 +72,7 @@ void print_wage_moments(const WageMoments& estimated, const WageMoments& actual)
     auto col_offset = 0U;
     {
         TextTable table_headline;
-        table_headline.add("Employment Moments - Women");
+        table_headline.add("Wage Moments - Women");
         table_headline.endOfRow();
 
         TextTable table = make_table();
@@ -107,7 +107,7 @@ void print_wage_moments(const WageMoments& estimated, const WageMoments& actual)
     }
     {
         TextTable table_headline;
-        table_headline.add("Employment Moments - Married Men");
+        table_headline.add("Wage Moments - Married Men");
         table_headline.endOfRow();
 
         TextTable table = make_table();
@@ -136,7 +136,7 @@ void print_wage_moments(const WageMoments& estimated, const WageMoments& actual)
             }
             table.endOfRow();
         }
-        std::cout << std::endl <<  table_headline;
+        std::cout << std::endl << table_headline;
         std::cout << table;
     }
 }
@@ -175,7 +175,7 @@ void print_emp_moments(const EmpMoments& estimated, const EmpMoments& actual) {
             }
             table.endOfRow();
         }
-        std::cout << std::endl <<  table_headline;
+        std::cout << std::endl << table_headline;
         std::cout << table;
         col_offset += SCHOOL_LEN-1;
     }
@@ -215,7 +215,7 @@ void print_marr_moments(const MarrMoments& estimated, const MarrMoments& actual)
             }
             table.endOfRow();
         }
-        std::cout << std::endl <<  table_headline;
+        std::cout << std::endl << table_headline;
         std::cout << table;
         col_offset += SCHOOL_LEN-1;
     }
@@ -256,7 +256,7 @@ void print_gen_moments(const GenMoments& estimated, const GenMoments& actual) {
         table.endOfRow();
     }
 
-    std::cout << std::endl <<  table_headline;
+    std::cout << std::endl << table_headline;
     std::cout << table;
 }
 
@@ -281,7 +281,7 @@ void print_up_down_moments(const UpDownMoments& m) {
         }
         table.endOfRow();
     }
-    std::cout << std::endl <<  table_headline;
+    std::cout << std::endl << table_headline;
     std::cout << table;
 }
 

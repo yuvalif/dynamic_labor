@@ -145,6 +145,8 @@ enum UpDownMomentsType {
     emp_m_eq_below,
     emp_m_down_above,
     emp_m_down_below,
+    n_kids_m_arr,
+    n_kids_um_arr,
     UP_DOWN_MOM_ROW
 };
 
@@ -161,15 +163,20 @@ const std::array<std::string, UP_DOWN_MOM_ROW> UpDownMomentsDescription = {
     "Married Equal - Match Quality",
     "Married Down - Match Quality",
     "Married Up - Men's Wage",
-    "Married Down - Men's Wage",
     "Married Equal - Men's Wage",
+    "Married Down - Men's Wage",
     "Emp of Married Up - Men's Wage Above",
     "Emp of Married Up - Men's Wage Below",
     "Emp of Married Equal - Men's Wage Above",
     "Emp of Married Equal - Men's Wage Below",
     "Emp of Married Down - Men's Wage Above",
-    "Emp of Married Down - Men's Wage Below"
+    "Emp of Married Down - Men's Wage Below",
+    "# Kids for Married Women",
+    "# Kids for Unmarried Women"
 };
+
+using BPDist = std::array<unsigned, CS_SIZE>;
+using CSDist = std::array<unsigned, UTILITY_SIZE>;
 
 struct EstimatedMoments {
     // estimated moments
@@ -179,11 +186,9 @@ struct EstimatedMoments {
     GenMoments general_moments;
     // non estimated moments
     UpDownMoments up_down_moments;
-    std::array<unsigned, CS_SIZE> bp_initial_dist;
-    std::array<unsigned, CS_SIZE> bp_dist;
-    std::array<unsigned, UTILITY_SIZE> cs_dist;
+    BPDist bp_initial_dist;
+    BPDist bp_dist;
+    CSDist cs_dist;
     SchoolingMeanMatrix wages_m_w;      // married women wages if employed
-    SchoolingMeanArray n_kids_m_arr;    // # of children by school group for married women
-    SchoolingMeanArray n_kids_um_arr;   // # of children by school group for unmarried women
 };
 

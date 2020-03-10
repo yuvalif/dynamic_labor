@@ -1,6 +1,7 @@
 #include <chrono>
 #include <iostream>
 #include <algorithm>
+#include <numeric>
 #include <boost/math/distributions/normal.hpp>
 #include "single_men.h"
 #include "single_women.h"
@@ -410,8 +411,8 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m, const 
                 }
                 if (t == last_t) {
                     n_kids_arr.accumulate(wife.WS, n_kids); // # of children by school group
-                    estimated.n_kids_m_arr.accumulate(wife.WS, n_kids_m);
-                    estimated.n_kids_um_arr.accumulate(wife.WS, n_kids_um);
+                    estimated.up_down_moments.accumulate(n_kids_m_arr, wife.WS, n_kids_m);
+                    estimated.up_down_moments.accumulate(n_kids_um_arr, wife.WS, n_kids_um);
                 }
                 // marriage transition matrix
                 if (decision.M == MARRIED && prev_M == UNMARRIED) {
@@ -628,24 +629,74 @@ void mse_normalize(std::array<double, SIZE>& m, const std::array<double, SIZE-1>
             m.begin()+1, std::divides<double>());
 }
 
-template<size_t SIZE>
-void print_dist(const std::string& table_name, const std::array<unsigned, SIZE>& dist) {
-    double total = 0.0;
-    std::for_each(dist.begin(), dist.end(), [&total](unsigned val){total += val;});
-
-    TextTable table_headline('-', '|', '+' );
-    table_headline.add(table_name);
+void print_distributions(const BPDist& bp_initial_dist, const BPDist& bp_dist, const CSDist& cs_dist) {
+    TextTable table_headline;
+    table_headline.add("Ditributions");
     table_headline.endOfRow();
 
-    TextTable table('-', '|', '+');
-    if (total > 0.0) {
-        std::for_each(dist.begin(), dist.end(), [&table, total](unsigned val){
+    TextTable table(' ');
+    {
+        const auto& dist = bp_initial_dist;
+        const auto total = std::accumulate(dist.begin(), dist.end(), 0.0);
+        table.add("Initial BP Distribution");
+
+        if (total > 0.0) {
+            std::for_each(dist.begin(), dist.end(), [&table, total](unsigned val){
                 table.add(std::to_string((double)val/total));
                 });
-    } else {
-        table.add("no values");
+        } else {
+            table.add("no values");
+        }
+        table.endOfRow();
     }
-    table.endOfRow();
+    {
+        const auto& dist = bp_dist;
+        const auto total = std::accumulate(dist.begin(), dist.end(), 0.0);
+        table.add("BP Distribution");
+
+        if (total > 0.0) {
+            std::for_each(dist.begin(), dist.end(), [&table, total](unsigned val){
+                table.add(std::to_string((double)val/total));
+                });
+        } else {
+            table.add("no values");
+        }
+        table.endOfRow();
+    }
+    {
+        const auto& dist = cs_dist;
+        const auto begin = dist.begin();
+        const auto end = dist.begin() + CS_SIZE;
+
+        table.add("CS Distribution");
+        const auto total = std::accumulate(begin, end, 0.0);
+
+        if (total > 0.0) {
+            std::for_each(begin, end, [&table, total](unsigned val){
+                table.add(std::to_string((double)val/total));
+                });
+        } else {
+            table.add("no values");
+        }
+        table.endOfRow();
+    }
+    {
+        const auto& dist = cs_dist;
+        const auto begin = dist.begin() + CS_SIZE;
+        const auto end = dist.end();
+
+        table.add("CS Distribution ???");
+        const auto total = std::accumulate(begin, end, 0.0);
+
+        if (total > 0.0) {
+            std::for_each(begin, end, [&table, total](unsigned val){
+                table.add(std::to_string((double)val/total));
+                });
+        } else {
+            table.add("no values");
+        }
+        table.endOfRow();
+    }
     std::cout << std::endl << table_headline;
     std::cout << table;
 }
@@ -668,11 +719,7 @@ double objective_function(const Parameters& p, const Moments& m, const MomentsSt
 
     if (display_moments) {
         print_up_down_moments(estimated_moments.up_down_moments);
-        print_dist("BP Distribution", estimated_moments.bp_dist);
-        print_dist("Initial BP Distribution", estimated_moments.bp_initial_dist);
-        print_dist("Consumption Share Distribution", estimated_moments.cs_dist);
-        print_mean_array("# Kids for Married Women", estimated_moments.n_kids_m_arr);
-        print_mean_array("# Kids for Unmarried Women", estimated_moments.n_kids_um_arr);
+        print_distributions(estimated_moments.bp_initial_dist, estimated_moments.bp_dist, estimated_moments.cs_dist);
 
         print_wage_moments(estimated_moments.wage_moments, m.wage_moments);
         print_emp_moments(estimated_moments.emp_moments, m.emp_moments);
