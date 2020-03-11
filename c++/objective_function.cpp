@@ -85,8 +85,7 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m, const 
     SchoolingArray count_just_found_job_um{0};
     SchoolingArray count_just_got_fired_mc{0};
     SchoolingArray count_just_found_job_mc{0};
-    // TODO: wages_m_h not used
-    MeanMatrix<T_MAX, SCHOOL_LEN> wages_m_h;
+    SchoolingMeanMatrix wages_m_h;
     // married men wages - 0 until 20+27 years of exp - 36-47 will be ignore in moments  
     SchoolingMeanMatrix wages_w;        // women wages if employed
     SchoolingMeanArray wages_m_w_up;    // married up women wages if employed
@@ -137,6 +136,7 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m, const 
 
             // make choices for all periods
             const auto last_t = wife.T_END;
+            // FIXME: husband moments are calculated up to last_t and not T_MAX
             for (auto t = 0U; t <= last_t; ++t) {
                 const auto prev_emp_state_w = wife.emp_state;
                 const auto prev_M = decision.M;
@@ -154,6 +154,7 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m, const 
                     if (draw_p() < choose_hudband_p) {
                         choose_husband = true;
                         husband = draw_husband(p, t, wife.age_index, wife.WS, wife.WS);
+                        wife.Q = husband.Q;
                         [[maybe_unused]] const auto dont_skip = update_husband_schooling(husband.HS, IGNORE_T, husband);
                         assert(dont_skip);
                     }
@@ -254,9 +255,9 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m, const 
 
                 // update the match quality
                 if (decision.M == MARRIED) {
+                    Q_minus_1 = wife.Q;
                     DIVORCE = 0;
                     ++duration;
-                    Q_minus_1 = wife.Q;
                     const auto match_quality_change_prob = draw_p();
                     if (match_quality_change_prob < p.MATCH_Q_DECREASE && wife.Q_INDEX > 0) {
                         --wife.Q_INDEX;
@@ -341,10 +342,8 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m, const 
                         estimated.up_down_moments.accumulate(wages_m_h_up, husband.HS, wage_h); // married up men wages 
                         if (prev_M == UNMARRIED) {
                             // first period of marriage
-                            // FIXME: ability is just drawn, not calculated
                             estimated.up_down_moments.accumulate(ability_h_up, husband.HS, husband.ability_h_value);
                             estimated.up_down_moments.accumulate(ability_w_down, wife.WS, wife.ability_w_value);
-                            // FIXME: can Q_minus_1 be different than zero on first marriage period?
                             estimated.up_down_moments.accumulate(match_w_down, wife.WS, Q_minus_1);
                         }
                     } else if (wife.WS < husband.HS) {
@@ -358,10 +357,8 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m, const 
                         estimated.up_down_moments.accumulate(wages_m_h_down, husband.HS, wage_h); // married down men wages
                         if (prev_M == UNMARRIED) {
                             // first period of marriage
-                            // FIXME: ability is just drawn, not calculated
                             estimated.up_down_moments.accumulate(ability_h_down, husband.HS, husband.ability_h_value);
                             estimated.up_down_moments.accumulate(ability_w_up, wife.WS, wife.ability_w_value);
-                            // FIXME: can Q_minus_1 be different than zero on first marriage period?
                             estimated.up_down_moments.accumulate(match_w_up, wife.WS, Q_minus_1);
                         }
                     } else {
@@ -376,10 +373,8 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m, const 
                         }
                         if (prev_M == UNMARRIED) {
                             // first period of marriage
-                            // FIXME: ability is just drawn, not calculated
                             estimated.up_down_moments.accumulate(ability_h_eq, husband.HS, husband.ability_h_value);
                             estimated.up_down_moments.accumulate(ability_w_eq, wife.WS, wife.ability_w_value);
-                            // FIXME: can Q_minus_1 be different than zero on first marriage period?
                             estimated.up_down_moments.accumulate(match_w_eq, wife.WS, Q_minus_1);
                         }
                     }
@@ -668,7 +663,7 @@ void print_distributions(const BPDist& bp_initial_dist, const BPDist& bp_dist, c
         const auto begin = dist.begin();
         const auto end = dist.begin() + CS_SIZE;
 
-        table.add("CS Distribution");
+        table.add("Unemployed CS Distribution");
         const auto total = std::accumulate(begin, end, 0.0);
 
         if (total > 0.0) {
@@ -685,7 +680,7 @@ void print_distributions(const BPDist& bp_initial_dist, const BPDist& bp_dist, c
         const auto begin = dist.begin() + CS_SIZE;
         const auto end = dist.end();
 
-        table.add("CS Distribution ???");
+        table.add("Employed CS Distribution");
         const auto total = std::accumulate(begin, end, 0.0);
 
         if (total > 0.0) {

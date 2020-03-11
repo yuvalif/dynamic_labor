@@ -180,15 +180,15 @@ using CSDist = std::array<unsigned, UTILITY_SIZE>;
 
 struct EstimatedMoments {
     // estimated moments
-    WageMoments wage_moments;
-    MarrMoments marr_fer_moments;
-    EmpMoments emp_moments;
-    GenMoments general_moments;
+    WageMoments wage_moments={{{0.0}}};
+    MarrMoments marr_fer_moments={{{0.0}}};
+    EmpMoments emp_moments={{{0.0}}};
+    GenMoments general_moments={{{0.0}}};
     // non estimated moments
     UpDownMoments up_down_moments;
-    BPDist bp_initial_dist;
-    BPDist bp_dist;
-    CSDist cs_dist;
+    BPDist bp_initial_dist={0};
+    BPDist bp_dist={0};
+    CSDist cs_dist={0};
     SchoolingMeanMatrix wages_m_w;      // married women wages if employed
 };
 

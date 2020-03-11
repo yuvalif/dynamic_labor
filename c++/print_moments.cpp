@@ -103,7 +103,7 @@ void print_wage_moments(const WageMoments& estimated, const WageMoments& actual)
         }
         std::cout << std::endl <<  table_headline;
         std::cout << table;
-        col_offset += SCHOOL_LEN-1;
+        col_offset += SCHOOL_LEN;
     }
     {
         TextTable table_headline;
