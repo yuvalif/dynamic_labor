@@ -2,7 +2,7 @@
 #include <iostream>
 #include <numeric>
 #include "cpp-text-table/TextTable.h"
-#include <sstream>
+#include "to_string.h"
 
 const std::string& school_to_string(int school_group) {
     return SCHOOL_NAMES[school_group];
@@ -10,17 +10,6 @@ const std::string& school_to_string(int school_group) {
 
 TextTable make_table() {
     return TextTable(' ');
-}
-
-
-// based on: 
-// https://stackoverflow.com/questions/16605967/set-precision-of-stdto-string-when-converting-floating-point-values
-std::string to_string_with_precision(double a_value, int n = 3)
-{
-    std::ostringstream out;
-    out.precision(n);
-    out << std::fixed << a_value;
-    return out.str();
 }
 
 void print_mean_array(const std::string& table_name, const SchoolingMeanArray& m) {

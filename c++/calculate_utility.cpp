@@ -8,20 +8,6 @@
 #include "draw_husband.h"
 #include <cmath>
 #include <array>
-#include <iostream>
-
-void print_utility(const Utility& u) {
-    std::cout << std::endl << "Married Wife Utility: " ;
-    for (const auto x : u.U_W) std::cout << (x == MINIMUM_UTILITY ? "null" : std::to_string(x)) << ", ";
-    std::cout << std::endl;
-    std::cout << "Married Husband Utility: ";
-    for (const auto x : u.U_H) std::cout << (x == MINIMUM_UTILITY ? "null" : std::to_string(x)) << ", ";
-    std::cout << std::endl;
-    std::cout << "Single Wife Utility: ";
-    for (const auto x : u.U_W_S) std::cout << (x == MINIMUM_UTILITY ? "null" : std::to_string(x)) << ", ";
-    std::cout << std::endl;
-    std::cout << "Single Husband Utility: " << (u.U_H_S == MINIMUM_UTILITY ? "null" : std::to_string(u.U_H_S)) << std::endl;
-}
 
 // initialize all values with MINIMUM_UTILITY
 Utility::Utility() {

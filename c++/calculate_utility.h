@@ -22,5 +22,4 @@ Utility calculate_utility(const Parameters& p, const Emax& EMAX_W, const Emax& E
         double wage_h, double wage_w, bool choose_partner,
         unsigned M, const Wife& wife, const Husband& husband, unsigned t, double BP, bool single_men);
 
-void print_utility(const Utility& u);
 

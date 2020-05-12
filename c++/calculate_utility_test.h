@@ -1,3 +1,4 @@
+#include <iostream>
 #include <cxxtest/TestSuite.h>
 #include "calculate_utility.h"
 #include "draw_wife.h"
@@ -5,50 +6,24 @@
 #include "parameters.h"
 #include "load_files.h"
 #include "emax.h"
+#include "cpp-text-table/TextTable.h"
+#include "to_string.h"
 
 const auto p = load_parameters("../../init_parameters.txt", "../../tax_brackets.out", "../../deductions_exemptions.out", "../../wives.out", "../../husbands");
 const auto empty_emax = make_emax();
 
-void utility_sanity(const Utility& u) {
-    const auto MAX_UTILITY_SANITY = 1e6;
-    bool utility_found = false;
-    for (const auto x : u.U_W) {
-        TS_ASSERT_LESS_THAN(x, MAX_UTILITY_SANITY);
-        if (x != MINIMUM_UTILITY) {
-            TS_ASSERT_LESS_THAN_EQUALS(0.0, x);
-        } else {
-            utility_found = true;
-        }
-    }
-    for (const auto x : u.U_H) {
-        TS_ASSERT_LESS_THAN(x, MAX_UTILITY_SANITY);
-        if (x != MINIMUM_UTILITY) {
-            TS_ASSERT_LESS_THAN_EQUALS(0.0, x);
-        } else {
-            utility_found = true;
-        }
-    }
-    for (const auto x : u.U_W_S) {
-        TS_ASSERT_LESS_THAN(x, MAX_UTILITY_SANITY);
-        if (x != MINIMUM_UTILITY) {
-            TS_ASSERT_LESS_THAN_EQUALS(0.0, x);
-        } else {
-            utility_found = true;
-        }
-    }
-    const auto x = u.U_H_S;
-    TS_ASSERT_LESS_THAN(x, MAX_UTILITY_SANITY);
-    if (x != MINIMUM_UTILITY) {
-        TS_ASSERT_LESS_THAN_EQUALS(0.0, x);
-    } else {
-        utility_found = true;
-    }
-    if (!utility_found) TS_WARN("All utility values are null");
-}
-
 class calculate_utility_suite : public CxxTest::TestSuite {
 public:
 	void test_single_women() {
+        TextTable table(' ');
+        table.add("Schooling");
+        table.add("Time");
+        table.add("Wage");
+        table.add("Kids");
+        table.add("Type");
+        table.add("Utility");
+        table.endOfRow();
+
         for (auto school_group : SCHOOL_W_VALUES) {
             for (auto t = 0; t < T_MAX-1; ++t) {
                 Wife wife;
@@ -56,7 +31,7 @@ public:
                 if (!update_wife_schooling(school_group, t, wife)) continue;
                 for (auto wage_w = 0.0; wage_w < 400000.0; wage_w += 40000.0) {
                     for (auto kids : KIDS_VALUES) {
-                        const auto utility = calculate_utility(p, empty_emax, empty_emax, 
+                        const auto u = calculate_utility(p, empty_emax, empty_emax, 
                                 kids, 
                                 0.0,                        // no husband wage 
                                 wage_w, 
@@ -67,14 +42,34 @@ public:
                                 t,
                                 0.5,                        // BP 
                                 false);                     // not single men
-                        utility_sanity(utility);
+                        table.add(std::to_string(school_group));
+                        table.add(std::to_string(t));
+                        table.add(to_string_with_precision(wage_w, 0));
+                        table.add(std::to_string(kids));
+                        table.add("S/W");
+                        std::stringstream ss;
+                        for (const auto x : u.U_W_S) ss << (x == MINIMUM_UTILITY ? "null" : 
+                                to_string_with_precision(x, 0)) << ", ";
+                        table.add(ss.str());
+                        table.endOfRow();
                     }
                 }
             }
         }
+        std::cout  << std::endl << table << std::endl;
     }
 	
     void test_single_men() {
+        TextTable table(' ');
+        table.add("Schooling");
+        table.add("Time");
+        table.add("Experience");
+        table.add("Ability");
+        table.add("Wage");
+        table.add("Type");
+        table.add("Utility");
+        table.endOfRow();
+
         const Wife wife;
         for (auto school_group : SCHOOL_W_VALUES) {
             for (auto t = 0; t < T_MAX-1; ++t) {
@@ -86,7 +81,7 @@ public:
                         // husband ability - high, medium, low
                         update_ability(p, ability_hi, husband);
                         for (auto wage_h = 10000.0; wage_h < 700000.0; wage_h += 40000.0) {
-                            const auto utility = calculate_utility(p, empty_emax, empty_emax, 
+                            const auto u = calculate_utility(p, empty_emax, empty_emax, 
                                 NO_KIDS, 
                                 wage_h,
                                 0.0,                        // no wife wage
@@ -97,15 +92,38 @@ public:
                                 t,
                                 0.5,                        // BP 
                                 true);                      // single men
-                            utility_sanity(utility);
+                            table.add(std::to_string(school_group));
+                            table.add(std::to_string(t));
+                            table.add(std::to_string(h_exp_i));
+                            table.add(std::to_string(ability_hi));
+                            table.add(to_string_with_precision(wage_h, 0));
+                            table.add("S/M");
+                            std::stringstream ss;
+                            const auto x = u.U_H_S;
+                            ss << (x == MINIMUM_UTILITY ? "null" : to_string_with_precision(x, 0)) << ", ";
+                            table.add(ss.str());
+                            table.endOfRow();
                         }
                     }
                 }
             }
         }
+        std::cout  << std::endl << table << std::endl;
     }
     
     void test_married_couple() {
+        TextTable table(' ');
+        table.add("Schooling");
+        table.add("Time");
+        table.add("Experience");
+        table.add("Ability");
+        table.add("Wife Wage");
+        table.add("Husband Wage");
+        table.add("Kids");
+        table.add("Type");
+        table.add("Utility");
+        table.endOfRow();
+
         for (auto school_group : SCHOOL_W_VALUES) {
             for (auto t = 0; t < T_MAX-1; ++t) {
                 Husband husband;
@@ -120,7 +138,7 @@ public:
                         for (auto wage_w = 0.0; wage_w < 400000.0; wage_w += 80000.0) {
                             for (auto wage_h = 10000.0; wage_h < 700000.0; wage_h += 80000.0) {
                                 for (auto kids : KIDS_VALUES) {
-                                    const auto utility = calculate_utility(p, empty_emax, empty_emax, 
+                                    const auto u = calculate_utility(p, empty_emax, empty_emax, 
                                         kids, 
                                         wage_h,
                                         wage_w,
@@ -131,7 +149,52 @@ public:
                                         t,
                                         0.5,                        // BP 
                                         false);                     // not single men
-                                    utility_sanity(utility);
+                                    table.add(std::to_string(school_group));
+                                    table.add(std::to_string(t));
+                                    table.add(std::to_string(h_exp_i));
+                                    table.add(std::to_string(ability_hi));
+                                    table.add(to_string_with_precision(wage_w, 0));
+                                    table.add(to_string_with_precision(wage_h, 0));
+                                    table.add(std::to_string(kids));
+                                    table.add("S/W");
+                                    {
+                                        std::stringstream ss;
+                                        for (const auto x : u.U_W_S) ss << (x == MINIMUM_UTILITY ? "null" : 
+                                                to_string_with_precision(x, 0)) << ", ";
+                                        table.add(ss.str());
+                                    }
+                                    table.endOfRow();
+
+                                    table.add(" ");table.add(" ");table.add(" ");table.add(" ");table.add(" ");table.add(" ");table.add(" ");
+                                    table.add("S/M");
+                                    {
+                                        std::stringstream ss;
+                                        const auto x = u.U_H_S;
+                                        ss << (x == MINIMUM_UTILITY ? "null" : 
+                                                to_string_with_precision(x, 0)) << ", ";
+                                        table.add(ss.str());
+                                    }
+                                    table.endOfRow();
+
+                                    table.add(" ");table.add(" ");table.add(" ");table.add(" ");table.add(" ");table.add(" ");table.add(" ");
+                                    table.add("M/W");
+                                    {
+                                        std::stringstream ss;
+                                        for (const auto x : u.U_W) ss << (x == MINIMUM_UTILITY ? "null" :
+                                                to_string_with_precision(x, 0)) << ", ";
+                                        table.add(ss.str());
+                                    }
+                                    table.endOfRow();
+
+                                    table.add(" ");table.add(" ");table.add(" ");table.add(" ");table.add(" ");table.add(" ");table.add(" ");
+                                    table.add("M/M");
+                                    {
+                                        std::stringstream ss;
+                                        for (const auto x : u.U_H) ss << (x == MINIMUM_UTILITY ? "null" : 
+                                                to_string_with_precision(x, 0)) << ", ";
+                                        table.add(ss.str());
+                                    }
+                                    table.endOfRow();
                                 }
                             }
                         }
@@ -139,6 +202,7 @@ public:
                 }
             }
         }
+        std::cout << std::endl << table << std::endl;
     }
 };
 
