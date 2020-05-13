@@ -15,7 +15,7 @@ const auto TAX_PERCENT_OFFSET = 11;
 // -----+-------------------------------------------------------------+--------------------------------------------+--------------------------------------------+--------
 //      |                                                             | 0 kids                                     | 1 kid                                      | 2 kids
 // -----+-------------------------------------------------------------+--------------------------------------------+--------------------------------------------+--------
-// year | ded married | ded single | ex married | ex single | ex kids | int1% | int1 | int2# | int3% | int2 | int3 | int1% | int1 | int2# | int3% | int2 | int3 | ...
+// year | ded married | ded single | ex married | ex single | ex kids | int1% | int1 | int2% | int3% | int2 | int3 | int1% | int1 | int2% | int3% | int2 | int3 | ...
 // -----+-------------------------------------------------------------+--------------------------------------------+--------------------------------------------+--------
 
 const auto DED_OFFSET = 6U;
@@ -45,14 +45,17 @@ double calculate_eict(const Parameters &p, double wage, unsigned row_number, uns
     double EICT = 0.0;
 
     const auto kids_offset = DED_KIDS_OFFSET*kids;
-    if (wage < p.ded[row_number][DED_INTERVAL1_OFFSET+kids_offset]) {
+    const auto offset1 = DED_INTERVAL1_OFFSET+kids_offset;
+    const auto offset2 = DED_INTERVAL2_OFFSET+kids_offset;
+    const auto offset3 = DED_INTERVAL3_OFFSET+kids_offset;
+    if (wage < p.ded[row_number][offset1]) {
         // first interval  credit rate
-        EICT = wage*p.ded[row_number][DED_INTERVAL1_OFFSET-1+kids_offset];
-    } else if (wage < p.ded[row_number][DED_INTERVAL2_OFFSET+kids_offset]) {
+        EICT = wage*p.ded[row_number][offset1-1];
+    } else if (wage < p.ded[row_number][offset2]) {
         // second (flat) interval - max EICT
-        EICT = p.ded[row_number][DED_INTERVAL2_OFFSET-2+kids_offset]; 
-    } else if (wage < p.ded[row_number][DED_INTERVAL3_OFFSET+kids_offset]) {
-        EICT = wage*p.ded[row_number][DED_INTERVAL3_OFFSET-2+kids_offset];
+        EICT = p.ded[row_number][offset2-1]; 
+    } else if (wage < p.ded[row_number][offset3]) {
+        EICT = wage*p.ded[row_number][offset3-2];
     }
 
     return EICT;

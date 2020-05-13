@@ -40,8 +40,8 @@ const int TERMINAL = 45;
 const int T_MAX = 28; // 28 periods, 45years - 18years
 const int EXP_W_LEN = 5; const auto EXP_W_VALUES = boost::irange(0, EXP_W_LEN);
 const int EXP_H_LEN = 5; const auto EXP_H_VALUES = boost::irange(0, EXP_H_LEN);
-// number of children: (0, 1, 2, 3, 4+)
-const int KIDS_LEN = 5; const auto KIDS_VALUES = boost::irange(0, KIDS_LEN);
+// number of children: (0, 1, 2, 3+)
+const int KIDS_LEN = 4; const auto KIDS_VALUES = boost::irange(0, KIDS_LEN);
 // previous work status: (employed, unemployed)
 const int PREV_WORK_LEN = 2; const auto PREV_WORK_VALUES = boost::irange(0, PREV_WORK_LEN);
 // ability wife/husband: (high, medium, low)
