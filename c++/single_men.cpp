@@ -57,7 +57,7 @@ unsigned single_men(const Parameters& p, unsigned HS, unsigned t, const Emax& EM
                 // at this point the BP IS .5 IF NO MARRIAGE AND NO OFFER, 
                 // is calculated by nash if offer and is from previous period if already married 
 
-                if (CHOOSE_WIFE == 1 && BP != -1.0) {
+                if (CHOOSE_WIFE == 1 && BP != NO_BP) {
                     // marriage decision - outside option value wife
                     const auto decision = marriage_emp_decision(utility, BP, wife, husband);
                     if (decision.M == MARRIED) {

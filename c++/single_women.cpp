@@ -69,7 +69,7 @@ unsigned single_women(const Parameters& p, unsigned WS, unsigned t, Emax& EMAX_W
                             BP = nash(p, utility, BP); // Nash bargaining at first period of marriage  
                         }
 
-                        if (CHOOSE_HUSBAND == 1 && BP > -1) {
+                        if (CHOOSE_HUSBAND == 1 && BP != NO_BP) {
                             // marriage decision - outside option value wife
                             const auto decision = marriage_emp_decision(utility, BP, wife, husband);
 

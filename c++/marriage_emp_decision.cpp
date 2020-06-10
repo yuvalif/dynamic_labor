@@ -17,14 +17,14 @@ MarriageEmpDecision marriage_emp_decision(const Utility& utility, double BP, Wif
     result.outside_option_h_v = utility.U_H_S;
     result.outside_option_w = wife_emp_decision(utility);
     
-    if (BP < 0) {
+    if (BP == NO_BP) {
         // no marriage is possible to begin with
         return result;
     }
 
     bool BP_FLAG_PLUS{false};
     bool BP_FLAG_MINUS{false};
-    unsigned max_iterations = 10;
+    unsigned max_iterations = 20;
 
     while (true) {
         if (max_iterations == 0) {

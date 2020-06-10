@@ -8,6 +8,7 @@
 #include "draw_husband.h"
 #include <cmath>
 #include <array>
+#include "to_string.h"
 
 // initialize all values with MINIMUM_UTILITY
 Utility::Utility() {
@@ -15,6 +16,24 @@ Utility::Utility() {
     std::fill(U_H.begin(), U_H.end(), MINIMUM_UTILITY);
     std::fill(U_W_S.begin(), U_W_S.end(), MINIMUM_UTILITY);
     U_H_S = MINIMUM_UTILITY;
+}
+
+std::string to_string(const Utility& u) {
+    std::stringstream ss;
+    for (const auto x : u.U_W_S) ss << to_string_with_precision(x, 0) << " ";
+    ss << std::endl;
+
+    const auto x = u.U_H_S;
+    ss << to_string_with_precision(x, 0) << " ";
+    ss << std::endl;
+
+    for (const auto x : u.U_W) ss << to_string_with_precision(x, 0) << " ";
+    ss << std::endl;
+
+    for (const auto x : u.U_H) ss << to_string_with_precision(x, 0) << " ";
+    ss << std::endl;
+
+    return ss.str();
 }
 
 Utility calculate_utility(const Parameters& p, const Emax& EMAX_W, const Emax& EMAX_H, unsigned kids,
@@ -89,19 +108,19 @@ Utility calculate_utility(const Parameters& p, const Emax& EMAX_W, const Emax& E
     std::array<double, 2> UC_W_S{};
     UC_W_S[0] = p.alpha1_w_s*(kids) + p.alpha2_w*log1p(kids) + p.alpha3_w;
     const auto women_cons_s2 = net.net_income_s_w*(1.0+kids*0.4); // women private consumption when single and employed
-    UC_W_S[1] = pow(women_cons_s2,p.alpha)/p.alpha + p.alpha1_w_s*kids;
-    const auto UC_H_S = pow(net.net_income_s_h,p.alpha)/p.alpha;
+    UC_W_S[1] = pow(women_cons_s2, p.alpha)/p.alpha + p.alpha1_w_s*kids;
+    const auto UC_H_S = pow(net.net_income_s_h, p.alpha)/p.alpha;
     if (t == T_END) {
-        result.U_W_S[0] = UC_W_S[0]+p.t1_w*wife.HSG+p.t2_w*wife.SC+p.t3_w*wife.CG+p.t4_w*wife.PC+p.t5_w*wife.WE      +p.t13_w*kids;     
-        result.U_W_S[1] = UC_W_S[1]+p.t1_w*wife.HSG+p.t2_w*wife.SC+p.t3_w*wife.CG+p.t4_w*wife.PC+p.t5_w*(wife.WE+1.0)+p.t13_w*kids+p.t16_w;       
+        result.U_W_S[UNEMP] = UC_W_S[UNEMP]+p.t1_w*wife.HSG+p.t2_w*wife.SC+p.t3_w*wife.CG+p.t4_w*wife.PC+p.t5_w*wife.WE      +p.t13_w*kids;     
+        result.U_W_S[EMP] = UC_W_S[EMP]+p.t1_w*wife.HSG+p.t2_w*wife.SC+p.t3_w*wife.CG+p.t4_w*wife.PC+p.t5_w*(wife.WE+1.0)+p.t13_w*kids+p.t16_w;       
         result.U_H_S    = UC_H_S+p.t6_h*husband.H_HSD+p.t7_h*husband.H_HSG+p.t8_h*husband.H_SC+p.t9_h*husband.H_CG+p.t10_h*husband.H_PC+p.t11_h*(husband.HE+1.0)+p.t13_h*kids_h;
     } else {
         unsigned exp_wi; unsigned exp_hi; unsigned BPi;	unsigned CSi;
         value_to_index(wife.WE, 0, 0, 0, exp_wi, exp_hi, BPi, CSi);
-        result.U_W_S[0] = UC_W_S[0]+beta0*EMAX_W[t+1][exp_wi][1][kids][UNEMP][wife.ability_wi][1][UNMARRIED][1][wife.WS][1][1];
+        result.U_W_S[UNEMP] = UC_W_S[UNEMP]+beta0*EMAX_W[t+1][exp_wi][1][kids][UNEMP][wife.ability_wi][1][UNMARRIED][1][wife.WS][1][1];
 
         value_to_index(wife.WE+1, 0, 0, 0, exp_wi, exp_hi, BPi, CSi);
-        result.U_W_S[1] = UC_W_S[1]+beta0*EMAX_W[t+1][exp_wi][1][kids][EMP][wife.ability_wi][1][UNMARRIED][1][wife.WS][1][1];
+        result.U_W_S[EMP] = UC_W_S[EMP]+beta0*EMAX_W[t+1][exp_wi][1][kids][EMP][wife.ability_wi][1][UNMARRIED][1][wife.WS][1][1];
 
         value_to_index(0, husband.HE+1, 0, 0, exp_wi, exp_hi, BPi, CSi);
         result.U_H_S    = UC_H_S   +beta0*EMAX_H[t+1][1][exp_hi][kids][UNEMP][1][husband.ability_hi][UNMARRIED][husband.HS][wife.WS][1][1];
@@ -111,7 +130,7 @@ Utility calculate_utility(const Parameters& p, const Emax& EMAX_W, const Emax& E
         // no women employment options
         std::fill(result.U_W.begin()+CS_SIZE, result.U_W.end(), MINIMUM_UTILITY);
         std::fill(result.U_H.begin()+CS_SIZE, result.U_H.end(), MINIMUM_UTILITY);
-        std::fill(result.U_W_S.begin(), result.U_W_S.end(), MINIMUM_UTILITY);
+        result.U_W_S[EMP] = MINIMUM_UTILITY;
     }
 
     return result;

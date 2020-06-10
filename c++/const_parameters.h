@@ -31,7 +31,7 @@ const std::array<double, CS_SIZE> cs_vector = {0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6
 const std::array<double, CS_SIZE> bp_vector = cs_vector;
 
 const double INITIAL_BP = 0.5;
-const double NO_BP = -1.0;
+const double NO_BP = -99.0;
 
 
 const int TERMINAL = 45;

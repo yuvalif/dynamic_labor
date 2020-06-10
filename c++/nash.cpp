@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <array>
 #include <cassert>
+#include <math.h>
 
 double nash(const Parameters& p, const Utility& utility, double BP) {
     // marriage decision - outside option value wife
@@ -33,50 +34,29 @@ double nash(const Parameters& p, const Utility& utility, double BP) {
     const auto max_nash_value = nash_value[max_nash_value_index];
 
     // find the value of the bargaining power
+    auto best_bp = NO_BP;
     if (max_nash_value > MINIMUM_UTILITY) {
         // there is at least one option with positive surplus for both
         if (max_nash_value_index == max_weighted_utility_index) {
-            return 0.5;
+            // input BP satisfies the condition
+            return BP;
         } else {
-            UtilityArray weighted_utility_option;
-            for (auto i = 0U; i < UTILITY_SIZE; ++i) {
-                weighted_utility_option[i] = utility.U_H[i]*bp_vector[i%CS_SIZE] + utility.U_W[i]*(1.0-bp_vector[i%CS_SIZE]);  // weighted utility
-            }
-            const auto weighted_utility_option_max = *(std::max_element(weighted_utility_option.begin(), weighted_utility_option.end()));
-            // 11 elements vector, with 1 for all the alpha-bp where 3 is bigger than 4, all possible alphas
-            std::array<unsigned, CS_SIZE> possibilities{};
-            for (auto i = 0U; i < CS_SIZE; ++i) {
-                if (weighted_utility_option[i] == weighted_utility_option_max) {
-                    possibilities[i] = 1;
+            // search for a BP that satisfies the above and is closest to the input BP
+            for (auto bp_id = 0; bp_id < CS_SIZE; ++bp_id) {
+                const auto new_bp = bp_vector[bp_id];
+                for (auto i = 0U; i < UTILITY_SIZE; ++i) {
+                    weighted_utility[i] = utility.U_H[i]*new_bp + utility.U_W[i]*(1.0-new_bp);
+                }
+                const auto max_weighted_utility_index = std::max_element(weighted_utility.begin(), weighted_utility.end()) - weighted_utility.begin();
+                if (max_nash_value_index == max_weighted_utility_index) {
+                    if (abs(best_bp - BP) > abs(new_bp - BP)) {
+                        best_bp = new_bp;
+                    }
                 }
             }
-            // initialize the indexes to alway be further from the center
-            int ind1 = -1; int ind2 = CS_SIZE;
-            // search for the last "1" in the index range of: 0-4
-            for (auto i = 0; i < 5; ++i) {
-                if (possibilities[i] == 1) {
-                    ind1 = i;
-                }
-            }
-            // search for the first "1" in the index range of: 10-6
-            for (int i = 5; i > 0; --i) {
-                if (possibilities[5+i] == 1) {
-                    ind2 = 5+i;
-                }
-            }
-            if (ind1 != -1 || ind2 != CS_SIZE) {
-                // need to update BP
-                if (5 - ind1 < ind2 - 5) {
-                    // ind1 is closer to the center
-                    return (double)ind1*0.1;
-                }
-                // ind2 is closer to the center
-                return (double)ind2*0.1;    
-            }
-            // in case there there are no "1" smaller or larger than 5 we return -1
         }
     }
 
-    return -1.0;
+    return best_bp;
 }
 

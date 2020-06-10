@@ -170,6 +170,12 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m, const 
                     const Utility utility = calculate_utility(p, EMAX_W, EMAX_H, n_kids, wage_h, wage_w,
                             true /*choose partner*/, decision.M, wife, husband, t, BP, false /*not single men*/);
                     BP = nash(p, utility, BP); // Nash bargaining at first period of marriage  
+//#ifdef SAMPLE_NASH
+//                    auto r = static_cast<float>(rand())/static_cast<float>(RAND_MAX);
+//                    if (r < 0.01) {
+//                        std::cout << to_string(utility);
+//                    }
+//#endif
                     if (BP != NO_BP) {
                         const int BP_INDEX = round(BP*10.0)+1;
                         ++estimated.bp_initial_dist[BP_INDEX];
