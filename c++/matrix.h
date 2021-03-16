@@ -2,6 +2,7 @@
 
 #include <array>
 #include <algorithm>
+#include <string>
 
 // a Matrix is a 2D array of doubles (with static size)
 template <size_t ROW, size_t COL> using Matrix = std::array<std::array<double, COL>, ROW>;

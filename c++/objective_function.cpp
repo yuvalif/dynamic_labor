@@ -248,7 +248,7 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m, const 
                         for (auto order = 0; order < MAX_NUM_KIDS-1; ++order) {
                             kid_age[order] = kid_age[order+1];
                         }
-                        kid_age[sizeof(kid_age)-1] = 0;
+                        kid_age[MAX_NUM_KIDS-1] = 0;
                         --n_kids;
                         assert(n_kids>=0);
                     }         
