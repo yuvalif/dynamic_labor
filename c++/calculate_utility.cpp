@@ -27,10 +27,10 @@ std::string to_string(const Utility& u) {
     ss << to_string_with_precision(x, 0) << " ";
     ss << std::endl;
 
-    for (const auto x : u.U_W) ss << to_string_with_precision(x, 0) << " ";
+    for (const auto xx : u.U_W) ss << to_string_with_precision(xx, 0) << " ";
     ss << std::endl;
 
-    for (const auto x : u.U_H) ss << to_string_with_precision(x, 0) << " ";
+    for (const auto xx : u.U_H) ss << to_string_with_precision(xx, 0) << " ";
     ss << std::endl;
 
     return ss.str();
@@ -60,8 +60,8 @@ Utility calculate_utility(const Parameters& p, const Emax& EMAX_W, const Emax& E
 
         for (auto i = 0; i < CS_SIZE; ++i) {  //consumption share grid
             const auto CS = cs_vector[i];
-            const auto total_cons1 = pow(net.net_income_m_unemp*(1.7+kids*0.4), p.hp) / pow(pow(CS, p.hp)+pow(1.0-CS, p.hp), 1.0/p.hp); // only men employed
-            const auto total_cons2 = pow(net.net_income_m*(1.7+kids*0.4), p.hp)       / pow(pow(CS, p.hp)+pow(1.0-CS, p.hp), 1.0/p.hp); // both employed
+            const auto total_cons1 = net.net_income_m_unemp*(1.7+kids*0.4) / pow(pow(CS, p.hp)+pow(1.0-CS, p.hp), 1.0/p.hp); // only men employed
+            const auto total_cons2 = net.net_income_m*(1.7+kids*0.4)       / pow(pow(CS, p.hp)+pow(1.0-CS, p.hp), 1.0/p.hp); // both employed
             const auto women_cons_m1 = CS*total_cons1;          // women private consumption when married and unemployed
             const auto women_cons_m2 = CS*total_cons2;          // women private consumption when married and employed
             const auto men_cons_m1 = (1.0-CS)*total_cons1;    // men private consumption when married and women unemployed

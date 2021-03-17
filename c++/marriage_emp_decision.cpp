@@ -34,7 +34,7 @@ MarriageEmpDecision marriage_emp_decision(const Utility& utility, double BP, Wif
 
         UtilityArray weighted_utility;
         for (auto i = 0U; i < UTILITY_SIZE; ++i) {
-            weighted_utility[i] = utility.U_H[i]*BP + utility.U_W[i]*(1.0-BP);
+            weighted_utility[i] = utility.U_H[i]*(1.0-BP) + utility.U_W[i]*BP;
         }
 
         const auto max_weighted_utility_index = std::max_element(weighted_utility.begin(), weighted_utility.end()) - weighted_utility.begin();

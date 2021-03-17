@@ -14,7 +14,7 @@ double nash(const Parameters& p, const Utility& utility, double BP) {
     UtilityArray weighted_utility;
 
     for (auto i = 0U; i < UTILITY_SIZE; ++i) {
-        weighted_utility[i] = utility.U_H[i]*BP + utility.U_W[i]*(1.0-BP);
+        weighted_utility[i] = utility.U_H[i]*(1.0-BP) + utility.U_W[i]*BP;
     }
 
     UtilityArray nash_value;
@@ -45,7 +45,7 @@ double nash(const Parameters& p, const Utility& utility, double BP) {
             for (auto bp_id = 0; bp_id < CS_SIZE; ++bp_id) {
                 const auto new_bp = bp_vector[bp_id];
                 for (auto i = 0U; i < UTILITY_SIZE; ++i) {
-                    weighted_utility[i] = utility.U_H[i]*new_bp + utility.U_W[i]*(1.0-new_bp);
+                    weighted_utility[i] = utility.U_H[i]*(1.0-new_bp) + utility.U_W[i]*new_bp;
                 }
                 const auto max_weighted_utility_index = std::max_element(weighted_utility.begin(), weighted_utility.end()) - weighted_utility.begin();
                 if (max_nash_value_index == max_weighted_utility_index) {
