@@ -60,8 +60,9 @@ Utility calculate_utility(const Parameters& p, const Emax& EMAX_W, const Emax& E
 
         for (auto i = 0; i < CS_SIZE; ++i) {  //consumption share grid
             const auto CS = cs_vector[i];
-            const auto total_cons1 = net.net_income_m_unemp*(1.7+kids*0.4) / pow(pow(CS, p.hp)+pow(1.0-CS, p.hp), 1.0/p.hp); // only men employed
-            const auto total_cons2 = net.net_income_m*(1.7+kids*0.4)       / pow(pow(CS, p.hp)+pow(1.0-CS, p.hp), 1.0/p.hp); // both employed
+            const auto total_cons_denom = pow(pow(CS, p.hp)+pow(1.0-CS, p.hp), 1.0/p.hp)*(1.0+kids*0.3);
+            const auto total_cons1 = net.net_income_m_unemp/total_cons_denom; // only men employed
+            const auto total_cons2 = net.net_income_m/total_cons_denom;       // both employed
             const auto women_cons_m1 = CS*total_cons1;          // women private consumption when married and unemployed
             const auto women_cons_m2 = CS*total_cons2;          // women private consumption when married and employed
             const auto men_cons_m1 = (1.0-CS)*total_cons1;    // men private consumption when married and women unemployed
@@ -107,7 +108,7 @@ Utility calculate_utility(const Parameters& p, const Emax& EMAX_W, const Emax& E
 
     std::array<double, 2> UC_W_S{};
     UC_W_S[0] = p.alpha1_w_s*(kids) + p.alpha2_w*log1p(kids) + p.alpha3_w;
-    const auto women_cons_s2 = net.net_income_s_w*(1.0+kids*0.4); // women private consumption when single and employed
+    const auto women_cons_s2 = net.net_income_s_w/(1.0+kids*0.3); // women private consumption when single and employed
     UC_W_S[1] = pow(women_cons_s2, p.alpha)/p.alpha + p.alpha1_w_s*kids;
     const auto UC_H_S = pow(net.net_income_s_h, p.alpha)/p.alpha;
     if (t == T_END) {
