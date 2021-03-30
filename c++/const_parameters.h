@@ -55,8 +55,9 @@ const auto SCHOOL_W_VALUES = boost::irange(1, SCHOOL_LEN);
 const std::array<std::string, SCHOOL_LEN> SCHOOL_NAMES = {"HSD", "HSG", "SC", "CG", "PC"};
 // match quality: (high, medium, low)
 const int MATCH_Q_LEN = 3; const auto MATCH_Q_VALUES = boost::irange(0, MATCH_Q_LEN);
-// wife bargening power: (0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8)
-const int BP_W_LEN = 7; const auto BP_W_VALUES = boost::irange(0, BP_W_LEN);
+// wife bargening power
+const int BP_W_LEN = 8;
+const std::array<double, BP_W_LEN> BP_W_VALUES = {0.0, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8};
 
 // 5 points grid for experience, use interpulations for the values between
 const std::array<unsigned, EXP_W_LEN> exp_vector = {0, 2, 4, 8, 16};

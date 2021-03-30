@@ -125,7 +125,7 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m, const 
             auto n_kids_um = 0;
             unsigned duration = 0;
             double Q_minus_1 = 0.0;
-            double BP = INITIAL_BP;
+            double bp = INITIAL_BP;
             update_ability(p, draw_3(), wife);
             MarriageEmpDecision decision;
 
@@ -145,7 +145,7 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m, const 
                 bool choose_husband = false;
                 // draw husband if not already married
                 if (decision.M == UNMARRIED) {
-                    BP = INITIAL_BP;
+                    bp = INITIAL_BP;
                     duration = 0;
                     wife.Q = 0.0;
                     // probability of meeting a potential husband
@@ -166,19 +166,12 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m, const 
 
                 if (decision.M == UNMARRIED && choose_husband) {
                     // not married, but has potential husband - calculate initial BP
-                    BP = INITIAL_BP;
                     const Utility utility = calculate_utility(p, EMAX_W, EMAX_H, n_kids, wage_h, wage_w,
-                            true /*choose partner*/, decision.M, wife, husband, t, BP, false /*not single men*/);
-                    BP = nash(p, utility, BP); // Nash bargaining at first period of marriage  
-//#ifdef SAMPLE_NASH
-//                    auto r = static_cast<float>(rand())/static_cast<float>(RAND_MAX);
-//                    if (r < 0.01) {
-//                        std::cout << to_string(utility);
-//                    }
-//#endif
-                    if (BP != NO_BP) {
-                        const int BP_INDEX = round(BP*10.0)+1;
-                        ++estimated.bp_initial_dist[BP_INDEX];
+                            true /*choose partner*/, decision.M, wife, husband, t, bp, false /*not single men*/);
+                    // Nash bargaining at first period of marriage  
+                    bp = nash(p, utility);
+                    if (bp != NO_BP) {
+                        ++estimated.bp_initial_dist[bp*10];
                     } else {
                         choose_husband = false;
                     }
@@ -190,11 +183,11 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m, const 
                     // and is from previous period if already married           
                     // utility is calculated again based on the new BP
                     const Utility utility = calculate_utility(p, EMAX_W, EMAX_H, n_kids, wage_h, wage_w,
-                        true /*choose partner*/, decision.M, wife, husband, t, BP, false /*not single men*/);
-                    decision = marriage_emp_decision(utility, BP, wife, husband);
+                        true /*choose partner*/, decision.M, wife, husband, t, bp, false /*not single men*/);
+                    decision = marriage_emp_decision(utility, bp, wife, husband, true);
                 } else {
                     const Utility utility = calculate_utility(p, EMAX_W, EMAX_H, n_kids, wage_h, wage_w,
-                        false /*no partner*/, decision.M, wife, husband, t, BP, false /*not single men*/);
+                        false /*no partner*/, decision.M, wife, husband, t, bp, false /*not single men*/);
                     wife.emp_state = wife_emp_decision(utility);
                 }
 
@@ -203,9 +196,8 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m, const 
                 emp_um[t+wife.age_index][school_group] += decision.M == UNMARRIED ? wife.emp_state : 0;
                 ++count_emp_total[t+wife.age_index][school_group];
 
-                if (BP != NO_BP) {
-                    const auto BP_INDEX = round(BP*10)+1;
-                    ++estimated.bp_dist[BP_INDEX];
+                if (bp != NO_BP) {
+                    ++estimated.bp_dist[bp*10];
                 }
                 if (decision.M == MARRIED) {
                     ++estimated.cs_dist[decision.max_weighted_utility_index];

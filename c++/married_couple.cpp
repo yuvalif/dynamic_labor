@@ -41,8 +41,8 @@ unsigned married_couple(const Parameters& p, int WS, unsigned t, Emax& EMAX_W, E
                                 for (auto Q_INDEX : MATCH_Q_VALUES) {
                                     wife.Q = normal_arr[Q_INDEX]*p.sigma[4];
                                     wife.Q_INDEX = Q_INDEX;
-                                    for (auto BPi : BP_W_VALUES) {
-                                        auto BP = 0.1 + BPi/10.0;  // the grid is 0.2 - 0.8
+                                    for (auto bpi = 1U; bpi < BP_W_LEN; ++bpi) {
+                                        auto bp = BP_W_VALUES[bpi];  // the grid is 0.2 - 0.8
                                         auto ADD_EMAX_W = 0.0;
                                         auto ADD_EMAX_H = 0.0;
                                         for (auto draw_b = 0U; draw_b <  DRAW_B; ++draw_b) {
@@ -77,10 +77,10 @@ unsigned married_couple(const Parameters& p, int WS, unsigned t, Emax& EMAX_W, E
                                             const auto CHOOSE_WIFE = 1; 
                                             const auto single_men = false;
                                             const Utility utility = calculate_utility(p, EMAX_W, EMAX_H, kids, wage_h, wage_w, 
-                                                    CHOOSE_WIFE, MARRIED, wife, husband, t, BP, single_men);
+                                                    CHOOSE_WIFE, MARRIED, wife, husband, t, bp, single_men);
 
                                             // marriage decision - outside option value wife
-                                            const auto decision = marriage_emp_decision(utility, BP, wife, husband);
+                                            const auto decision = marriage_emp_decision(utility, bp, wife, husband, true);
 
                                             if (decision.M == MARRIED) {
                                                 ADD_EMAX_H += utility.U_H[decision.max_weighted_utility_index];
@@ -90,9 +90,9 @@ unsigned married_couple(const Parameters& p, int WS, unsigned t, Emax& EMAX_W, E
                                                 ADD_EMAX_W += decision.outside_option_w_v;
                                             }
                                         }  //end draw backward loop                                        
-                                        EMAX_H[t][W_EXP_INDEX][H_EXP_INDEX][kids][prev][ability_wi][ability_hi][MARRIED][HS][WS][Q_INDEX][BPi] = 
+                                        EMAX_H[t][W_EXP_INDEX][H_EXP_INDEX][kids][prev][ability_wi][ability_hi][MARRIED][HS][WS][Q_INDEX][bpi] = 
                                             ADD_EMAX_H/DRAW_B;
-                                        EMAX_W[t][W_EXP_INDEX][H_EXP_INDEX][kids][prev][ability_wi][ability_hi][MARRIED][HS][WS][Q_INDEX][BPi] = 
+                                        EMAX_W[t][W_EXP_INDEX][H_EXP_INDEX][kids][prev][ability_wi][ability_hi][MARRIED][HS][WS][Q_INDEX][bpi] = 
                                             ADD_EMAX_W/DRAW_B;
                                         ++iter_count;
                                     }   // end BP  loop

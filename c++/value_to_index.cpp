@@ -22,18 +22,27 @@ void value_to_index(unsigned WE, unsigned HE, double BP, unsigned CS,
     exp_wi = group_exp(WE);
     exp_hi = group_exp(HE);
 
-    if (BP < 0.2) {
+    if (BP < 0.2)
         BPi = 0;
-    } else if (BP > 0.8) {
+    else if (BP < 0.3)
+        BPi = 1;
+    else if (BP < 0.4)
+        BPi = 2;
+    else if (BP < 0.5)
+        BPi = 3;
+    else if (BP < 0.6)
+        BPi = 4;
+    else if (BP < 0.7)
+        BPi = 5;
+    else if (BP < 0.8)
+        BPi = 6;
+    else
         BPi = 7;
-    } else {
-        BPi = round((BP*10.0)-1.0);
-    }
 
     if (CS < 0.2) {
         CSi = 1;
-    } else if (CS > 0.8) {
-        CSi = 7;
+    } else if (CS >= 0.8) {
+        CSi = 6;
     } else {
         CSi = round((CS*10.0)-1.0);
     }

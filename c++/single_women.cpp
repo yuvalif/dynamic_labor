@@ -59,19 +59,19 @@ unsigned single_women(const Parameters& p, unsigned WS, unsigned t, Emax& EMAX_W
                         // at this point the BP IS .5 
                         // IF NO MARRIAGE AND NO OFFER, BP is calculated by nash 
                         // if offer and is from previous period if already married
-                        double BP = 0.5;
+                        double bp = NO_BP;
                         const auto M = MARRIED; 
                         const auto single_men = false;
                         const Utility utility = calculate_utility(p, EMAX_W, EMAX_H, kids, wage_h, wage_w, CHOOSE_HUSBAND,
-                                M, wife, husband, t, BP, single_men);
+                                M, wife, husband, t, bp, single_men);
                         //   MAXIMIZATION - MARRIAGE + WORK DESICION 
                         if (CHOOSE_HUSBAND == 1) {
-                            BP = nash(p, utility, BP); // Nash bargaining at first period of marriage  
+                            bp = nash(p, utility); // Nash bargaining at first period of marriage  
                         }
 
-                        if (CHOOSE_HUSBAND == 1 && BP != NO_BP) {
+                        if (bp == NO_BP) {
                             // marriage decision - outside option value wife
-                            const auto decision = marriage_emp_decision(utility, BP, wife, husband);
+                            const auto decision = marriage_emp_decision(utility, bp, wife, husband, true);
 
                             if (decision.M == MARRIED) {
                                 ADD_EMAX = ADD_EMAX + utility.U_W[decision.max_weighted_utility_index];
