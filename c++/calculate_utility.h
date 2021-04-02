@@ -24,3 +24,5 @@ Utility calculate_utility(const Parameters& p, const Emax& EMAX_W, const Emax& E
 
 std::string to_string(const Utility& u);
 
+std::string to_string(const UtilityArray& a);
+

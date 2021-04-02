@@ -36,6 +36,14 @@ std::string to_string(const Utility& u) {
     return ss.str();
 }
 
+std::string to_string(const UtilityArray& a) {
+    std::stringstream ss;
+    for (const auto xx : a) ss << to_string_with_precision(xx, 0) << " ";
+    ss << std::endl;
+
+    return ss.str();
+}
+
 Utility calculate_utility(const Parameters& p, const Emax& EMAX_W, const Emax& EMAX_H, unsigned kids,
         double wage_h, double wage_w, bool choose_partner,
         unsigned M, const Wife& wife, const Husband& husband, unsigned t, double BP, bool single_men) {
@@ -107,9 +115,9 @@ Utility calculate_utility(const Parameters& p, const Emax& EMAX_W, const Emax& E
     }
 
     std::array<double, 2> UC_W_S{};
-    UC_W_S[0] = p.alpha1_w_s*(kids) + p.alpha2_w*log1p(kids) + p.alpha3_w;
+    UC_W_S[UNEMP] = p.alpha1_w_s*(kids) + p.alpha2_w*log1p(kids) + p.alpha3_w;
     const auto women_cons_s2 = net.net_income_s_w/(1.0+kids*0.3); // women private consumption when single and employed
-    UC_W_S[1] = pow(women_cons_s2, p.alpha)/p.alpha + p.alpha1_w_s*kids;
+    UC_W_S[EMP] = pow(women_cons_s2, p.alpha)/p.alpha + p.alpha1_w_s*kids;
     const auto UC_H_S = pow(net.net_income_s_h, p.alpha)/p.alpha;
     if (t == T_END) {
         result.U_W_S[UNEMP] = UC_W_S[UNEMP]+p.t1_w*wife.HSG+p.t2_w*wife.SC+p.t3_w*wife.CG+p.t4_w*wife.PC+p.t5_w*wife.WE      +p.t13_w*kids;     

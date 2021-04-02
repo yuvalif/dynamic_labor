@@ -8,5 +8,7 @@ struct MomentsStdev;
 // it return a single value that represent the difference between the estimated and actual moments
 // the "no_emax" parameter is used to execute the objective functiona statically (all emax values are zero)
 // the "display_moments" parameter indicate whether to print the extual and estimated moments
-double objective_function(const Parameters& p, const Moments& m, const MomentsStdev& m_stdev, bool display_moments, bool no_emax);
+// the "adjust_bp" parameter indicate whether to try and find a better BP if the initial one does not cause marriage
+double objective_function(const Parameters& p, const Moments& m, const MomentsStdev& m_stdev, 
+    bool display_moments, bool no_emax, bool adjust_bp);
 

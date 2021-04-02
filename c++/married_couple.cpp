@@ -9,7 +9,7 @@
 #include "nash.h"
 #include "marriage_emp_decision.h"
 
-unsigned married_couple(const Parameters& p, int WS, unsigned t, Emax& EMAX_W, Emax& EMAX_H) { 
+unsigned married_couple(const Parameters& p, int WS, unsigned t, Emax& EMAX_W, Emax& EMAX_H, bool adjust_bp) { 
     unsigned iter_count = 0;
 
     Wife wife;
@@ -80,7 +80,7 @@ unsigned married_couple(const Parameters& p, int WS, unsigned t, Emax& EMAX_W, E
                                                     CHOOSE_WIFE, MARRIED, wife, husband, t, bp, single_men);
 
                                             // marriage decision - outside option value wife
-                                            const auto decision = marriage_emp_decision(utility, bp, wife, husband, true);
+                                            const auto decision = marriage_emp_decision(utility, bp, wife, husband, adjust_bp);
 
                                             if (decision.M == MARRIED) {
                                                 ADD_EMAX_H += utility.U_H[decision.max_weighted_utility_index];

@@ -8,6 +8,7 @@
 
 // find the BP value that has the maximum nash value
 double nash(const Parameters& p, const Utility& utility) {
+    return 0.5;
     // marriage decision - outside option value wife
     const auto outside_option_w_v = std::max(utility.U_W_S[0], utility.U_W_S[1]);
     const auto outside_option_h_v = utility.U_H_S;

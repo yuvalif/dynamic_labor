@@ -7,13 +7,13 @@
 #include <cassert>
 
 unsigned wife_emp_decision(const Utility& utility) {
-  return (utility.U_W_S[0] > utility.U_W_S[1]) ? UNEMP : EMP;
+  return (utility.U_W_S[UNEMP] > utility.U_W_S[EMP]) ? UNEMP : EMP;
 }
 
 MarriageEmpDecision marriage_emp_decision(const Utility& utility, double& bp, Wife& wife, Husband& husband, bool adjust_bp) {
 
   MarriageEmpDecision result;
-  result.outside_option_w_v = std::max(utility.U_W_S[0], utility.U_W_S[1]);
+  result.outside_option_w_v = std::max(utility.U_W_S[UNEMP], utility.U_W_S[EMP]);
   result.outside_option_h_v = utility.U_H_S;
   result.outside_option_w = wife_emp_decision(utility);
 
@@ -24,72 +24,38 @@ MarriageEmpDecision marriage_emp_decision(const Utility& utility, double& bp, Wi
 
   bool BP_FLAG_PLUS{false};
   bool BP_FLAG_MINUS{false};
-  unsigned max_iterations = 20;
-
+  unsigned max_iterations = CS_SIZE;
 
   while (true) {
     if (max_iterations == 0) {
       throw std::runtime_error("max iteration reached. BP=" + std::to_string(bp));
     }
-    --max_iterations;
 
     assert(bp >= 0.0 && bp <= 1.0);
 
-    const unsigned bpi_uemp = bp*10.0;
-    const unsigned bpi_emp = bp*10.0+CS_SIZE;
-    const auto U_W_uemp = utility.U_W[bpi_uemp];
-    const auto U_H_uemp = utility.U_H[bpi_uemp];
-    const auto U_W_emp = utility.U_W[bpi_emp];
-    const auto U_H_emp = utility.U_H[bpi_emp];
-    double max_U_W;
-    double max_U_H;
-    bool employed;
-    bool valid_option_found;
-
-    if (U_H_uemp >= result.outside_option_h_v && U_W_uemp >= result.outside_option_w_v &&
-        U_H_emp >= result.outside_option_h_v && U_W_emp >= result.outside_option_w_v) {
-      // both employment and unemployment are valid options - find the maximum weighted utility
-      if ((U_H_uemp*(1-bp) + U_W_uemp*bp) > (U_H_emp*(1-bp) + U_W_emp*bp)) {
-        max_U_H = U_H_uemp;
-        max_U_W = U_W_uemp;
-        employed = false;
-      } else {
-        max_U_H = U_H_emp;
-        max_U_W = U_W_emp;
-        employed = true;
+    UtilityArray weighted_utility_both; // weighted utilities when both has options better than the outside
+    UtilityArray weighted_utility_one;  // weighted utilities when only one has option better than the outside
+    std::fill(weighted_utility_both.begin(), weighted_utility_both.end(), MINIMUM_UTILITY);
+    std::fill(weighted_utility_one.begin(), weighted_utility_one.end(), MINIMUM_UTILITY);
+    for (auto csi = 0U; csi < CS_SIZE*2; ++csi) {
+      const auto u_h = utility.U_H[csi];
+      const auto u_w = utility.U_W[csi];
+      if (u_h >= result.outside_option_h_v && u_w >= result.outside_option_w_v) {
+        weighted_utility_both[csi] = u_h*(1.0-bp) + u_w*bp;
+      } else if (u_h > result.outside_option_h_v || u_w > result.outside_option_w_v) {
+        weighted_utility_one[csi] = u_h*(1.0-bp) + u_w*bp;
       }
-      valid_option_found = true;
-    } else if (U_H_uemp >= result.outside_option_h_v && U_W_uemp >= result.outside_option_w_v) {
-      // only unemployment is a valid option
-      max_U_H = U_H_uemp;
-      max_U_W = U_W_uemp;
-      employed = false;
-      valid_option_found = true;
-    } else if (U_H_emp >= result.outside_option_h_v && U_W_emp >= result.outside_option_w_v) {
-      // only employment is a valid option
-      max_U_H = U_H_emp;
-      max_U_W = U_W_emp;
-      employed = true;
-      valid_option_found = true;
-    } else {
-      // both employment and unemployment are not valid options - find the maximum weighted utility
-      // TODO: is this correct, or should we try to adjust for both employment and unemployment?
-      if ((U_H_uemp*(1-bp) + U_W_uemp*bp) > (U_H_emp*(1-bp) + U_W_emp*bp)) {
-        max_U_H = U_H_uemp;
-        max_U_W = U_W_uemp;
-        employed = false;
-      } else {
-        max_U_H = U_H_emp;
-        max_U_W = U_W_emp;
-        employed = true;
-      }
-      valid_option_found = false;
     }
 
-    if (valid_option_found) {
+    result.max_weighted_utility_index = std::max_element(weighted_utility_both.begin(), weighted_utility_both.end()) - weighted_utility_both.begin();
+
+    const auto max_weighted_utility_both = weighted_utility_both[result.max_weighted_utility_index];
+
+    if (max_weighted_utility_both != MINIMUM_UTILITY) {
       // the max in married for both is better than outside
       // no change to bp
       result.M = MARRIED;
+      const auto employed = result.max_weighted_utility_index >= CS_SIZE;
       wife.emp_state = employed ? EMP : UNEMP;
       wife.WE += (employed ? 1 : 0);
       ++husband.HE;
@@ -100,16 +66,26 @@ MarriageEmpDecision marriage_emp_decision(const Utility& utility, double& bp, Wi
       break;
     }
 
-    // change bp to try and find valid option
-    if (max_U_H < result.outside_option_h_v && max_U_W < result.outside_option_w_v) { 
-      // the outside option is better for both - no marriage
+    --max_iterations;
+
+    const auto max_weighted_utility_one_index = std::max_element(weighted_utility_one.begin(), weighted_utility_one.end()) - weighted_utility_one.begin(); 
+    const auto max_weighted_utility_one = weighted_utility_one[max_weighted_utility_one_index];
+
+    if (max_weighted_utility_one == MINIMUM_UTILITY) {
+      // the outside option is better for either - no marriage
       break;
-    } else if (max_U_H  >= result.outside_option_h_v && max_U_W < result.outside_option_w_v) { 
+    }
+
+    const auto max_U_H = utility.U_H[max_weighted_utility_one_index];
+    const auto max_U_W = utility.U_W[max_weighted_utility_one_index];
+
+    // change bp to try and find valid option
+    if (max_U_H >= result.outside_option_h_v && max_U_W < result.outside_option_w_v) { 
       // the outside option is better for wife
       // increase the wife bp
       bp += 0.1;
       if (bp > 1.0 || BP_FLAG_MINUS) { 
-        // no solution - boundry reached or infinite loop of BP
+        // no solution - boundry reached or resolution is not high enough
         break;
       }
       BP_FLAG_PLUS = true;
@@ -118,10 +94,14 @@ MarriageEmpDecision marriage_emp_decision(const Utility& utility, double& bp, Wi
       // increase the husband bp
       bp -= 0.1;
       if (bp < 0.0 || BP_FLAG_PLUS) {
-        // no solution - boundry reached or infinite loop of BP
+        // no solution - boundry reached or resolution is not high enough
         break;
       }
       BP_FLAG_MINUS = true;
+    } else {
+      throw std::runtime_error("no adjustment should be done at this point. max(H,W)=(" +
+          std::to_string(max_U_H) + "," + std::to_string(max_U_W) + "). " +
+          "outside(H,W)=(" + std::to_string(result.outside_option_h_v) + "," + std::to_string(result.outside_option_w_v) + ")");
     }
   }
 

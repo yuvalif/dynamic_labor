@@ -11,7 +11,7 @@
 #include "nash.h"
 #include <cstdlib>
 
-unsigned single_men(const Parameters& p, unsigned HS, unsigned t, const Emax& EMAX_W, Emax& EMAX_H) {
+unsigned single_men(const Parameters& p, unsigned HS, unsigned t, const Emax& EMAX_W, Emax& EMAX_H, bool adjust_bp) {
     Husband husband;
 
     if (!update_husband_schooling(HS, t, husband)) {
@@ -59,7 +59,7 @@ unsigned single_men(const Parameters& p, unsigned HS, unsigned t, const Emax& EM
 
                 if (bp == NO_BP) {
                     // marriage decision - outside option value wife
-                    const auto decision = marriage_emp_decision(utility, bp, wife, husband, true);
+                    const auto decision = marriage_emp_decision(utility, bp, wife, husband, adjust_bp);
                     if (decision.M == MARRIED) {
                         ADD_EMAX += utility.U_H[decision.max_weighted_utility_index];
                     } else {

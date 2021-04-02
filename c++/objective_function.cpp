@@ -20,23 +20,23 @@
 #include "print_moments.h"
 #include "cpp-text-table/TextTable.h"
 
-unsigned calculate_emax(const Parameters& p, Emax& EMAX_W, Emax& EMAX_H) {
+unsigned calculate_emax(const Parameters& p, Emax& EMAX_W, Emax& EMAX_H, bool adjust_bp) {
     unsigned iter_count = 0;
     // running until the one before last period
     for (auto t = T_MAX - 2; t >= 0; --t) {
         // EMAX FOR SINGLE MEN
         for (auto HS : SCHOOL_H_VALUES) {
-            iter_count += single_men(p, HS, t, EMAX_W, EMAX_H);
+            iter_count += single_men(p, HS, t, EMAX_W, EMAX_H, adjust_bp);
         } // end husband schooling loop
 
         // EMAX FOR SINGLE WOMEN
         for (auto WS : SCHOOL_W_VALUES) {
-            iter_count += single_women(p, WS, t, EMAX_W, EMAX_H);
+            iter_count += single_women(p, WS, t, EMAX_W, EMAX_H, adjust_bp);
         } // end wife schooling loop
 
         // EMAX FOR MARRIED COUPLE
         for (auto WS : SCHOOL_W_VALUES) {
-            iter_count += married_couple(p, WS, t, EMAX_W, EMAX_H);
+            iter_count += married_couple(p, WS, t, EMAX_W, EMAX_H, adjust_bp);
         } // end wife schooling loop
     }
     return iter_count;
@@ -58,7 +58,7 @@ double mean(const SchoolingArray& val_arr, const SchoolingArray& count_arr, unsi
     return (double)val_arr[school_group]/(double)count;
 }
 
-EstimatedMoments calculate_moments(const Parameters& p, const Moments& m, const Emax& EMAX_W, const Emax& EMAX_H) {
+EstimatedMoments calculate_moments(const Parameters& p, const Moments& m, const Emax& EMAX_W, const Emax& EMAX_H, bool adjust_bp) {
     EstimatedMoments estimated;
     boost::math::normal normal_dist;
     SchoolingMatrix emp_total = {{{0}}};    // employment
@@ -164,10 +164,11 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m, const 
                 const auto wage_h = (decision.M == MARRIED || choose_husband) ? calculate_wage_h(p, husband, epsilon()) : 0.0;
                 const auto wage_w = calculate_wage_w(p, wife, draw_p(), epsilon());
 
+                const auto is_single_men = false;
                 if (decision.M == UNMARRIED && choose_husband) {
                     // not married, but has potential husband - calculate initial BP
                     const Utility utility = calculate_utility(p, EMAX_W, EMAX_H, n_kids, wage_h, wage_w,
-                            true /*choose partner*/, decision.M, wife, husband, t, bp, false /*not single men*/);
+                            true /*choose partner*/, decision.M, wife, husband, t, bp, is_single_men);
                     // Nash bargaining at first period of marriage  
                     bp = nash(p, utility);
                     if (bp != NO_BP) {
@@ -183,11 +184,11 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m, const 
                     // and is from previous period if already married           
                     // utility is calculated again based on the new BP
                     const Utility utility = calculate_utility(p, EMAX_W, EMAX_H, n_kids, wage_h, wage_w,
-                        true /*choose partner*/, decision.M, wife, husband, t, bp, false /*not single men*/);
-                    decision = marriage_emp_decision(utility, bp, wife, husband, true);
+                        true /*choose partner*/, decision.M, wife, husband, t, bp, is_single_men);
+                    decision = marriage_emp_decision(utility, bp, wife, husband, adjust_bp);
                 } else {
                     const Utility utility = calculate_utility(p, EMAX_W, EMAX_H, n_kids, wage_h, wage_w,
-                        false /*no partner*/, decision.M, wife, husband, t, bp, false /*not single men*/);
+                        false /*no partner*/, decision.M, wife, husband, t, bp, is_single_men);
                     wife.emp_state = wife_emp_decision(utility);
                 }
 
@@ -694,13 +695,14 @@ void print_distributions(const BPDist& bp_initial_dist, const BPDist& bp_dist, c
     std::cout << table;
 }
 
-double objective_function(const Parameters& p, const Moments& m, const MomentsStdev& m_stdev, bool display_moments, bool no_emax) {
+double objective_function(const Parameters& p, const Moments& m, const MomentsStdev& m_stdev, 
+    bool display_moments, bool no_emax, bool adjust_bp) {
     auto EMAX_W = make_emax();
     auto EMAX_H = make_emax();
 
     if (!no_emax) {
         const auto t_start = std::chrono::high_resolution_clock::now();
-        const auto iter_count = calculate_emax(p, EMAX_W, EMAX_H);
+        const auto iter_count = calculate_emax(p, EMAX_W, EMAX_H, adjust_bp);
         const auto t_end = std::chrono::high_resolution_clock::now();
         std::cout << "emax calculation did " << iter_count << " iterations, over " 
             << std::chrono::duration<double, std::milli>(t_end-t_start).count() << " milliseconds" << std::endl;;
@@ -708,7 +710,7 @@ double objective_function(const Parameters& p, const Moments& m, const MomentsSt
         std::cout << "running static model (no emax calculation)" << std::endl;
     }
 
-    const auto estimated_moments = calculate_moments(p, m, EMAX_W, EMAX_H);    
+    const auto estimated_moments = calculate_moments(p, m, EMAX_W, EMAX_H, adjust_bp);    
 
     if (display_moments) {
         print_up_down_moments(estimated_moments.up_down_moments);
