@@ -11,7 +11,8 @@ int main(int argc, char* argv[]) {
 
     if (cmdl[{"-h", "--help"}]) {
         std::cout << "Usage: " << cmdl[0] << " [OPTIONS]" << std::endl;
-        std::cout << "\t-v, --verbose\t\tPrint moment matrixes and other output. Should be used when running manually (default to FALSE)" << std::endl;
+        std::cout << "\t-m, --moments\t\tPrint moment matrixes and other output. Should be used when running manually (default to FALSE)" << std::endl;
+        std::cout << "\t-v, --verbose\t\tPrint verbose information during the execution of the simulation, as well as moment matrixes.  Should be used when running manually (default to FALSE)" << std::endl;
         std::cout << "\t-s, --static\t\tRun static mode, do not caluclate emax. (default to FALSE)" << std::endl;
         std::cout << "\t-d, --data-dir=DATA_DIR\tLocation of input files. (default to ../../)" << std::endl;
         std::cout << "\t-a, --adjust\t\tAdjust bargaining power. (default to FALSE)" << std::endl;
@@ -19,6 +20,7 @@ int main(int argc, char* argv[]) {
         return 0;
     }
     const auto verbose = cmdl[{"-v", "--verbose"}];
+    const auto moments = (cmdl[{"-m", "--moments"}] || verbose);
     const auto no_emax = cmdl[{"-s", "--static"}];
     const auto adjust_bp = cmdl[{"-a", "--adjust"}];
     std::string data_dir("../../");
@@ -37,7 +39,7 @@ int main(int argc, char* argv[]) {
             data_dir+"marr_fer_moments_stdev.txt", 
             data_dir+"emp_moments_stdev.txt", 
             data_dir+"general_moments_stdev.txt");
-    const double f = objective_function(p, m, m_stdev, verbose, no_emax, adjust_bp);
+    const double f = objective_function(p, m, m_stdev, moments, no_emax, adjust_bp,verbose);
     // 2 emax matrixes: men and women
     std::cout << "state space = " << T_MAX*EXP_W_LEN*EXP_H_LEN*KIDS_LEN*PREV_WORK_LEN*ABILITY_LEN*ABILITY_LEN*MARITAL_LEN*(SCHOOL_LEN-1)*SCHOOL_LEN*MATCH_Q_LEN*BP_W_LEN*2 << std::endl;
     std::cout << "objective function = " << f << std::endl;

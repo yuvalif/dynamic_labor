@@ -1,6 +1,10 @@
 #pragma once
 
+#include <optional>
+
 struct Parameters;
+
+struct Wife;
 
 struct Husband {
     unsigned ID = 0;
@@ -24,9 +28,9 @@ struct Husband {
 
 Husband draw_husband(const Parameters& p, unsigned t, unsigned age_index, unsigned school_group, unsigned WS);
 
-// update the husband based on schooling and time
+// update the husband based on schooling, time and wife's age
 // returns whether further calculation is needed
-bool update_husband_schooling(unsigned HS, unsigned t, Husband& husband);
+bool update_husband_schooling(unsigned HS, std::optional<Wife> wife, unsigned t, Husband& husband);
 
 void update_ability(const Parameters& p, unsigned ability, Husband& husband);
 

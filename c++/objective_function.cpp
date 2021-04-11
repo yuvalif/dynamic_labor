@@ -58,7 +58,7 @@ double mean(const SchoolingArray& val_arr, const SchoolingArray& count_arr, unsi
     return (double)val_arr[school_group]/(double)count;
 }
 
-EstimatedMoments calculate_moments(const Parameters& p, const Moments& m, const Emax& EMAX_W, const Emax& EMAX_H, bool adjust_bp) {
+EstimatedMoments calculate_moments(const Parameters& p, const Moments& m, const Emax& EMAX_W, const Emax& EMAX_H, bool adjust_bp, bool verbose) {
     EstimatedMoments estimated;
     boost::math::normal normal_dist;
     SchoolingMatrix emp_total = {{{0}}};    // employment
@@ -136,8 +136,18 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m, const 
 
             // make choices for all periods
             const auto last_t = wife.T_END;
+            if (verbose) {
+              std::cout << "=========" << std::endl;
+              std::cout << "new women" << std::endl;
+              std::cout << "=========" << std::endl;
+            }
+
             // FIXME: husband moments are calculated up to last_t and not T_MAX
             for (auto t = 0U; t <= last_t; ++t) {
+                if (verbose) {
+                  std::cout << "========= " << t << " =========" << std::endl;
+                  print_wife(wife);
+                }
                 const auto prev_emp_state_w = wife.emp_state;
                 const auto prev_M = decision.M;
                 unsigned new_born = 0;
@@ -149,14 +159,19 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m, const 
                     duration = 0;
                     wife.Q = 0.0;
                     // probability of meeting a potential husband
-                    const auto choose_hudband_p = exp(p.p0_w+p.p1_w*(wife.AGE+t)+p.p2_w*pow(wife.AGE+t,2))/
-                        (1.0+exp(p.p0_w+p.p1_w*(wife.AGE+t)+p.p2_w*pow(wife.AGE+t,2)));
+                    const auto choose_hudband_p = exp(p.p0_w+p.p1_w*(wife.AGE)+p.p2_w*pow(wife.AGE,2))/
+                        (1.0+exp(p.p0_w+p.p1_w*(wife.AGE)+p.p2_w*pow(wife.AGE,2)));
                     if (draw_p() < choose_hudband_p) {
                         choose_husband = true;
                         husband = draw_husband(p, t, wife.age_index, wife.WS, wife.WS);
                         wife.Q = husband.Q;
-                        [[maybe_unused]] const auto dont_skip = update_husband_schooling(husband.HS, IGNORE_T, husband);
+                        [[maybe_unused]] const auto dont_skip = update_husband_schooling(husband.HS, wife, IGNORE_T, husband);
                         assert(dont_skip);
+                        assert(husband.AGE == wife.AGE && husband.age_index == wife.age_index);
+                        if (verbose) {
+                          std::cout << "new potential husband" << std::endl;
+                          print_husband(husband);
+                        }
                     }
                 }
 
@@ -178,6 +193,13 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m, const 
                     }
                 }
 
+                if (decision.M == MARRIED) {
+                  if (verbose) {
+                    std::cout << "existing husband" << std::endl;
+                    print_husband(husband);
+                  }
+                }
+
                 if (decision.M == MARRIED || choose_husband) {
                     // at this point the BP is 0.5 if there is no marriage offer
                     // BP is calculated by nash above if offer given
@@ -187,11 +209,13 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m, const 
                         true /*choose partner*/, decision.M, wife, husband, t, bp, is_single_men);
                     decision = marriage_emp_decision(utility, bp, wife, husband, adjust_bp);
                 } else {
+                    assert(wage_h == 0.0);
                     const Utility utility = calculate_utility(p, EMAX_W, EMAX_H, n_kids, wage_h, wage_w,
                         false /*no partner*/, decision.M, wife, husband, t, bp, is_single_men);
                     wife.emp_state = wife_emp_decision(utility);
                 }
 
+                assert(t+wife.age_index < T_MAX);
                 emp_total[t+wife.age_index][school_group] += wife.emp_state;
                 emp_m[t+wife.age_index][school_group] += decision.M == MARRIED ? wife.emp_state : 0;
                 emp_um[t+wife.age_index][school_group] += decision.M == UNMARRIED ? wife.emp_state : 0;
@@ -218,11 +242,11 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m, const 
                 // c10 number of children at household    
                 // c11 schooling - husband  
                 // c12 unmarried
-                const auto c_lamda = p.c1*wife.emp_state + p.c2*wife.HSG*(wife.AGE+t) + p.c3*wife.HSG*pow(wife.AGE+t,2) + 
-                    p.c4*wife.SC*(wife.AGE+t) + p.c5*wife.SC*pow(wife.AGE+t,2) + p.c6*wife.CG*(wife.AGE+t) + p.c7*wife.CG*pow(wife.AGE+t,2) + 
-                    p.c8*wife.PC*(wife.AGE+t) + p.c9*wife.PC*pow(wife.AGE+t,2) + p.c10*n_kids + p.c11*husband.HS*decision.M + p.c12*decision.M;
+                const auto c_lamda = p.c1*wife.emp_state + p.c2*wife.HSG*(wife.AGE) + p.c3*wife.HSG*pow(wife.AGE,2) + 
+                    p.c4*wife.SC*(wife.AGE) + p.c5*wife.SC*pow(wife.AGE,2) + p.c6*wife.CG*(wife.AGE) + p.c7*wife.CG*pow(wife.AGE,2) + 
+                    p.c8*wife.PC*(wife.AGE) + p.c9*wife.PC*pow(wife.AGE,2) + p.c10*n_kids + p.c11*husband.HS*decision.M + p.c12*decision.M;
                 const auto child_prob = boost::math::cdf(normal_dist, c_lamda);
-                if (draw_p() < child_prob && wife.AGE+t < 40)  { 
+                if (draw_p() < child_prob && wife.AGE < 40)  { 
                     new_born = 1;
                     n_kids = std::min(n_kids+1, MAX_NUM_KIDS);
                     if (decision.M == MARRIED) {
@@ -326,7 +350,6 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m, const 
                     wages_w.accumulate(wife.WE, school_group, wage_w);
                 }
 
-                const auto age_index = wife.age_index;
                 if (decision.M == MARRIED) {
                     assert(wage_h > 0.0); // husband always works
                     wages_m_h.accumulate(husband.HE, husband.HS, wage_h); // husband always works
@@ -395,31 +418,35 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m, const 
                     }
                 }
 
-                married[t+age_index][school_group] += decision.M;
+                married[t+wife.age_index][school_group] += decision.M;
 
                 // FERTILITY AND MARRIED RATE MOMENTS
                 if (decision.M == MARRIED) {
-                    newborn_m.accumulate(t+age_index, wife.WS, new_born);
+                    newborn_m.accumulate(t+wife.age_index, wife.WS, new_born);
                 } else {
-                    newborn_um.accumulate(t+age_index, wife.WS, new_born);
+                    newborn_um.accumulate(t+wife.age_index, wife.WS, new_born);
                 }
                 if (t == last_t) {
                     n_kids_arr.accumulate(wife.WS, n_kids); // # of children by school group
                     estimated.up_down_moments.accumulate(n_kids_m_arr, wife.WS, n_kids_m);
                     estimated.up_down_moments.accumulate(n_kids_um_arr, wife.WS, n_kids_um);
                 }
+
                 // marriage transition matrix
                 if (decision.M == MARRIED && prev_M == UNMARRIED) {
+                    if (verbose) std::cout << "decided to get married" << std::endl;
                     // from single to married
                     ++just_married[school_group];
                     ++count_just_married[school_group];
                     if (first_marriage) {
-                        age_at_first_marriage.accumulate(wife.WS, wife.AGE+t);
+                        age_at_first_marriage.accumulate(wife.WS, wife.AGE);
                         ++assortative_mating_count[school_group];
                         ++assortative_mating_hist[school_group][husband.HS];
                         first_marriage = false;
                     } 
+                    assert(DIVORCE == 0);
                 } else if (decision.M == UNMARRIED && prev_M == MARRIED) {
+                    if (verbose) std::cout << "decided to get divorced" << std::endl;
                     // from married to divorce
                     DIVORCE = 1;
                     ++just_divorced[school_group];
@@ -429,13 +456,18 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m, const 
                         first_divorce = false;
                     }
                 } else if (decision.M == MARRIED && prev_M == MARRIED) {
+                    if (verbose) std::cout << "still married" << std::endl;
                     // still married
                     ++count_just_married[school_group];
+                    assert(DIVORCE == 0);
                 } else if (decision.M == UNMARRIED && prev_M == UNMARRIED) {
                     // still unmarried 
+                    if (verbose) std::cout << "still " << (DIVORCE ? "divorced" : "single") << std::endl;
                     ++count_just_divorced[school_group];
                 }
-                divorce[t+age_index][school_group] += DIVORCE;
+                divorce[t+wife.age_index][school_group] += DIVORCE;
+                ++wife.AGE;
+                ++husband.AGE;
             } // close the time loop
         } // close the draw_f loop
     } // close the schooling_group loop
@@ -468,7 +500,7 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m, const 
         estimated.marr_fer_moments[t][0] = t+18;
         auto offset = 1;
         for (auto school_group : SCHOOL_W_VALUES) {
-            estimated.marr_fer_moments[t][offset] = married[t][school_group]/(double)DRAW_F;
+            estimated.marr_fer_moments[t][offset] = (double)married[t][school_group]/(double)DRAW_F;
             ++offset;
         }
         for (auto school_group : SCHOOL_W_VALUES) {
@@ -476,7 +508,7 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m, const 
             ++offset;
         }
         for (auto school_group : SCHOOL_W_VALUES) {
-            estimated.marr_fer_moments[t][offset] = divorce[t][school_group]/(double)DRAW_F;
+            estimated.marr_fer_moments[t][offset] = (double)divorce[t][school_group]/(double)DRAW_F;
             ++offset;
         }
     }
@@ -696,7 +728,7 @@ void print_distributions(const BPDist& bp_initial_dist, const BPDist& bp_dist, c
 }
 
 double objective_function(const Parameters& p, const Moments& m, const MomentsStdev& m_stdev, 
-    bool display_moments, bool no_emax, bool adjust_bp) {
+    bool display_moments, bool no_emax, bool adjust_bp, bool verbose) {
     auto EMAX_W = make_emax();
     auto EMAX_H = make_emax();
 
@@ -710,7 +742,7 @@ double objective_function(const Parameters& p, const Moments& m, const MomentsSt
         std::cout << "running static model (no emax calculation)" << std::endl;
     }
 
-    const auto estimated_moments = calculate_moments(p, m, EMAX_W, EMAX_H, adjust_bp);    
+    const auto estimated_moments = calculate_moments(p, m, EMAX_W, EMAX_H, adjust_bp, verbose);    
 
     if (display_moments) {
         print_up_down_moments(estimated_moments.up_down_moments);

@@ -1,15 +1,22 @@
 #include <cassert>
+#include <optional>
 #include "draw_husband.h"
+#include "draw_wife.h"
 #include "parameters.h"
 #include "const_parameters.h"
 #include "random_pools.h"
 
-bool update_husband_schooling(unsigned HS, unsigned t, Husband& husband) {
+bool update_husband_schooling(unsigned HS, std::optional<Wife> wife, unsigned t, Husband& husband) {
     // T_END is used together with the t index which get values 0-27
     husband.HS = HS;
     husband.HE = 0;
-    husband.AGE = AGE_VALUES[HS];
-    husband.age_index = AGE_INDEX_VALUES[HS];
+    if (wife) {
+      husband.AGE = wife->AGE;
+      husband.age_index = wife->age_index;
+    } else {
+      husband.AGE = AGE_VALUES[HS];
+      husband.age_index = AGE_INDEX_VALUES[HS];
+    }
     husband.T_END = TERMINAL - husband.AGE - 1;
     if (t > husband.T_END) {
         return false; 
@@ -100,3 +107,4 @@ void print_husband(const Husband& husband) {
     std::cout << "\tAge: (" << husband.age_index << ", " << husband.AGE << ")" << std::endl;
     std::cout << "\tLast Period: " << husband.T_END << std::endl;
 }
+

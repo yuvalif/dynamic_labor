@@ -47,7 +47,7 @@ unsigned single_women(const Parameters& p, unsigned WS, unsigned t, Emax& EMAX_W
                             CHOOSE_HUSBAND = 1;
                             husband = draw_husband(p, t, wife.age_index, WS, WS);
                         }
-                        update_husband_schooling(HS, t, husband);
+                        update_husband_schooling(HS, wife, t, husband);
                         if (CHOOSE_HUSBAND == 1) {
                             wage_h = calculate_wage_h(p, husband, epsilon());
                         }

@@ -14,7 +14,7 @@
 unsigned single_men(const Parameters& p, unsigned HS, unsigned t, const Emax& EMAX_W, Emax& EMAX_H, bool adjust_bp) {
     Husband husband;
 
-    if (!update_husband_schooling(HS, t, husband)) {
+    if (!update_husband_schooling(HS, std::nullopt, t, husband)) {
         return 0;
     }
 

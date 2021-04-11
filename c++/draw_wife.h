@@ -1,5 +1,7 @@
 #pragma once
 
+#include "const_parameters.h"
+
 struct Parameters;
 
 struct Wife {
@@ -16,7 +18,7 @@ struct Wife {
     // wife experience
     unsigned WE = 0;
 
-    unsigned emp_state = 0;
+    unsigned emp_state = UNEMP;
     double ability_w_value = 0;
     unsigned ability_wi = 0;
     double Q = 0.0;
@@ -35,4 +37,6 @@ Wife draw_wife(const Parameters& p, unsigned t, unsigned age_index, unsigned sch
 bool update_wife_schooling(unsigned WS, unsigned t, Wife& wife);
 
 void update_ability(const Parameters& p, unsigned ability, Wife& wife);
+
+void print_wife(const Wife& wife);
 

@@ -80,3 +80,16 @@ Wife draw_wife(const Parameters& p, unsigned t, unsigned age_index, unsigned HS)
     return result;
 }
 
+#include <iostream>
+
+void print_wife(const Wife& wife) {
+    std::cout << "Wife " << std::endl;
+    std::cout << "\tSchooling: " << wife.WS << std::endl;
+    std::cout << "\tSchooling Map: " << wife.HSD << " " << wife.HSG << " " << wife.SC << " " << wife.CG << " " << wife.PC << std::endl;
+    std::cout << "\tExperience: " << wife.WE << std::endl;
+    std::cout << "\tAbility: (" << wife.ability_wi << ", " << wife.ability_w_value << ")" << std::endl;
+    std::cout << "\tMatch Quality: (" << wife.Q_INDEX << ", " << wife.Q << ")" << std::endl;
+    std::cout << "\tAge: (" << wife.age_index << ", " << wife.AGE << ")" << std::endl;
+    std::cout << "\tLast Period: " << wife.T_END << std::endl;
+}
+

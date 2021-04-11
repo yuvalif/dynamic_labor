@@ -34,7 +34,7 @@ unsigned married_couple(const Parameters& p, int WS, unsigned t, Emax& EMAX_W, E
                         for (auto prev : PREV_WORK_VALUES) { 
                             wife.emp_state = prev;
                             for (auto HS : SCHOOL_H_VALUES) {
-                                update_husband_schooling(HS, t, husband);
+                                update_husband_schooling(HS, wife, t, husband);
                                 if (HS == WS) {
                                     wife.similar_educ = p.EDUC_MATCH[WS];
                                 }
