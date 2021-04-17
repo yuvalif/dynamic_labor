@@ -101,13 +101,12 @@ Utility calculate_utility(const Parameters& p, const Emax& EMAX_W, const Emax& E
                     p.t11_h*(husband.HE+1.0)+p.t12_h+p.t13_h*kids+p.t14_h*(wife.Q+wife.similar_educ)+p.t16_h+p.t17_h;
             } else if (t < T_END) {
                 // the loop goes from 28 to 1, but for SC, CG and PC the loop is shorter
-                unsigned exp_wi; unsigned exp_hi; unsigned BPi;	unsigned CSi;
-                // calculate EMAX indexes when women unemployed
-                value_to_index(wife.WE, husband.HE+1, BP, CS, exp_wi, exp_hi, BPi, CSi);
+                unsigned exp_wi = exp_to_index(wife.WE);
+                unsigned exp_hi = exp_to_index(husband.HE+1);
+                unsigned BPi = bp_to_index(BP);
                 result.U_W[i] = UC_W1+beta0*EMAX_W[t+1][exp_wi][exp_hi][kids][UNEMP][wife.ability_wi][husband.ability_hi][MARRIED][husband.HS][wife.WS][wife.Q_INDEX][BPi];
                 result.U_H[i] = UC_H1+beta0*EMAX_H[t+1][exp_wi][exp_hi][kids][UNEMP][wife.ability_wi][husband.ability_hi][MARRIED][husband.HS][wife.WS][wife.Q_INDEX][BPi];
-                // calculate EMAX indexes when women employed
-                value_to_index(wife.WE+1, husband.HE+1, BP, CS, exp_wi, exp_hi, BPi, CSi);
+                exp_wi = exp_to_index(wife.WE+1);
                 result.U_W[CS_SIZE+i] = UC_W2+beta0*EMAX_W[t+1][exp_wi][exp_hi][kids][EMP][wife.ability_wi][husband.ability_hi][MARRIED][husband.HS][wife.WS][wife.Q_INDEX][BPi];
                 result.U_H[CS_SIZE+i] = UC_H2+beta0*EMAX_H[t+1][exp_wi][exp_hi][kids][EMP][wife.ability_wi][husband.ability_hi][MARRIED][husband.HS][wife.WS][wife.Q_INDEX][BPi];
             }
@@ -124,14 +123,12 @@ Utility calculate_utility(const Parameters& p, const Emax& EMAX_W, const Emax& E
         result.U_W_S[EMP] = UC_W_S[EMP]+p.t1_w*wife.HSG+p.t2_w*wife.SC+p.t3_w*wife.CG+p.t4_w*wife.PC+p.t5_w*(wife.WE+1.0)+p.t13_w*kids+p.t16_w;       
         result.U_H_S    = UC_H_S+p.t6_h*husband.H_HSD+p.t7_h*husband.H_HSG+p.t8_h*husband.H_SC+p.t9_h*husband.H_CG+p.t10_h*husband.H_PC+p.t11_h*(husband.HE+1.0)+p.t13_h*kids_h;
     } else {
-        unsigned exp_wi; unsigned exp_hi; unsigned BPi;	unsigned CSi;
-        value_to_index(wife.WE, 0, 0, 0, exp_wi, exp_hi, BPi, CSi);
+        unsigned exp_wi = exp_to_index(wife.WE);
         result.U_W_S[UNEMP] = UC_W_S[UNEMP]+beta0*EMAX_W[t+1][exp_wi][1][kids][UNEMP][wife.ability_wi][1][UNMARRIED][1][wife.WS][1][1];
-
-        value_to_index(wife.WE+1, 0, 0, 0, exp_wi, exp_hi, BPi, CSi);
+        exp_wi = exp_to_index(wife.WE);
         result.U_W_S[EMP] = UC_W_S[EMP]+beta0*EMAX_W[t+1][exp_wi][1][kids][EMP][wife.ability_wi][1][UNMARRIED][1][wife.WS][1][1];
 
-        value_to_index(0, husband.HE+1, 0, 0, exp_wi, exp_hi, BPi, CSi);
+        unsigned exp_hi = exp_to_index(husband.HE);
         result.U_H_S    = UC_H_S   +beta0*EMAX_H[t+1][1][exp_hi][kids][UNEMP][1][husband.ability_hi][UNMARRIED][husband.HS][wife.WS][1][1];
     }
 

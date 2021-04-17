@@ -9,7 +9,6 @@
 bool update_husband_schooling(unsigned HS, std::optional<Wife> wife, unsigned t, Husband& husband) {
     // T_END is used together with the t index which get values 0-27
     husband.HS = HS;
-    husband.HE = 0;
     if (wife) {
       husband.AGE = wife->AGE;
       husband.age_index = wife->age_index;
@@ -18,6 +17,8 @@ bool update_husband_schooling(unsigned HS, std::optional<Wife> wife, unsigned t,
       husband.age_index = AGE_INDEX_VALUES[HS];
     }
     husband.T_END = TERMINAL - husband.AGE - 1;
+    // if husband is still at school, experience would be zero
+    husband.HE = (husband.AGE >= AGE_VALUES[HS]) ? husband.AGE - AGE_VALUES[HS] : 0;
     if (t > husband.T_END) {
         return false; 
     }

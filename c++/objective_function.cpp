@@ -146,7 +146,6 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m, const 
             for (auto t = 0U; t <= last_t; ++t) {
                 if (verbose) {
                   std::cout << "========= " << t << " =========" << std::endl;
-                  print_wife(wife);
                 }
                 const auto prev_emp_state_w = wife.emp_state;
                 const auto prev_M = decision.M;
@@ -170,7 +169,6 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m, const 
                         assert(husband.AGE == wife.AGE && husband.age_index == wife.age_index);
                         if (verbose) {
                           std::cout << "new potential husband" << std::endl;
-                          print_husband(husband);
                         }
                     }
                 }
@@ -196,21 +194,21 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m, const 
                 if (decision.M == MARRIED) {
                   if (verbose) {
                     std::cout << "existing husband" << std::endl;
-                    print_husband(husband);
                   }
                 }
 
+                Utility utility;
                 if (decision.M == MARRIED || choose_husband) {
                     // at this point the BP is 0.5 if there is no marriage offer
                     // BP is calculated by nash above if offer given
                     // and is from previous period if already married           
                     // utility is calculated again based on the new BP
-                    const Utility utility = calculate_utility(p, EMAX_W, EMAX_H, n_kids, wage_h, wage_w,
+                    utility = calculate_utility(p, EMAX_W, EMAX_H, n_kids, wage_h, wage_w,
                         true /*choose partner*/, decision.M, wife, husband, t, bp, is_single_men);
                     decision = marriage_emp_decision(utility, bp, wife, husband, adjust_bp);
                 } else {
                     assert(wage_h == 0.0);
-                    const Utility utility = calculate_utility(p, EMAX_W, EMAX_H, n_kids, wage_h, wage_w,
+                    utility = calculate_utility(p, EMAX_W, EMAX_H, n_kids, wage_h, wage_w,
                         false /*no partner*/, decision.M, wife, husband, t, bp, is_single_men);
                     wife.emp_state = wife_emp_decision(utility);
                 }
@@ -434,7 +432,16 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m, const 
 
                 // marriage transition matrix
                 if (decision.M == MARRIED && prev_M == UNMARRIED) {
-                    if (verbose) std::cout << "decided to get married" << std::endl;
+                    if (verbose) {
+                      std::cout << "decided to get married" << std::endl;
+                      std::cout << "utility:" << std::endl;
+                      std::cout << to_string(utility) << std::endl;
+                      print_husband(husband);
+                      print_wife(wife);
+                      std::cout << "kids: " << n_kids << std::endl;
+                      std::cout << "husband wage:" << wage_h << std::endl;
+                      std::cout << "wife wage:" << wage_w << std::endl;
+                    }
                     // from single to married
                     ++just_married[school_group];
                     ++count_just_married[school_group];
@@ -446,7 +453,16 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m, const 
                     } 
                     assert(DIVORCE == 0);
                 } else if (decision.M == UNMARRIED && prev_M == MARRIED) {
-                    if (verbose) std::cout << "decided to get divorced" << std::endl;
+                    if (verbose) {
+                      std::cout << "decided to get divorced" << std::endl;
+                      std::cout << "utility:" << std::endl;
+                      std::cout << to_string(utility) << std::endl;
+                      print_husband(husband);
+                      print_wife(wife);
+                      std::cout << "kids: " << n_kids << std::endl;
+                      std::cout << "husband wage:" << wage_h << std::endl;
+                      std::cout << "wife wage:" << wage_w << std::endl;
+                    }
                     // from married to divorce
                     DIVORCE = 1;
                     ++just_divorced[school_group];
@@ -456,7 +472,16 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m, const 
                         first_divorce = false;
                     }
                 } else if (decision.M == MARRIED && prev_M == MARRIED) {
-                    if (verbose) std::cout << "still married" << std::endl;
+                    if (verbose) {
+                      std::cout << "still married" << std::endl;
+                      std::cout << "utility:" << std::endl;
+                      std::cout << to_string(utility) << std::endl;
+                      print_husband(husband);
+                      print_wife(wife);
+                      std::cout << "kids: " << n_kids << std::endl;
+                      std::cout << "husband wage:" << wage_h << std::endl;
+                      std::cout << "wife wage:" << wage_w << std::endl;
+                    }
                     // still married
                     ++count_just_married[school_group];
                     assert(DIVORCE == 0);
