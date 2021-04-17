@@ -20,7 +20,7 @@ unsigned single_men(const Parameters& p, unsigned HS, unsigned t, const Emax& EM
 
     unsigned iter_count = 0;
 
-    for (auto h_exp_i : EXP_H_VALUES) { 
+    for (auto h_exp_i : EXP_VALUES) { 
         // HUSBAND EXPERENCE - 5 GRID LEVEL
         husband.HE = exp_vector[h_exp_i];
         for (auto ability_hi : ABILITY_VALUES) {   

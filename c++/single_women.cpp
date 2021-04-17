@@ -18,7 +18,7 @@ unsigned single_women(const Parameters& p, unsigned WS, unsigned t, Emax& EMAX_W
         return 0;
     }
 
-    for (auto w_exp_i : EXP_W_VALUES) { 
+    for (auto w_exp_i : EXP_VALUES) { 
         wife.WE = exp_vector[w_exp_i];
         for (auto ability_wi : ABILITY_VALUES) {
             update_ability(p, ability_wi, wife);

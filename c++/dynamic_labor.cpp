@@ -16,6 +16,8 @@ int main(int argc, char* argv[]) {
         std::cout << "\t-s, --static\t\tRun static mode, do not caluclate emax. (default to FALSE)" << std::endl;
         std::cout << "\t-d, --data-dir=DATA_DIR\tLocation of input files. (default to ../../)" << std::endl;
         std::cout << "\t-a, --adjust\t\tAdjust bargaining power. (default to FALSE)" << std::endl;
+        std::cout << "\t-o, --out\t\tDumpt emax to file. File prefix can be given. File names would be '<prefix>_women.csv' and <prefix>_men.csv" << std::endl;
+        std::cout << "\t-i, --in\t\tRead emax from file. File prefix can be given. File names would be '<prefix>_women.csv' and <prefix>_men.csv" << std::endl;
         std::cout << "\t-h, --help\t\tPrint this message" << std::endl;
         return 0;
     }
@@ -26,6 +28,23 @@ int main(int argc, char* argv[]) {
     std::string data_dir("../../");
     if (cmdl[{"-d", "--data-dir"}]) {
         cmdl({"-d", "--data-dir"}) >> data_dir;
+    }
+    const auto infile = cmdl[{"-i", "--in"}];
+    const auto outfile = cmdl[{"-o", "--out"}];
+    if ((infile || outfile) && no_emax) {
+      std::cerr << "static run cannot create or consume emax" << std::endl;
+      return 1;
+    }
+    if (infile && outfile) { 
+      std::cerr << "cannot provide both infile and outfile" << std::endl;
+      return 1;
+    }
+    std::string prefix;
+    if (infile) {
+        cmdl({"-i", "--in"}) >> prefix;
+    }
+    if (outfile) {
+        cmdl({"-o", "--out"}) >> prefix;
     }
     const auto p = load_parameters(data_dir+"init_parameters.txt", 
             data_dir+"tax_brackets.out", 
@@ -39,9 +58,9 @@ int main(int argc, char* argv[]) {
             data_dir+"marr_fer_moments_stdev.txt", 
             data_dir+"emp_moments_stdev.txt", 
             data_dir+"general_moments_stdev.txt");
-    const double f = objective_function(p, m, m_stdev, moments, no_emax, adjust_bp,verbose);
+    const double f = objective_function(p, m, m_stdev, moments, no_emax, adjust_bp, verbose, prefix, infile, outfile);
     // 2 emax matrixes: men and women
-    std::cout << "state space = " << T_MAX*EXP_W_LEN*EXP_H_LEN*KIDS_LEN*PREV_WORK_LEN*ABILITY_LEN*ABILITY_LEN*MARITAL_LEN*(SCHOOL_LEN-1)*SCHOOL_LEN*MATCH_Q_LEN*BP_W_LEN*2 << std::endl;
+    std::cout << "state space = " << T_MAX*EXP_LEN*EXP_LEN*KIDS_LEN*PREV_WORK_LEN*ABILITY_LEN*ABILITY_LEN*MARITAL_LEN*(SCHOOL_LEN-1)*SCHOOL_LEN*MATCH_Q_LEN*BP_W_LEN*2 << std::endl;
     std::cout << "objective function = " << f << std::endl;
 
     return 0;

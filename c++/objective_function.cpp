@@ -753,7 +753,7 @@ void print_distributions(const BPDist& bp_initial_dist, const BPDist& bp_dist, c
 }
 
 double objective_function(const Parameters& p, const Moments& m, const MomentsStdev& m_stdev, 
-    bool display_moments, bool no_emax, bool adjust_bp, bool verbose) {
+    bool display_moments, bool no_emax, bool adjust_bp, bool verbose, const std::string& prefix, bool infile, bool outfile) {
     auto EMAX_W = make_emax();
     auto EMAX_H = make_emax();
 
@@ -763,6 +763,10 @@ double objective_function(const Parameters& p, const Moments& m, const MomentsSt
         const auto t_end = std::chrono::high_resolution_clock::now();
         std::cout << "emax calculation did " << iter_count << " iterations, over " 
             << std::chrono::duration<double, std::milli>(t_end-t_start).count() << " milliseconds" << std::endl;;
+        if (outfile) {
+          dump_emax(prefix + "_women.csv", EMAX_W);
+          dump_emax(prefix + "_men.csv", EMAX_H);
+        }
     } else {
         std::cout << "running static model (no emax calculation)" << std::endl;
     }

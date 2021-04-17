@@ -15,4 +15,5 @@ using Emax = std::unique_ptr<float[]>;
 
 Emax make_emax();
 
+void dump_emax(const std::string& file, const Emax& emax);
 

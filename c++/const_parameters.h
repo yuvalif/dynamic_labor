@@ -38,8 +38,7 @@ const int TERMINAL = 45;
 
 // emax dimensions:
 const int T_MAX = 28; // 28 periods, 45years - 18years
-const int EXP_W_LEN = 5; const auto EXP_W_VALUES = boost::irange(0, EXP_W_LEN);
-const int EXP_H_LEN = 5; const auto EXP_H_VALUES = boost::irange(0, EXP_H_LEN);
+const int EXP_LEN = 5; const auto EXP_VALUES = boost::irange(0, EXP_LEN);
 // number of children: (0, 1, 2, 3+)
 const int KIDS_LEN = 4; const auto KIDS_VALUES = boost::irange(0, KIDS_LEN);
 // previous work status: (employed, unemployed)
@@ -60,7 +59,7 @@ const int BP_W_LEN = 8;
 const std::array<double, BP_W_LEN> BP_W_VALUES = {0.0, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8};
 
 // 5 points grid for experience, use interpulations for the values between
-const std::array<unsigned, EXP_W_LEN> exp_vector = {0, 2, 4, 8, 16};
+const std::array<unsigned, EXP_LEN> exp_vector = {0, 2, 4, 8, 16};
 
 const std::array<double, ABILITY_LEN> normal_arr = {-1.150, 0.0, 1.150};     // low, medium, high
 

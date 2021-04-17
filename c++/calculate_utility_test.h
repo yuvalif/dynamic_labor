@@ -75,7 +75,7 @@ public:
             for (auto t = 0; t < T_MAX-1; ++t) {
                 Husband husband;
                 if (!update_husband_schooling(school_group, wife, t, husband)) continue;
-                for (auto h_exp_i : EXP_H_VALUES) { 
+                for (auto h_exp_i : EXP_VALUES) { 
                     husband.HE = exp_vector[h_exp_i];
                     for (auto ability_hi : ABILITY_VALUES) {   
                         // husband ability - high, medium, low
@@ -130,7 +130,7 @@ public:
                 if (!update_husband_schooling(school_group, std::nullopt, t, husband)) continue;
                 Wife wife;
                 if (!update_wife_schooling(school_group, t, wife)) continue;
-                for (auto h_exp_i : EXP_H_VALUES) { 
+                for (auto h_exp_i : EXP_VALUES) { 
                     husband.HE = exp_vector[h_exp_i];
                     for (auto ability_hi : ABILITY_VALUES) {   
                         // husband ability - high, medium, low

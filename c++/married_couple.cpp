@@ -19,10 +19,10 @@ unsigned married_couple(const Parameters& p, int WS, unsigned t, Emax& EMAX_W, E
         return 0;
     }
 
-    for (auto W_EXP_INDEX : EXP_W_VALUES) { 
+    for (auto W_EXP_INDEX : EXP_VALUES) { 
         // WIFE EXPERENCE - 5 GRID LEVEL
         wife.WE = exp_vector[W_EXP_INDEX];
-        for (auto H_EXP_INDEX : EXP_H_VALUES) { 
+        for (auto H_EXP_INDEX : EXP_VALUES) { 
             // HUSBAND EXPERENCE - 5 GRID LEVEL
             husband.HE = exp_vector[H_EXP_INDEX];
             for (auto kids : KIDS_VALUES) {
