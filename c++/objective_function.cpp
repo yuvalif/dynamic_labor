@@ -21,14 +21,14 @@
 #include "cpp-text-table/TextTable.h"
 
 unsigned calculate_emax(const Parameters& p, MarriedEmax& w_m_emax, MarriedEmax& h_m_emax,
-    SingleWomenEmax& w_s_emax, SingleMenEmax& h_s_emax, bool adjust_bp) 
+    SingleWomenEmax& w_s_emax, SingleMenEmax& h_s_emax, bool adjust_bp, bool verbose) 
 {
   unsigned iter_count = 0;
   // running until the one before last period
   for (auto t = T_MAX - 2; t >= 0; --t) {
     // EMAX FOR SINGLE MEN
     for (auto HS : SCHOOL_H_VALUES) {
-      iter_count += single_men(p, HS, t, w_m_emax, h_m_emax, w_s_emax, h_s_emax, adjust_bp);
+      iter_count += single_men(p, HS, t, w_m_emax, h_m_emax, w_s_emax, h_s_emax, adjust_bp, verbose);
     } // end husband schooling loop
 
     // EMAX FOR SINGLE WOMEN
@@ -767,7 +767,7 @@ double objective_function(const Parameters& p, const Moments& m, const MomentsSt
 
   if (!no_emax) {
     const auto t_start = std::chrono::high_resolution_clock::now();
-    const auto iter_count = calculate_emax(p, w_m_emax, h_m_emax, w_s_emax, h_s_emax, adjust_bp);
+    const auto iter_count = calculate_emax(p, w_m_emax, h_m_emax, w_s_emax, h_s_emax, adjust_bp, verbose);
     const auto t_end = std::chrono::high_resolution_clock::now();
     std::cout << "emax calculation did " << iter_count << " iterations, over " 
       << std::chrono::duration<double, std::milli>(t_end-t_start).count() << " milliseconds" << std::endl;;

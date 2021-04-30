@@ -130,8 +130,7 @@ Utility calculate_utility(const Parameters& p,
     exp_wi = exp_to_index(wife.WE);
     result.U_W_S[EMP] = UC_W_S[EMP]+beta0*w_s_emax[t+1][exp_wi][kids][EMP][wife.ability_wi][wife.WS];
 
-    unsigned exp_hi = exp_to_index(husband.HE);
-    result.U_H_S    = UC_H_S   +beta0*h_s_emax[t+1][exp_hi][husband.ability_hi][husband.HS];
+    result.U_H_S    = UC_H_S   +beta0*h_s_emax[t+1][husband.ability_hi][husband.HS];
   }
 
   if (wage_w == 0.0) {

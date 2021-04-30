@@ -9,9 +9,9 @@ using MarriedEmax = boost::multi_array<double, 11>;
 // time | exp   | kids  | work  | ability | school |
 // 0-27 | 0 - 4 | 0 - 3 | 0 - 1 | 0 - 2   | 1 - 4  |
 using SingleWomenEmax = boost::multi_array<double, 6>;
-// time | exp   | ability | school |
-// 0-27 | 0 - 4 | 0 - 2   | 1 - 4  |
-using SingleMenEmax = boost::multi_array<double, 4>;
+// time | ability | school |
+// 0-27 | 0 - 2   | 1 - 4  |
+using SingleMenEmax = boost::multi_array<double, 3>;
 
 template<typename EmaxT>
 EmaxT make_emax();

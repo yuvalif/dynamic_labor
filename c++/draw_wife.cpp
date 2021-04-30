@@ -5,14 +5,11 @@
 #include "random_pools.h"
 
 bool update_wife_schooling(unsigned WS, unsigned t, Wife& wife) {
-  // T_END is used together with the t index which get values 0-27
+  // T_END is used together with the t index which get values 0-26
   wife.WS = WS;
-  wife.AGE = AGE_VALUES[WS];
+  wife.AGE = AGE_VALUES[WS] + t;
   wife.age_index = AGE_INDEX_VALUES[WS];
-  wife.T_END = TERMINAL - wife.AGE - 1;
-  if (t > wife.T_END) {
-    return false;
-  }
+  wife.T_END = TERMINAL - AGE_VALUES[WS] - 1;
   if (WS == 1) {
     wife.HSG = 1;
     wife.SC = 0; wife.CG = 0; wife.PC = 0;
@@ -27,6 +24,9 @@ bool update_wife_schooling(unsigned WS, unsigned t, Wife& wife) {
     wife.HSG = 0; wife.SC = 0; wife.CG = 0;
   } else {
     assert(false);
+  }
+  if (t > wife.T_END) {
+    return false;
   }
   return true;
 }
@@ -89,7 +89,7 @@ void print_wife(const Wife& wife) {
   std::cout << "\tExperience: " << wife.WE << std::endl;
   std::cout << "\tAbility: (" << wife.ability_wi << ", " << wife.ability_w_value << ")" << std::endl;
   std::cout << "\tMatch Quality: (" << wife.Q_INDEX << ", " << wife.Q << ")" << std::endl;
-  std::cout << "\tAge: (" << wife.age_index << ", " << wife.AGE << ")" << std::endl;
+  std::cout << "\tAge: " << wife.AGE << std::endl;
   std::cout << "\tLast Period: " << wife.T_END << std::endl;
 }
 

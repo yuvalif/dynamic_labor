@@ -9,7 +9,7 @@ SingleWomenEmax make_emax<SingleWomenEmax>() {
 
 template<>
 SingleMenEmax make_emax<SingleMenEmax>() {
-  return SingleMenEmax(boost::extents[T_MAX][EXP_LEN][ABILITY_LEN][SCHOOL_LEN]);
+  return SingleMenEmax(boost::extents[T_MAX][ABILITY_LEN][SCHOOL_LEN]);
 }
 
 template<>
@@ -85,15 +85,12 @@ void dump_emax(const std::string& filename, const SingleMenEmax& emax) {
 
   std::cout << "dumping emax to: " << filename << std::endl;
   for (auto t = 0U; t < T_MAX; ++t) {
-    for (auto exp = 0U; exp < EXP_LEN; ++exp) {
       for (auto ability = 0U; ability < ABILITY_LEN; ++ability) {
         for (auto school = 0U; school < SCHOOL_LEN; ++school) {
-          file << t << "," << exp << "," <<  
-            ability << "," << school << "," <<       
-            emax[t][exp][ability][school] << std::endl;
+          file << t << "," << ability << "," << school << "," <<       
+            emax[t][ability][school] << std::endl;
         }
       }
-    }
   }
   std::cout << "finished dumping emax" << std::endl; 
 }
