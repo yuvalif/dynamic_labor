@@ -7,20 +7,22 @@
 using UtilityArray = std::array<double, UTILITY_SIZE>;
 
 struct Utility {
-    Utility(); // ctor
-    UtilityArray U_W{};
-    UtilityArray U_H{};
-    std::array<double, 2> U_W_S{};
-    double U_H_S{};
+  Utility(); // ctor
+  UtilityArray U_W{};
+  UtilityArray U_H{};
+  std::array<double, 2> U_W_S{};
+  double U_H_S{};
 };
 
 struct Parameters;
 struct Wife;
 struct Husband;
 
-Utility calculate_utility(const Parameters& p, const Emax& EMAX_W, const Emax& EMAX_H, unsigned kids,
-        double wage_h, double wage_w, bool choose_partner,
-        unsigned M, const Wife& wife, const Husband& husband, unsigned t, double BP, bool single_men);
+Utility calculate_utility(const Parameters& p, 
+    const MarriedEmax& w_emax, const MarriedEmax& h_emax,
+    const SingleWomenEmax& w_s_emax, const SingleMenEmax& h_s_emax, 
+    unsigned kids,double wage_h, double wage_w, bool choose_partner,
+    unsigned M, const Wife& wife, const Husband& husband, unsigned t, double BP, bool single_men);
 
 std::string to_string(const Utility& u);
 

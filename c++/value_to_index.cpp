@@ -19,7 +19,7 @@ unsigned bp_to_index(double bp) {
   if (bp < 0.2)
     return 0;
   else if (bp < 0.3)
-   return 1;
+    return 1;
   else if (bp < 0.4)
     return 2;
   else if (bp < 0.5)
@@ -30,7 +30,7 @@ unsigned bp_to_index(double bp) {
     return 5;
   else if (bp < 0.8)
     return 6;
- 
+
   // 0.8 <= bp <= 1
   return 7;
 }

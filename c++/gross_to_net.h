@@ -1,10 +1,10 @@
 #pragma once
 
 struct NetIncome {
-    double net_income_s_h{};
-    double net_income_s_w{}; 
-    double net_income_m{};
-    double net_income_m_unemp{};
+  double net_income_s_h{};
+  double net_income_s_w{}; 
+  double net_income_m{};
+  double net_income_m_unemp{};
 };
 
 struct Parameters;
