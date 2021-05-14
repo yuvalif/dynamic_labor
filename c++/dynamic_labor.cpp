@@ -60,7 +60,7 @@ int main(int argc, char* argv[]) {
       data_dir+"general_moments_stdev.txt");
   const double f = objective_function(p, m, m_stdev, moments, no_emax, adjust_bp, verbose, prefix, infile, outfile);
   // 2 emax matrixes: men and women
-  std::cout << "state space = " << T_MAX*EXP_LEN*EXP_LEN*KIDS_LEN*PREV_WORK_LEN*ABILITY_LEN*ABILITY_LEN*MARITAL_LEN*(SCHOOL_LEN-1)*SCHOOL_LEN*MATCH_Q_LEN*BP_W_LEN*2 << std::endl;
+  std::cout << "state space = " << T_MAX*EXP_LEN*EXP_LEN*KIDS_LEN*WORK_LEN*ABILITY_LEN*ABILITY_LEN*MARITAL_LEN*(SCHOOL_LEN-1)*SCHOOL_LEN*MATCH_Q_LEN*BP_W_LEN*2 << std::endl;
   std::cout << "objective function = " << f << std::endl;
 
   return 0;

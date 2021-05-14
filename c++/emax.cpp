@@ -4,7 +4,7 @@
 
 template<>
 SingleWomenEmax make_emax<SingleWomenEmax>() {
-  return SingleWomenEmax(boost::extents[T_MAX][EXP_LEN][KIDS_LEN][PREV_WORK_LEN][ABILITY_LEN][SCHOOL_LEN]);
+  return SingleWomenEmax(boost::extents[T_MAX][EXP_LEN][KIDS_LEN][WORK_LEN][ABILITY_LEN][SCHOOL_LEN]);
 }
 
 template<>
@@ -14,7 +14,7 @@ SingleMenEmax make_emax<SingleMenEmax>() {
 
 template<>
 MarriedEmax make_emax<MarriedEmax>() {
-  return MarriedEmax(boost::extents[T_MAX][EXP_LEN][EXP_LEN][KIDS_LEN][PREV_WORK_LEN][ABILITY_LEN][ABILITY_LEN][SCHOOL_LEN][SCHOOL_LEN][MATCH_Q_LEN][BP_W_LEN]);
+  return MarriedEmax(boost::extents[T_MAX][EXP_LEN][EXP_LEN][KIDS_LEN][WORK_LEN][ABILITY_LEN][ABILITY_LEN][SCHOOL_LEN][SCHOOL_LEN][MATCH_Q_LEN][BP_W_LEN]);
 }
 
 void dump_emax(const std::string& filename, const MarriedEmax& emax) {

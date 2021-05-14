@@ -33,7 +33,7 @@ unsigned calculate_emax(const Parameters& p, MarriedEmax& w_m_emax, MarriedEmax&
 
     // EMAX FOR SINGLE WOMEN
     for (auto WS : SCHOOL_W_VALUES) {
-      iter_count += single_women(p, WS, t, w_m_emax, h_m_emax, w_s_emax, h_s_emax, adjust_bp);
+      iter_count += single_women(p, WS, t, w_m_emax, h_m_emax, w_s_emax, h_s_emax, adjust_bp, verbose);
     } // end wife schooling loop
 
     // EMAX FOR MARRIED COUPLE
@@ -169,7 +169,7 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m,
             choose_husband = true;
             husband = draw_husband(p, t, wife.age_index, wife.WS, wife.WS);
             wife.Q = husband.Q;
-            [[maybe_unused]] const auto dont_skip = update_husband_schooling(husband.HS, wife, IGNORE_T, husband);
+            [[maybe_unused]] const auto dont_skip = update_husband_schooling(husband.HS, IGNORE_T, husband);
             assert(dont_skip);
             assert(husband.AGE == wife.AGE && husband.age_index == wife.age_index);
             if (verbose) {

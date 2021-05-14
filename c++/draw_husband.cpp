@@ -6,42 +6,34 @@
 #include "const_parameters.h"
 #include "random_pools.h"
 
-bool update_husband_schooling(unsigned HS, std::optional<Wife> wife, unsigned t, Husband& husband) {
-  // T_END is used together with the t index which get values 0-26
-  husband.HS = HS;
-  if (wife) {
-    husband.AGE = wife->AGE;
-    husband.age_index = wife->age_index;
-  } else {
-    husband.AGE = AGE_VALUES[HS] + t;
-    husband.age_index = AGE_INDEX_VALUES[HS];
-  }
-
-  husband.T_END = TERMINAL - AGE_VALUES[HS] - 1;
+bool update_husband_schooling(unsigned school_group, unsigned t, Husband& husband) {
+  husband.HS = school_group;
+  husband.AGE = AGE_VALUES[school_group] + t;
+  husband.age_index = AGE_INDEX_VALUES[school_group];
+  husband.T_END = TERMINAL - AGE_VALUES[school_group] - 1;
 
   // if husband is still at school, experience would be zero
-  husband.HE = (husband.AGE >= AGE_VALUES[HS]) ? husband.AGE - AGE_VALUES[HS] : 0;
+  husband.HE = (husband.AGE >= AGE_VALUES[school_group]) ? husband.AGE - AGE_VALUES[school_group] : 0;
 
-  if (HS == 0) {
+  if (school_group == 0) {
     husband.H_HSD = 1;
     husband.H_HSG = 0; husband.H_SC = 0; husband.H_CG = 0; husband.H_PC = 0;
-  } else if (HS == 1) {
+  } else if (school_group == 1) {
     husband.H_HSG = 1;
     husband.H_HSD = 0; husband.H_SC = 0; husband.H_CG = 0; husband.H_PC = 0;
-  } else if (HS == 2) {
+  } else if (school_group == 2) {
     husband.H_SC = 1;
     husband.H_HSG = 0; husband.H_HSD = 0; husband.H_CG = 0; husband.H_PC = 0;
-  } else if (HS == 3) {
+  } else if (school_group == 3) {
     husband.H_CG = 1;
     husband.H_HSG = 0; husband.H_HSD = 0; husband.H_SC = 0; husband.H_PC = 0;
-  } else if (HS == 4) {
+  } else if (school_group == 4) {
     husband.H_PC = 1;
     husband.H_HSG = 0; husband.H_HSD = 0; husband.H_SC = 0; husband.H_CG = 0;
   } else {
     assert(false);
   }
 
-  assert(husband.H_SC + husband.H_HSD + husband.H_HSG + husband.H_CG + husband.H_PC == 1);
   if (t > husband.T_END) {
     return false; 
   }
@@ -53,25 +45,18 @@ void update_ability(const Parameters& p, unsigned ability, Husband& husband) {
   husband.ability_h_value = normal_arr[ability]*p.sigma[3];
 }
 
-Husband draw_husband(const Parameters& p, unsigned t, unsigned age_index, unsigned school_group, unsigned WS) {
-
-  static unsigned id = 0;
+Husband draw_husband(const Parameters& p, unsigned t, unsigned age_index, unsigned school_group, unsigned w_school_group) {
   Husband result;
-
-  result.ID = ++id;
-
-  update_ability(p, draw_3(), result);
   result.Q_INDEX = draw_3();
   result.Q = normal_arr[result.Q_INDEX]*p.sigma[4];
-
-  assert(WS > 0 && WS < 5);
+  update_ability(p, draw_3(), result);
 
   const Husbands* tmp_husbands;
-  if (WS == 1) {
+  if (w_school_group == 1) {
     tmp_husbands = &p.husbands2;
-  } else if (WS == 2) {
+  } else if (w_school_group == 2) {
     tmp_husbands = &p.husbands3;
-  } else if (WS == 3) {
+  } else if (w_school_group == 3) {
     tmp_husbands = &p.husbands4;
   } else {
     tmp_husbands = &p.husbands5;
@@ -95,6 +80,7 @@ Husband draw_husband(const Parameters& p, unsigned t, unsigned age_index, unsign
 
   // husband schooling is in the range: 0-4
   result.HS = index/5;
+  assert(result.HS < 5 && result.HS >= 0);
 
   return result;
 }
@@ -102,7 +88,6 @@ Husband draw_husband(const Parameters& p, unsigned t, unsigned age_index, unsign
 #include <iostream>
 
 void print_husband(const Husband& husband) {
-  std::cout << "Husband (" << husband.ID << ")" << std::endl;
   std::cout << "\tSchooling: " << husband.HS << std::endl;
   std::cout << "\tSchooling Map: " << husband.H_HSD << " " << husband.H_HSG << " " << husband.H_SC << " " << husband.H_CG << " " << husband.H_PC << std::endl;
   std::cout << "\tExperience: " << husband.HE << std::endl;

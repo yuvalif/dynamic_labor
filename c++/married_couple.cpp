@@ -32,10 +32,10 @@ unsigned married_couple(const Parameters& p, int WS, unsigned t, MarriedEmax& w_
           update_ability(p, ability_wi, wife);
           for (auto ability_hi : ABILITY_VALUES) {   
             update_ability(p, ability_hi, husband);
-            for (auto prev : PREV_WORK_VALUES) { 
+            for (auto prev : WORK_VALUES) { 
               wife.emp_state = prev;
               for (auto HS : SCHOOL_H_VALUES) {
-                update_husband_schooling(HS, wife, t, husband);
+                update_husband_schooling(WS, t, husband);
                 if (HS == WS) {
                   wife.similar_educ = p.EDUC_MATCH[WS];
                 }

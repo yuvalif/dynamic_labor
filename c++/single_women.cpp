@@ -8,84 +8,93 @@
 #include "calculate_utility.h"
 #include "nash.h"
 #include "marriage_emp_decision.h"
+#include <iostream>
 
-unsigned single_women(const Parameters& p, unsigned WS, unsigned t, const MarriedEmax& w_m_emax, const MarriedEmax& h_m_emax,
-    SingleWomenEmax& w_s_emax, const SingleMenEmax& h_s_emax, bool adjust_bp) { 
-  unsigned iter_count = 0;
+unsigned single_women(const Parameters& p, unsigned school_group, unsigned t, const MarriedEmax& w_m_emax, const MarriedEmax& h_m_emax,
+    SingleWomenEmax& w_s_emax, const SingleMenEmax& h_s_emax, bool adjust_bp, bool verbose) { 
 
-  Wife wife;
+  if (verbose) {
+    std::cout << "====================== single women: " << school_group << ", " << t << " ======================" << std::endl;
+  }
 
-  if (!update_wife_schooling(WS, t, wife)) {
+  Wife base_wife;
+
+  if (!update_wife_schooling(school_group, t, base_wife)) {
+    if (verbose) {
+      std::cout << "not calculating for wife" << std::endl;
+      print_wife(base_wife);
+    }
     return 0;
   }
 
-  for (auto w_exp_i : EXP_VALUES) { 
-    wife.WE = exp_vector[w_exp_i];
-    for (auto ability_wi : ABILITY_VALUES) {
-      update_ability(p, ability_wi, wife);
-      double ADD_EMAX = 0;
+  unsigned iter_count = 0;
+
+  for (auto w_exp_i : EXP_VALUES) {
+    base_wife.WE = w_exp_i;
+    for (auto ability_i : ABILITY_VALUES) {
+      update_ability(p, ability_i, base_wife);
       for (auto kids : KIDS_VALUES) {
-        for (auto prev : PREV_WORK_VALUES) { 
-          wife.emp_state = prev - 1;
+        for (auto prev_emp_state : WORK_VALUES) { 
+          base_wife.emp_state = prev_emp_state;
+          double sum = 0;
+          if (verbose) {
+            print_wife(base_wife);
+          }
           for (auto draw_b = 0U; draw_b <  DRAW_B; ++draw_b) {
-            // DRAW A HUSBAND 
-            const auto HS = 1; 
-            // in forward solving school_group represents wife's education
-            // here it represents the education of the individual we calculate the EMAX for
-            double wage_h = 0; double wage_w = 0;
-            unsigned CHOOSE_HUSBAND = 0;
-            //1-wife; 
-            //2-wife EXP+SCHOOLING; 
-            //3-wife ABILITY; 
-            //4-INITIAL MATCH QUALITY; 
-            //5-JOB OFFER FOR MARRIED MEN AND WOMEN EMAX; 
-            //6-JOB OFFER FOR SINGLE MEN EMAX 
-            const auto P_HUSBAND = exp(p.p0_w+p.p1_w*(wife.AGE+t)+p.p2_w*pow(wife.AGE+t,2))/
-              (1.0+exp(p.p0_w+p.p1_w*(wife.AGE+t)+p.p2_w*pow(wife.AGE+t,2)));
+            auto wife = base_wife;
             Husband husband;
-            // PROBABILITY OF MEETING A POTENTIAL HUSBAND
-            if (draw_p() < P_HUSBAND) {
+            // probabilty of meeting a potential husband
+            const auto p_husband = exp(p.p0_w+p.p1_w*(wife.AGE+t)+p.p2_w*pow(wife.AGE+t,2))/(1.0+exp(p.p0_w+p.p1_w*(wife.AGE+t)+p.p2_w*pow(wife.AGE+t,2)));
+            unsigned CHOOSE_HUSBAND = 0;
+            double wage_h = 0.0; 
+            double wage_w = 0.0;
+            if (draw_p() < p_husband) {
               CHOOSE_HUSBAND = 1;
-              husband = draw_husband(p, t, wife.age_index, WS, WS);
-            }
-            update_husband_schooling(HS, wife, t, husband);
-            if (CHOOSE_HUSBAND == 1) {
+              husband = draw_husband(p, t, wife.age_index, school_group, school_group);
+              update_husband_schooling(school_group, t, husband);
               wage_h = calculate_wage_h(p, husband, epsilon());
             }
-            // JOB OFFER PROBABILITY + WAGE WIFE
             wage_w =  calculate_wage_w(p, wife, draw_p(), epsilon());
-            // MAXIMIZATION - MARRIAGE + WORK DESICION
 
-            // calculate husbands and wives utility from each option -inf for unavailable
-            // at this point the BP IS .5 
-            // IF NO MARRIAGE AND NO OFFER, BP is calculated by nash 
-            // if offer and is from previous period if already married
-            double bp = NO_BP;
-            const auto M = MARRIED; 
-            const auto single_men = false;
+            double bp = INITIAL_BP;
+            const auto is_single_men = false;
             const Utility utility = calculate_utility(p, w_m_emax, h_m_emax, w_s_emax, h_s_emax, kids, wage_h, wage_w, CHOOSE_HUSBAND,
-                M, wife, husband, t, bp, single_men);
-            //   MAXIMIZATION - MARRIAGE + WORK DESICION 
+                UNMARRIED, wife, husband, t, bp, is_single_men);
             if (CHOOSE_HUSBAND == 1) {
               bp = nash(p, utility); // Nash bargaining at first period of marriage  
+            } else {
+              bp = NO_BP;
             }
+ 						
+						if (verbose && CHOOSE_HUSBAND) {
+          		print_wife(wife);
+          		std::cout << to_string(utility); 
+        		}
 
-            if (bp == NO_BP) {
-              // marriage decision - outside option value wife
+            if (bp != NO_BP) {
+              // marriage decision
               const auto decision = marriage_emp_decision(utility, bp, wife, husband, adjust_bp);
 
               if (decision.M == MARRIED) {
-                ADD_EMAX = ADD_EMAX + utility.U_W[decision.max_weighted_utility_index];
+                sum += utility.U_W[decision.max_weighted_utility_index];
+                if (verbose) std::cout << "got married" << std::endl;
               } else {
-                ADD_EMAX = ADD_EMAX + decision.outside_option_w_v;
+                sum += decision.outside_option_w_v;
+                if (verbose) std::cout << "did not get married" << std::endl;
               }
             } else {
-              ADD_EMAX = ADD_EMAX + utility.U_H_S;
+              sum += std::max(utility.U_W_S[UNEMP], utility.U_W_S[EMP]);
+              if (verbose) std::cout << "did not get marriage offer" << std::endl;
             }
-            ++iter_count;
+            if (verbose) std::cout << "====================== new draw ======================" << std::endl;
           }   // end draw backward loop
-          w_s_emax[t][w_exp_i][kids][prev][ability_wi][WS] = ADD_EMAX/(double)DRAW_B;
-        } // end emp_state        
+          w_s_emax[t][w_exp_i][kids][prev_emp_state][ability_i][school_group] = sum/(double)DRAW_B;
+          if (verbose) {
+            std::cout << "emax(" << t << ", " << ability_i << ", " << school_group << ")=" << sum/(double)DRAW_B << std::endl;
+            std::cout << "======================================================" << std::endl;
+          }   
+          ++iter_count;
+        } // end prev_emp_state
       } // end of kids loop
     } // end single wemen ability loop
   } // end single women experience loop

@@ -7,7 +7,6 @@ struct Parameters;
 struct Wife;
 
 struct Husband {
-  unsigned ID = 0;
   unsigned H_HSD = 0;
   unsigned H_HSG = 0;
   unsigned H_SC = 0;
@@ -28,9 +27,9 @@ struct Husband {
 
 Husband draw_husband(const Parameters& p, unsigned t, unsigned age_index, unsigned school_group, unsigned WS);
 
-// update the husband based on schooling, time and wife's age
+// update the husband based on schooling and time
 // returns whether further calculation is needed
-bool update_husband_schooling(unsigned HS, std::optional<Wife> wife, unsigned t, Husband& husband);
+bool update_husband_schooling(unsigned school_grpup, unsigned t, Husband& husband);
 
 void update_ability(const Parameters& p, unsigned ability, Husband& husband);
 

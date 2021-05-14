@@ -58,15 +58,6 @@ Wife draw_wife(const Parameters& p, unsigned t, unsigned age_index, unsigned HS)
   result.WS = index/10 + 1;
   assert(result.WS < 5 && result.WS > 0);
 
-  if (index < 10) 
-    result.HSG = 1;
-  else if (index < 20)
-    result.SC = 1;
-  else if (index < 30)
-    result.CG = 1;
-  else
-    result.PC = 1;
-
   result.WE = exp_vector[index%5];
 
   // [0,4]->0, [5,9]->1, [10,14]->0, [15-19]->1, etc.
