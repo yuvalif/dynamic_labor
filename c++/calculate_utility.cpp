@@ -103,14 +103,13 @@ Utility calculate_utility(const Parameters& p,
           p.t11_h*(husband.HE+1.0)+p.t12_h+p.t13_h*kids+p.t14_h*(wife.Q+wife.similar_educ)+p.t16_h+p.t17_h;
       } else if (t < T_END) {
         // the loop goes from 28 to 1, but for SC, CG and PC the loop is shorter
-        unsigned exp_wi = exp_to_index(wife.WE);
-        unsigned exp_hi = exp_to_index(husband.HE+1);
-        unsigned BPi = bp_to_index(BP);
-        result.U_W[i] = UC_W1+beta0*w_emax[t+1][exp_wi][exp_hi][kids][UNEMP][wife.ability_wi][husband.ability_hi][husband.HS][wife.WS][wife.Q_INDEX][BPi];
-        result.U_H[i] = UC_H1+beta0*h_emax[t+1][exp_wi][exp_hi][kids][UNEMP][wife.ability_wi][husband.ability_hi][husband.HS][wife.WS][wife.Q_INDEX][BPi];
+        auto exp_wi = exp_to_index(wife.WE);
+        const auto BPi = bp_to_index(BP);
+        result.U_W[i] = UC_W1+beta0*w_emax[t+1][exp_wi][kids][UNEMP][wife.ability_wi][husband.ability_hi][husband.HS][wife.WS][wife.Q_INDEX][BPi];
+        result.U_H[i] = UC_H1+beta0*h_emax[t+1][exp_wi][kids][UNEMP][wife.ability_wi][husband.ability_hi][husband.HS][wife.WS][wife.Q_INDEX][BPi];
         exp_wi = exp_to_index(wife.WE+1);
-        result.U_W[CS_SIZE+i] = UC_W2+beta0*w_emax[t+1][exp_wi][exp_hi][kids][EMP][wife.ability_wi][husband.ability_hi][husband.HS][wife.WS][wife.Q_INDEX][BPi];
-        result.U_H[CS_SIZE+i] = UC_H2+beta0*h_emax[t+1][exp_wi][exp_hi][kids][EMP][wife.ability_wi][husband.ability_hi][husband.HS][wife.WS][wife.Q_INDEX][BPi];
+        result.U_W[CS_SIZE+i] = UC_W2+beta0*w_emax[t+1][exp_wi][kids][EMP][wife.ability_wi][husband.ability_hi][husband.HS][wife.WS][wife.Q_INDEX][BPi];
+        result.U_H[CS_SIZE+i] = UC_H2+beta0*h_emax[t+1][exp_wi][kids][EMP][wife.ability_wi][husband.ability_hi][husband.HS][wife.WS][wife.Q_INDEX][BPi];
       }
     }
   }

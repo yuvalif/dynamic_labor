@@ -4,22 +4,22 @@
 #include "const_parameters.h"
 #include "random_pools.h"
 
-bool update_wife_schooling(unsigned WS, unsigned t, Wife& wife) {
+bool update_wife_schooling(unsigned school_group, unsigned t, Wife& wife) {
   // T_END is used together with the t index which get values 0-26
-  wife.WS = WS;
-  wife.AGE = AGE_VALUES[WS] + t;
-  wife.age_index = AGE_INDEX_VALUES[WS];
-  wife.T_END = TERMINAL - AGE_VALUES[WS] - 1;
-  if (WS == 1) {
+  wife.WS = school_group;
+  wife.AGE = AGE_VALUES[school_group] + t;
+  wife.age_index = AGE_INDEX_VALUES[school_group];
+  wife.T_END = TERMINAL - AGE_VALUES[school_group] - 1;
+  if (school_group == 1) {
     wife.HSG = 1;
     wife.SC = 0; wife.CG = 0; wife.PC = 0;
-  } else if (WS == 2) {
+  } else if (school_group == 2) {
     wife.SC = 1;
     wife.HSG = 0; wife.CG = 0; wife.PC = 0;
-  } else if (WS == 3) {
+  } else if (school_group == 3) {
     wife.CG = 1;
     wife.HSG = 0; wife.SC = 0; wife.PC = 0;
-  } else if (WS == 4) {
+  } else if (school_group == 4) {
     wife.PC = 1;
     wife.HSG = 0; wife.SC = 0; wife.CG = 0;
   } else {

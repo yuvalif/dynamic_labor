@@ -38,7 +38,7 @@ unsigned calculate_emax(const Parameters& p, MarriedEmax& w_m_emax, MarriedEmax&
 
     // EMAX FOR MARRIED COUPLE
     for (auto WS : SCHOOL_W_VALUES) {
-      iter_count += married_couple(p, WS, t, w_m_emax, h_m_emax, w_s_emax, h_s_emax, adjust_bp);
+      iter_count += married_couple(p, WS, t, w_m_emax, h_m_emax, w_s_emax, h_s_emax, adjust_bp, verbose);
     } // end wife schooling loop
   }
   return iter_count;

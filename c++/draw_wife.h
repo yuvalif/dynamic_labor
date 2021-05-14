@@ -34,7 +34,7 @@ Wife draw_wife(const Parameters& p, unsigned t, unsigned age_index, unsigned sch
 
 // update the wife based on schooling and time
 // returns whether further calculation is needed
-bool update_wife_schooling(unsigned WS, unsigned t, Wife& wife);
+bool update_wife_schooling(unsigned school_group, unsigned t, Wife& wife);
 
 void update_ability(const Parameters& p, unsigned ability, Wife& wife);
 

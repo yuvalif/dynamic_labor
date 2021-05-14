@@ -88,6 +88,7 @@ Husband draw_husband(const Parameters& p, unsigned t, unsigned age_index, unsign
 #include <iostream>
 
 void print_husband(const Husband& husband) {
+  std::cout << "Husband " << std::endl;
   std::cout << "\tSchooling: " << husband.HS << std::endl;
   std::cout << "\tSchooling Map: " << husband.H_HSD << " " << husband.H_HSG << " " << husband.H_SC << " " << husband.H_CG << " " << husband.H_PC << std::endl;
   std::cout << "\tExperience: " << husband.HE << std::endl;
