@@ -55,10 +55,10 @@ unsigned married_couple(const Parameters& p, int WS, unsigned t, MarriedEmax& w_
 									base_wife.Q = normal_arr[Q_INDEX]*p.sigma[4];
 									base_wife.Q_INDEX = Q_INDEX;
 									for (auto bpi = 1U; bpi < BP_W_LEN; ++bpi) {
-										auto bp = BP_W_VALUES[bpi];  // the grid is 0.2 - 0.8
 										auto w_sum = 0.0;
 										auto h_sum = 0.0;
 										for (auto draw_b = 0U; draw_b <  DRAW_B; ++draw_b) {
+										  auto bp = BP_W_VALUES[bpi];  // the grid is 0.2 - 0.8
                       auto wife = base_wife;
                       auto husband = base_husband;
 											const auto wage_h = calculate_wage_h(p, husband, epsilon());

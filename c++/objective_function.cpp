@@ -171,7 +171,6 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m,
             wife.Q = husband.Q;
             [[maybe_unused]] const auto dont_skip = update_husband_schooling(husband.HS, IGNORE_T, husband);
             assert(dont_skip);
-            assert(husband.AGE == wife.AGE && husband.age_index == wife.age_index);
             if (verbose) {
               std::cout << "new potential husband" << std::endl;
             }
