@@ -29,7 +29,10 @@ Husband draw_husband(const Parameters& p, unsigned t, unsigned age_index, unsign
 
 // update the husband based on schooling and time
 // returns whether further calculation is needed
-bool update_husband_schooling(unsigned school_grpup, unsigned t, Husband& husband);
+bool update_school_and_age(unsigned school_grpup, unsigned t, Husband& husband);
+
+// update the husband based on schooling and wife's age
+void update_school_and_age(unsigned school_grpup, const Wife& wife, Husband& husband);
 
 void update_ability(const Parameters& p, unsigned ability, Husband& husband);
 

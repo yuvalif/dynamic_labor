@@ -77,7 +77,7 @@ class calculate_utility_suite : public CxxTest::TestSuite {
       for (auto school_group : SCHOOL_W_VALUES) {
         for (auto t = 0; t < T_MAX-1; ++t) {
           Husband husband;
-          if (!update_husband_schooling(school_group, t, husband)) continue;
+          if (!update_school_and_age(school_group, t, husband)) continue;
           for (auto h_exp_i : EXP_VALUES) { 
             husband.HE = exp_vector[h_exp_i];
             for (auto ability_hi : ABILITY_VALUES) {   
@@ -131,7 +131,7 @@ class calculate_utility_suite : public CxxTest::TestSuite {
       for (auto school_group : SCHOOL_W_VALUES) {
         for (auto t = 0; t < T_MAX-1; ++t) {
           Husband husband;
-          if (!update_husband_schooling(school_group, t, husband)) continue;
+          if (!update_school_and_age(school_group, t, husband)) continue;
           Wife wife;
           if (!update_wife_schooling(school_group, t, wife)) continue;
           for (auto h_exp_i : EXP_VALUES) { 

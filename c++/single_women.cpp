@@ -51,7 +51,7 @@ unsigned single_women(const Parameters& p, unsigned school_group, unsigned t, co
             if (draw_p() < p_husband) {
               CHOOSE_HUSBAND = 1;
               husband = draw_husband(p, t, wife.age_index, school_group, school_group);
-              update_husband_schooling(school_group, t, husband);
+              update_school_and_age(school_group, t, husband);
               wage_h = calculate_wage_h(p, husband, epsilon());
             }
             wage_w =  calculate_wage_w(p, wife, draw_p(), epsilon());

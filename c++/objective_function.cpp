@@ -167,10 +167,11 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m,
             (1.0+exp(p.p0_w+p.p1_w*(wife.AGE)+p.p2_w*pow(wife.AGE,2)));
           if (draw_p() < choose_hudband_p) {
             choose_husband = true;
+	    // TODO: what school group to use here?
             husband = draw_husband(p, t, wife.age_index, wife.WS, wife.WS);
             wife.Q = husband.Q;
-            [[maybe_unused]] const auto dont_skip = update_husband_schooling(husband.HS, IGNORE_T, husband);
-            assert(dont_skip);
+            update_school_and_age(husband.HS, wife, husband);
+            assert(husband.AGE == wife.AGE);
             if (verbose) {
               std::cout << "new potential husband" << std::endl;
             }
@@ -757,7 +758,7 @@ void print_distributions(const BPDist& bp_initial_dist, const BPDist& bp_dist, c
 }
 
 double objective_function(const Parameters& p, const Moments& m, const MomentsStdev& m_stdev, 
-    bool display_moments, bool no_emax, bool adjust_bp, bool verbose, const std::string& prefix, bool infile, bool outfile) 
+    bool display_moments, bool no_emax, bool adjust_bp, bool verbose, bool verbose_emax, const std::string& prefix, bool infile, bool outfile) 
 {
   auto w_m_emax = make_emax<MarriedEmax>();
   auto h_m_emax = make_emax<MarriedEmax>();
@@ -766,7 +767,7 @@ double objective_function(const Parameters& p, const Moments& m, const MomentsSt
 
   if (!no_emax) {
     const auto t_start = std::chrono::high_resolution_clock::now();
-    const auto iter_count = calculate_emax(p, w_m_emax, h_m_emax, w_s_emax, h_s_emax, adjust_bp, verbose);
+    const auto iter_count = calculate_emax(p, w_m_emax, h_m_emax, w_s_emax, h_s_emax, adjust_bp, verbose_emax);
     const auto t_end = std::chrono::high_resolution_clock::now();
     std::cout << "emax calculation did " << iter_count << " iterations, over " 
       << std::chrono::duration<double, std::milli>(t_end-t_start).count() << " milliseconds" << std::endl;;

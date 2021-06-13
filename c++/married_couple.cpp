@@ -40,11 +40,11 @@ unsigned married_couple(const Parameters& p, int WS, unsigned t, MarriedEmax& w_
 					for (auto prev_emp_state : WORK_VALUES) { 
 							base_wife.emp_state = prev_emp_state;
 							for (auto HS : SCHOOL_H_VALUES) {
-								if (!update_husband_schooling(HS, t, base_husband)) {
+								if (!update_school_and_age(HS, t, base_husband)) {
 									if (verbose) {
                     std::cout << "skipping husband" << std::endl;
                     print_husband(base_husband);
-            			  std::cout << "================" << std::endl;
+				  std::cout << "================" << std::endl;
                   }
                   continue;
                 }
@@ -68,10 +68,10 @@ unsigned married_couple(const Parameters& p, int WS, unsigned t, MarriedEmax& w_
 											const Utility utility = calculate_utility(p, w_emax, h_emax, w_s_emax, h_s_emax, kids, wage_h, wage_w, 
 													CHOOSE_PARTNER, MARRIED, wife, husband, t, bp, single_men);
 
-	                    if (verbose) {	
+			    if (verbose) {	
 											  print_wife(wife);
                         print_husband(husband);
-				                std::cout << to_string(utility);
+						std::cout << to_string(utility);
                       }
 
 											// marriage decision - outside option value wife
@@ -92,10 +92,10 @@ unsigned married_couple(const Parameters& p, int WS, unsigned t, MarriedEmax& w_
 											w_sum/(double)DRAW_B;
 										h_emax[t][w_exp_i][kids][prev_emp_state][ability_wi][ability_hi][HS][WS][Q_INDEX][bpi] = 
 											h_sum/(double)DRAW_B;
-					          if (verbose) {
-          				  	std::cout << "emax() = " << w_sum/(double)DRAW_B << ", " << h_sum/(double)DRAW_B << std::endl;
-            					std::cout << "======================================================" << std::endl;
-          					}
+						  if (verbose) {
+						std::cout << "emax() = " << w_sum/(double)DRAW_B << ", " << h_sum/(double)DRAW_B << std::endl;
+						std::cout << "======================================================" << std::endl;
+						}
 
 										++iter_count;
 									}  // end BP loop

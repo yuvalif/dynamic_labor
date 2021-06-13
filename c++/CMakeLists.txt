@@ -16,8 +16,8 @@ if(NOT DRAWS)
     set(DRAWS 10)
 endif()
 
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wall -Werror -Ofast -DDRAWS=${DRAWS} -DUSE_MULTI_ARRAY")
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g3 -Wall -Werror -g3 -O0 -fsanitize=address -fno-omit-frame-pointer -DUSE_MULTI_ARRAY")
+set(CMAKE_CXX_FLAGS_RELEASE "-Wall -Werror -Ofast -flto -DDRAWS=${DRAWS} -march=native -DUSE_MULTI_ARRAY")
+set(CMAKE_CXX_FLAGS_DEBUG "-Wall -Werror -g3 -O0 -DDRAWS=${DRAWS} -fsanitize=address -fno-omit-frame-pointer -DUSE_MULTI_ARRAY")
 set(CMAKE_LINKER_FLAGS_DEBUG "${CMAKE_LINKER_FLAGS_DEBUG} -fsanitize=address")
 
 add_library(dynamic_labor 

@@ -6,12 +6,10 @@
 #include "const_parameters.h"
 #include "random_pools.h"
 
-bool update_husband_schooling(unsigned school_group, unsigned t, Husband& husband) {
+void update_school(unsigned school_group, Husband& husband) {
   husband.HS = school_group;
-  husband.AGE = AGE_VALUES[school_group] + t;
   husband.age_index = AGE_INDEX_VALUES[school_group];
   husband.T_END = TERMINAL - AGE_VALUES[school_group] - 1;
-
   // if husband is still at school, experience would be zero
   husband.HE = (husband.AGE >= AGE_VALUES[school_group]) ? husband.AGE - AGE_VALUES[school_group] : 0;
 
@@ -33,11 +31,22 @@ bool update_husband_schooling(unsigned school_group, unsigned t, Husband& husban
   } else {
     assert(false);
   }
+}
+
+bool update_school_and_age(unsigned school_group, unsigned t, Husband& husband) {
+  husband.AGE = AGE_VALUES[school_group] + t;
+
+  update_school(school_group, husband);
 
   if (t > husband.T_END) {
     return false; 
   }
   return true;
+}
+
+void update_school_and_age(unsigned school_group, const Wife& wife, Husband& husband) {
+  husband.AGE = wife.AGE;
+  update_school(school_group, husband);
 }
 
 void update_ability(const Parameters& p, unsigned ability, Husband& husband) {
@@ -92,8 +101,8 @@ void print_husband(const Husband& husband) {
   std::cout << "\tSchooling: " << husband.HS << std::endl;
   std::cout << "\tSchooling Map: " << husband.H_HSD << " " << husband.H_HSG << " " << husband.H_SC << " " << husband.H_CG << " " << husband.H_PC << std::endl;
   std::cout << "\tExperience: " << husband.HE << std::endl;
-  std::cout << "\tAbility: (" << husband.ability_hi << ", " << husband.ability_h_value << ")" << std::endl;
-  std::cout << "\tMatch Quality: (" << husband.Q_INDEX << ", " << husband.Q << ")" << std::endl;
+  std::cout << "\tAbility: " << husband.ability_h_value << std::endl;
+  std::cout << "\tMatch Quality: " << husband.Q << std::endl;
   std::cout << "\tAge: " << husband.AGE << std::endl;
   std::cout << "\tLast Period: " << husband.T_END << std::endl;
 }

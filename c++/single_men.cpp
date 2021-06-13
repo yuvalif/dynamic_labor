@@ -21,7 +21,7 @@ unsigned single_men(const Parameters& p, unsigned school_group, unsigned t, cons
 
   Husband base_husband;
 
-  if (!update_husband_schooling(school_group, t, base_husband)) {
+  if (!update_school_and_age(school_group, t, base_husband)) {
     if (verbose) {
       std::cout << "not calculating for husband" << std::endl;
       print_husband(base_husband);
