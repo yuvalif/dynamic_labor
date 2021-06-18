@@ -44,13 +44,38 @@ std::array<double,SIZE> load_array(const std::string& file_name) {
   return arr;
 }
 
+// ignore blank lines and lines that start with a commend (by default '%')
+template <size_t SIZE>
+std::array<double,SIZE> load_array_with_comments(const std::string& file_name, char comment_char = '%') {
+  std::ifstream file(file_name);
+  if (!file.is_open()) {
+    throw std::runtime_error("failed to open: " + file_name);
+  }
+  std::array<double, SIZE> arr;
+  size_t i = 0;
+  std::string line;
+  while (i < SIZE) {
+    std::getline(file, line);
+    if (!file.good()) {
+      throw std::runtime_error("parse error in: '" + file_name + 
+          "' row: " + std::to_string(i));
+    }
+    const auto line_start = line.find_first_not_of(" \t\n");
+    if (line_start != std::string::npos && line[line_start] != comment_char) {
+      arr[i] = std::stod(line);
+      ++i;
+    }
+  }
+  return arr;
+}
+
 Parameters load_parameters(const std::string& model_parameters_file_name,
     const std::string& tax_file_name,
     const std::string& ded_file_name,
     const std::string& wives_file_name,
     const std::string& husbands_file_prefix){
 
-  return Parameters(load_array<PARAMETER_LIST_LEN>(model_parameters_file_name),
+  return Parameters(load_array_with_comments<PARAMETER_LIST_LEN>(model_parameters_file_name),
       load_matrix<TAX_ROW, TAX_COL>(tax_file_name),
       load_matrix<TAX_ROW, DED_COL>(ded_file_name),
       load_matrix<WIVES_ROW, WIVES_COL>(wives_file_name),

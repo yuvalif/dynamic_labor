@@ -1,103 +1,112 @@
-0.5959
-9.9803
-8.4959
-6.4955
-34.2589
-311.6549
-0.0490
-0.0554
-0.0620
-0.0690
--0.0005
--0.0008
--0.0007
--0.0013
-9.6938
-9.8868
-10.1581
-10.5916
-0.0488
-0.0674
-0.0799
-0.0877
-0.0989
--0.0011
--0.0013
--0.0016
--0.0017
--0.0020
-9.9114
-9.9113
-9.9864
-10.1897
-10.4221
-2.6952
-0.3323
-0.3611
-0.4799
-0.6433
-0.0148
-1.28
--0.0026
--0.0747
--0.0001
--0.0688
-0.0000
--0.0595
--0.0001
--0.0624
-0.0000
--0.0392
-0.0112
-0.4043
-8.9736
-21.0551
-26.1932
-45.8533
-13.9753
-4.8883
-10.9044
-16.2296
-19.6857
-18.4466
-5.7585
-86.2776
-10.6749
-13.5150
-4.8663
-28.5904
-0.0000
-5.0872
-7.0516
-7.0166
-10.8640
-9.5935
--13.9762
--2.5834
-23.6025
-45.2488
-61.4983
-8.8273
-83.3019
-2.4062
-12.5110
-3.6724
-4.3327
-0.0000
--0.7620
-0.0963
--0.0025
--0.6861
-0.0996
--0.0020
--1.5483
-0.3
-22.2506
-21.7559
-24.3652
-23.2607
--10.9144
--10.9140
--10.9285
--10.9439
--10.9588
+% utility parameters (alpha)
+0.59965   % CRRA income parameter (1)
+9.76866   % women utility from children when married (2)
+8.64472   % women utility from children when single (3)
+5.94454   % men utility from children when maarried (4)
+31.86416  % utility from leisure as a function of number of children (5)
+297.76214 % utility from leisure (6)
+% wage parameters wife (beta)
+0.05013   % experience (7)
+0.05606   % experience (8)
+0.06301   % experience (9)
+0.06871   % experience (10)
+-0.0005   % exp^2 (11)
+-0.0008   % exp^2 (12)
+-0.0007   % exp^2 (13)
+-0.0013   % exp^2 (14)
+9.71104   % HSG - schooling (15)
+9.89622   % SC -  schooling (16)
+10.16739  % CG -  schooling (17)
+10.59848  % PC -  schooling (18)
+% wage parameters husband (beta)
+0.04917   % experience (19)
+0.06671   % experience (20)
+0.07869   % experience (21)
+0.08693   % experience (22)
+0.09783   % experience (23)
+-0.00123  % exp^2 (24)
+-0.00143  % exp^2 (25)
+-0.00163  % exp^2 (26)
+-0.00177  % exp^2 (27)
+-0.00199  % exp^2 (28)
+9.91566   % HSD - schooling (29)
+9.91285   % HSG - schooling (30)
+9.98839   % SC - schooling (31)
+10.19046  % CG - schooling (32)
+10.41603  % PC - schooling (33)
+% job offer parameters wife (row)
+2.69671   % work in previous period (34)
+0.33691   % HSG - schooling (35)
+0.36611   % SC - schooling (36)
+0.47732   % CG - schooling (37)
+0.59311   % PC - schooling (38)
+0.01501   % work experience (39)
+% home production technology - parameters (hp)
+1.22786   % economies of scale in marriage (40)
+% probability of another child parameters (c)
+-0.0026   % dummy? (41)
+-0.07518  % age wife - HSG (42)
+-0.00009  % age square wife - HSG (43)
+-0.06917  % age wife - SC (44)
+0.00000   % age square wife - SC (45)
+-0.05983  % age wife - CG (46)
+-0.00011  % age square wife - CG (47)
+-0.06269  % age wife - PC (48)
+-0.00003  % age square wife - PC (49)
+-0.03952  % number of children at household (50)
+0.01099   % schooling - husband (51)
+0.40396   % married (52)
+% terminal value Parameters (t)
+10.66081  % schooling wife - HSG (53)
+18.94146  % schooling wife - SC (54)
+31.20066  % schooling wife - CG (55)
+44.32608  % schooling wife - PC (56)
+13.46640  % exp wife (57)
+7.76321   % schooling husband if married - HSD (58)
+12.93352  % schooling husband if married - HSG (59)
+17.08230  % schooling husband if married - SC (60)
+19.33771  % schooling husband if married - CG (61)
+21.06585  % schooling husband if married - PC (62)
+6.93452   % exp husband if married (63)
+33.24595  % martial status (64)
+3.82900   % number of children (65)
+16.04158  % match quality if married (66)
+2.03147   % number of children if married (67)
+21.40492  % previous work state - wife (68)
+0.0       % dummy (69)
+6.76035   % schooling wife if married- HSG (70)
+8.44978   % schooling wife if married- SC (71)
+13.54135  % schooling wife if married- CG (72)
+16.57359  % schooling wife if married- PC (73)
+8.52153   % exp wife if married (74)
+-8.48603  % schooling husband - HSD (75)
+2.19182   % schooling husband - HSG (76)
+21.45374  % schooling husband - SC (77)
+37.67797  % schooling husband - CG (78)
+48.15956  % schooling husband - PC (79)
+8.69768   % exp husband (80)
+24.00441  % martial status if married (81)
+1.92952   % number of children if married (82)
+11.59128  % match quality if married (83)
+3.02324   % number of children if married - NO NEED (84)
+3.57758   % previous work state - wife if married (85)
+0.0       % dummy (86)
+% probability of meeting a partner (p)
+-0.99482  % probability of meeting a potential husband - wife constant (87)
+0.08512   % probability of meeting a potential husband - wife age (88)
+-0.00280  % probability of meeting a potential husband - wife age square (89)
+-0.83845  % probability of meeting a potential husband - husband constant (90)
+0.09415   % probability of meeting a potential husband - husband age (91)
+-0.00237  % probability of meeting a potential husband - husband age square (92)
+-1.67008  % probability of match quality decrease (93)
+-1.39713  % probability of match quality increase (94)
+11.47873  % education match parameter (95)
+12.33525  % education match parameter (96)
+14.88097  % education match parameter (97)
+14.54916  % education match parameter (98)
+% random shocks variance-covariance matrix (sigma)
+-0.97272  % wage error variance husband (99)
+-1.11858  % wage error variance wife (100)
+-1.08414  % variance wife ability (101)
+-0.94988  % variance husband ability (102)
+-1.16801  % variance match quality (103)

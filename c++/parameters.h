@@ -254,5 +254,3 @@ struct Parameters {
     {}
 };
 
-void print_parameters(const Parameters& p);
-

@@ -23,7 +23,6 @@ set(CMAKE_LINKER_FLAGS_DEBUG "${CMAKE_LINKER_FLAGS_DEBUG} -fsanitize=address")
 add_library(dynamic_labor 
     emax.cpp
     random_pools.cpp 
-    parameters.cpp
     nash.cpp 
     draw_wife.cpp 
     draw_husband.cpp 
