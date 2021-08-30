@@ -103,6 +103,7 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m,
   SchoolingMeanArray age_at_first_marriage; // age at first marriage
   SchoolingMeanMatrix newborn_um;      // new born in period t - for probability and distribution
   SchoolingMeanMatrix newborn_m;       // new born in period t - for probability and distribution
+  SchoolingMeanMatrix newborn_all;       // new born in period t - for probability and distribution
   SchoolingMeanArray duration_of_first_marriage; // duration of marriage if divorce or 45-age of marriage if still married at 45.
   // husband education by wife education
   UMatrix<SCHOOL_LEN, SCHOOL_LEN> assortative_mating_hist{{{0}}};
@@ -424,12 +425,13 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m,
         married[t+wife.age_index][school_group] += decision.M;
 
         // FERTILITY AND MARRIED RATE MOMENTS
+        newborn_all.accumulate(t+wife.age_index, wife.WS, new_born);
         if (decision.M == MARRIED) {
           newborn_m.accumulate(t+wife.age_index, wife.WS, new_born);
         } else {
           newborn_um.accumulate(t+wife.age_index, wife.WS, new_born);
         }
-        if (wife.AGE == MAX_FERTILITY_AGE) {
+        if (wife.AGE == MAX_FERTILITY_AGE - 4) {
           n_kids_arr.accumulate(wife.WS, n_kids); // # of children by school group
           estimated.up_down_moments.accumulate(n_kids_m_arr, wife.WS, n_kids_m);
           estimated.up_down_moments.accumulate(n_kids_um_arr, wife.WS, n_kids_um);
@@ -534,7 +536,7 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m,
       ++offset;
     }
     for (auto school_group : SCHOOL_W_VALUES) {
-      estimated.marr_fer_moments[t][offset] = newborn_m.mean(t, school_group);
+      estimated.marr_fer_moments[t][offset] = newborn_all.mean(t, school_group);
       ++offset;
     }
     for (auto school_group : SCHOOL_W_VALUES) {
@@ -669,6 +671,7 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m,
       estimated.general_moments[row][WS-1] = newborn_m.column_mean(WS);
     }
   }
+
   return estimated;
 }
 

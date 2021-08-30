@@ -83,7 +83,7 @@ std::array<double, COL> MSE(const Matrix<ROW, COL>& lhs, const Matrix<ROW, COL>&
   return result;
 }
 
-// serialize a mtrix to a string
+// serialize a matrix to a string
 template<size_t ROW, size_t COL> 
 std::string to_string(const Matrix<ROW, COL>& m) {
   std::string result;
@@ -123,6 +123,18 @@ class MeanMatrix {
       }
       if (_count == 0) return 0.0;
       return _sum/(double)_count;
+    }
+
+    std::string to_string() const {
+      std::string result;
+      for (auto i = 0U; i < ROW; ++i) {
+        for (auto j = 0U; j < COL; ++j) {
+          result += std::to_string(sum[i][j])+"/"+std::to_string(count[i][j]);
+          result += "\t";
+        }
+        result += "\n";
+      }
+      return result;
     }
 };
 
