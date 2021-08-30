@@ -249,7 +249,7 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m,
           p.c4*wife.SC*(wife.AGE) + p.c5*wife.SC*pow(wife.AGE,2) + p.c6*wife.CG*(wife.AGE) + p.c7*wife.CG*pow(wife.AGE,2) + 
           p.c8*wife.PC*(wife.AGE) + p.c9*wife.PC*pow(wife.AGE,2) + p.c10*n_kids + p.c11*husband.HS*decision.M + p.c12*decision.M;
         const auto child_prob = boost::math::cdf(normal_dist, c_lamda);
-        if (draw_p() < child_prob && wife.AGE < 40)  { 
+        if (draw_p() < child_prob && wife.AGE < MAX_FERTILITY_AGE)  { 
           new_born = 1;
           n_kids = std::min(n_kids+1, MAX_NUM_KIDS);
           if (decision.M == MARRIED) {
@@ -429,7 +429,7 @@ EstimatedMoments calculate_moments(const Parameters& p, const Moments& m,
         } else {
           newborn_um.accumulate(t+wife.age_index, wife.WS, new_born);
         }
-        if (t == last_t) {
+        if (wife.AGE == MAX_FERTILITY_AGE) {
           n_kids_arr.accumulate(wife.WS, n_kids); // # of children by school group
           estimated.up_down_moments.accumulate(n_kids_m_arr, wife.WS, n_kids_m);
           estimated.up_down_moments.accumulate(n_kids_um_arr, wife.WS, n_kids_um);

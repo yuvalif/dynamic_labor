@@ -69,4 +69,6 @@ const int T_MAX = 28;
 const std::array<unsigned, SCHOOL_LEN> AGE_INDEX_VALUES = {0, 0, 2, 4, 7};
 const std::array<unsigned, SCHOOL_LEN> AGE_VALUES = {18, 18, 20, 22, 25};
 
+// maximum fertility age
+const unsigned int MAX_FERTILITY_AGE = 40;
 
